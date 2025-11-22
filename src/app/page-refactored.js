@@ -16,25 +16,26 @@ import LocationSheet from "@/components/LocationSheet";
 import { useScrollDetection } from "@/hooks/useScrollDetection";
 import { usePropertyFilter } from "@/hooks/usePropertyFilter";
 
-// Store
-import useLocationStore from "@/stores/locationStore";
-
 // Data
-import { PROPERTIES_DATA, VIRTUAL_TOURS_DATA } from "@/constants/propertyData";
+import {
+  PROPERTIES_DATA,
+  VIRTUAL_TOURS_DATA,
+} from "@/constants/propertyData";
 
 export default function Home() {
-  // Zustand store for global location state
-  const location = useLocationStore((state) => state.location);
-  const searchResult = useLocationStore((state) => state.searchResult);
-  const updateFromSearchResult = useLocationStore((state) => state.updateFromSearchResult);
-  const setSearchResult = useLocationStore((state) => state.setSearchResult);
-
-  // Local state for UI
+  // State management
+  const [selectedLocation, setSelectedLocation] = useState({
+    city: "Mumbai",
+    lat: 19.076,
+    lng: 72.8777,
+    name: "Andheri West",
+  });
   const [hoveredTourId, setHoveredTourId] = useState(null);
+  const [searchResult, setSearchResult] = useState(null);
   const [isLocationSheetOpen, setIsLocationSheetOpen] = useState(false);
   const [sheetMapCenter, setSheetMapCenter] = useState({
-    lat: location.lat,
-    lng: location.lng,
+    lat: 19.076,
+    lng: 72.8777,
   });
   const [sheetMapMarker, setSheetMapMarker] = useState(null);
 
@@ -42,22 +43,29 @@ export default function Home() {
   const scrolled = useScrollDetection(50);
   const filteredProperties = usePropertyFilter(
     PROPERTIES_DATA,
-    location,
+    selectedLocation,
     5
   );
 
-  // Event handlers using Zustand store
+  // Event handlers
   const handleSearchSelect = (place) => {
     console.log("=== Address Selected ===");
     console.log("Address:", place.formattedAddress);
     console.log("Latitude:", place.coordinates?.lat);
     console.log("Longitude:", place.coordinates?.lng);
-    console.log("Ref ID:", place.refId || place.id);
     console.log("Full Place Details:", place);
     console.log("=======================");
 
-    // Update global location store
-    updateFromSearchResult(place);
+    setSearchResult(place);
+
+    if (place.coordinates) {
+      setSelectedLocation({
+        city: "Mumbai",
+        lat: place.coordinates.lat,
+        lng: place.coordinates.lng,
+        name: place.formattedAddress,
+      });
+    }
   };
 
   const handleOpenLocationSheet = () => {
@@ -69,16 +77,6 @@ export default function Home() {
       setSheetMapMarker({
         lat: searchResult.coordinates.lat,
         lng: searchResult.coordinates.lng,
-        draggable: true,
-      });
-    } else {
-      setSheetMapCenter({
-        lat: location.lat,
-        lng: location.lng,
-      });
-      setSheetMapMarker({
-        lat: location.lat,
-        lng: location.lng,
         draggable: true,
       });
     }
@@ -99,8 +97,13 @@ export default function Home() {
         draggable: true,
       });
 
-      // Update global location store
-      updateFromSearchResult(place);
+      setSearchResult(place);
+      setSelectedLocation({
+        city: "Mumbai",
+        lat: place.coordinates.lat,
+        lng: place.coordinates.lng,
+        name: place.formattedAddress,
+      });
     }
   };
 
@@ -114,11 +117,15 @@ export default function Home() {
         lng: data.lng,
       },
       addressComponents: data.addressComponents,
-      refId: data.refId || null,
     };
 
-    // Update global location store
-    updateFromSearchResult(place);
+    setSearchResult(place);
+    setSelectedLocation({
+      city: "Mumbai",
+      lat: data.lat,
+      lng: data.lng,
+      name: data.address || "Selected Location",
+    });
   };
 
   return (
@@ -140,7 +147,7 @@ export default function Home() {
       {/* Header */}
       <Header
         scrolled={scrolled}
-        selectedLocation={location}
+        selectedLocation={selectedLocation}
         onOpenLocationSheet={handleOpenLocationSheet}
       />
 

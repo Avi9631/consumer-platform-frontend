@@ -121,7 +121,7 @@ export default function OlaMapViewer({
       // Initialize the map with configuration
       // Explicitly include API key in style URL to ensure it's sent
       const map = olaMapsInstance.init({
-        style: `https://api.olamaps.io/tiles/vector/v1/styles/default-light-standard/style.json?api_key=${apiKey}`,
+        style: `https://api.olamaps.io/tiles/vector/v1/styles/default-light-standard/style.json`,
         container: mapContainerRef.current.id,
         center: [center.lng, center.lat],
         zoom: zoom,
