@@ -62,7 +62,7 @@ export default function LocationSheet({
           </SheetHeader>
 
           {/* Map Viewer - Full Height */}
-          <div className="flex-1 relative">
+          <div className="flex-1 relative p-4">
             <GoogleMapViewer
               center={mapCenter}
               zoom={16}
@@ -99,12 +99,12 @@ export default function LocationSheet({
                   )}
                 </div>
               </div>
-              <Button
+              {/* <Button
                 className="w-full"
                 onClick={() => onOpenChange(false)}
               >
                 Confirm Location
-              </Button>
+              </Button> */}
             </div>
           )}
         </div>

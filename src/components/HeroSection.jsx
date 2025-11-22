@@ -3,12 +3,14 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import GoogleMapSearch from "@/components/maps/GoogleMapSearch";
+import useLocationStore from "@/stores/locationStore";
 
 /**
  * HeroSection Component
  * Main hero banner with search functionality
  */
 export default function HeroSection({ onSearchSelect }) {
+  const location = useLocationStore((state) => state.location);
   return (
     <section className="relative min-h-[400px] md:h-[500px] flex items-center justify-center overflow-visible pt-16 bg-gradient-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#3d1f2f]">
       <div className="absolute inset-0 z-0">
@@ -82,6 +84,7 @@ export default function HeroSection({ onSearchSelect }) {
             onPlaceSelect={onSearchSelect}
             placeholder="Type to search for address or location..."
             className="w-full"
+            initialValue={location.formattedAddress || location.name}
           />
         </motion.div>
       </div>
