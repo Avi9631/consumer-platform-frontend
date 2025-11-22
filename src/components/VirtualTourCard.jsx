@@ -45,7 +45,7 @@ export default function VirtualTourCard({ tour, isHovered, onHover }) {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div className="relative aspect-9/16">
+      <div className="relative aspect-9/14">
         {/* Video/iframe element */}
         {isYouTubeVideo ? (
           <>
