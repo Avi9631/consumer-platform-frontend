@@ -721,7 +721,7 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative min-h-[400px] md:h-[500px] flex items-center justify-center overflow-visible pt-16">
+      <section className="relative min-h-[400px] md:h-[500px] flex items-center justify-center overflow-visible pt-16 bg-gradient-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#3d1f2f]">
         <div className="absolute inset-0 z-0">
           <Image
             src="https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1920&h=1080&fit=crop"
@@ -800,7 +800,7 @@ export default function Home() {
       </section>
 
       {/* Virtual Tours Carousel Section */}
-      <section className="py-12 md:py-16 bg-gradient-to-b from-[#2d1b1f] via-[#3d1f2f] to-[#2d1b1f] overflow-hidden relative z-10">
+      <section className="py-8 md:py-12 bg-gradient-to-b from-[#3d1f2f] via-[#2d1b1f] to-[#1a0f1f] overflow-hidden relative z-10">
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 md:mb-8">
             <div className="flex items-center gap-3">
@@ -924,7 +924,7 @@ export default function Home() {
       </section>
 
       {/* Assured Properties Section */}
-      <section className="py-12 md:py-16 bg-gradient-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#1a0f1f] relative z-10 overflow-hidden">
+      <section className="py-8 md:py-12 bg-gradient-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#3d1f2f] relative z-10 overflow-hidden">
         <div className="container mx-auto px-4 md:px-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 md:mb-8">
             <div className="flex items-center gap-3">
@@ -932,7 +932,7 @@ export default function Home() {
                 <span className="text-primary drop-shadow-[0_0_20px_rgba(251,146,60,0.8)]">
                   Assured
                 </span>{" "}
-                Properties
+                Projects
               </h2>
             </div>
             <div className="flex gap-2">
