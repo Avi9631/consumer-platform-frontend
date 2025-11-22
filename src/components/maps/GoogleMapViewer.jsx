@@ -251,12 +251,14 @@ export default function GoogleMapViewer({
             onDragEnd={handleMarkerDrag}
             onClick={() => setSelectedMarker(currentMarker)}
             icon={{
-              path: window.google?.maps?.SymbolPath?.CIRCLE || 0,
-              fillColor: '#ea580c',
+              path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z',
+              fillColor: '#000000',
               fillOpacity: 1,
-              strokeColor: '#fff',
-              strokeWeight: 2,
-              scale: 8,
+              strokeColor: '#ea580c',
+              strokeWeight: 3,
+              strokeOpacity: 0.8,
+              scale: 1.5,
+              anchor: { x: 12, y: 22 },
             }}
           />
         )}
@@ -268,12 +270,14 @@ export default function GoogleMapViewer({
             position={{ lat: markerData.lat, lng: markerData.lng }}
             onClick={() => setSelectedMarker(markerData)}
             icon={{
-              path: window.google?.maps?.SymbolPath?.CIRCLE || 0,
-              fillColor: markerData.color || '#ea580c',
+              path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z',
+              fillColor: '#000000',
               fillOpacity: 1,
-              strokeColor: '#fff',
-              strokeWeight: 2,
-              scale: 6,
+              strokeColor: markerData.strokeColor || '#ea580c',
+              strokeWeight: 3,
+              strokeOpacity: 0.8,
+              scale: 1.2,
+              anchor: { x: 12, y: 22 },
             }}
           />
         ))}
