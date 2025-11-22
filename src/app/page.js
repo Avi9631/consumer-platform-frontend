@@ -156,7 +156,8 @@ export default function Home() {
       />
 
       {/* Hero Section */}
-      <HeroSection onSearchSelect={handleSearchSelect} />
+      <HeroSection onSearchSelect={handleSearchSelect}  selectedLocation={location}
+        onOpenLocationSheet={handleOpenLocationSheet}/>
 
       {/* Virtual Tours Carousel */}
       <CarouselSection

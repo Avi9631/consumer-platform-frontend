@@ -4,6 +4,7 @@ import { MapPin, X } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Sheet } from "@/components/ui/sheet";
+import { UserRound } from "lucide-react";
 
 /**
  * Header Component
@@ -43,7 +44,7 @@ export default function Header({
             </Button>
           )}
           <Avatar>
-            <AvatarFallback>A</AvatarFallback>
+            <AvatarFallback><UserRound  /></AvatarFallback>
           </Avatar>
         </div>
       </div>

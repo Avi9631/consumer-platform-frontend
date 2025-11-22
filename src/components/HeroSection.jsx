@@ -4,12 +4,14 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import GoogleMapSearch from "@/components/maps/GoogleMapSearch";
 import useLocationStore from "@/stores/locationStore";
+import { Button } from "./ui/button";
+import { MapPin } from "lucide-react";
 
 /**
  * HeroSection Component
  * Main hero banner with search functionality
  */
-export default function HeroSection({ onSearchSelect }) {
+export default function HeroSection({ onSearchSelect, onOpenLocationSheet , selectedLocation}) {
   const location = useLocationStore((state) => state.location);
   return (
     <section className="relative min-h-[400px] md:h-[500px] flex items-center justify-center overflow-visible pt-16 bg-gradient-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#3d1f2f]">
@@ -73,19 +75,64 @@ export default function HeroSection({ onSearchSelect }) {
           5km radius search
         </motion.p>
 
-        {/* Search Bar */}
+        {/* Enhanced Address Display */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
           className="max-w-4xl mx-auto px-4 relative z-50"
         >
-          <GoogleMapSearch
-            onPlaceSelect={onSearchSelect}
-            placeholder="Type to search for address or location..."
-            className="w-full"
-            initialValue={location.formattedAddress || location.name}
-          />
+          <div className="relative group">
+            {/* Glowing background effect */}
+            <div className="absolute -inset-1 bg-linear-to-r from-orange-600 via-primary to-orange-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-all duration-500"></div>
+            
+            {/* Main button container */}
+            <div className="relative bg-linear-to-r from-background/95 to-background/90 backdrop-blur-xl rounded-2xl border border-primary/20 shadow-[0_8px_32px_rgba(251,146,60,0.15)] overflow-hidden">
+              <Button
+                variant="ghost"
+                onClick={onOpenLocationSheet}
+                className="w-full h-16 px-6 py-4 bg-transparent hover:bg-primary/5 border-0 rounded-2xl group/btn transition-all duration-300 hover:shadow-[0_0_30px_rgba(251,146,60,0.25)]"
+              >
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-4">
+                    {/* Enhanced icon with glow */}
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-primary rounded-full blur-sm opacity-30 group-hover/btn:opacity-50 transition-all duration-300"></div>
+                      <div className="relative bg-primary/20 p-3 rounded-full border border-primary/30 group-hover/btn:bg-primary/30 transition-all duration-300">
+                        <MapPin className="w-5 h-5 text-primary drop-shadow-[0_0_8px_rgba(251,146,60,0.8)]" />
+                      </div>
+                    </div>
+                    
+                    {/* Location text with better typography */}
+                    <div className="flex flex-col items-start">
+                      <span className="text-xs text-muted-foreground/80 font-medium tracking-wider uppercase">
+                        Current Location
+                      </span>
+                      <span className="text-base font-semibold text-foreground truncate max-w-[200px] md:max-w-[300px] group-hover/btn:text-primary transition-colors duration-300">
+                        {selectedLocation.name || "Select Location"}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Change location indicator */}
+                  <div className="flex items-center gap-2 text-muted-foreground group-hover/btn:text-primary transition-colors duration-300">
+                    <span className="text-sm font-medium hidden md:inline">Change</span>
+                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+              </Button>
+              
+              {/* Subtle animated border */}
+              <div className="absolute inset-0 rounded-2xl border border-primary/10 group-hover:border-primary/30 transition-all duration-500"></div>
+            </div>
+            
+            {/* Optional floating badge for premium feel */}
+            {selectedLocation.name && (
+              <div className="absolute -top-2 -right-2 bg-linear-to-r from-primary to-orange-500 text-white text-xs px-3 py-1 rounded-full shadow-lg animate-pulse">
+                <span className="font-medium">✨ Active</span>
+              </div>
+            )}
+          </div>
         </motion.div>
       </div>
     </section>
