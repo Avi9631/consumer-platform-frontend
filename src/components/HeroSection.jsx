@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import OlaMapSearch from "@/components/maps/OlaMapSearch";
+import GoogleMapSearch from "@/components/maps/GoogleMapSearch";
 
 /**
  * HeroSection Component
@@ -78,7 +78,7 @@ export default function HeroSection({ onSearchSelect }) {
           transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
           className="max-w-4xl mx-auto px-4 relative z-50"
         >
-          <OlaMapSearch
+          <GoogleMapSearch
             onPlaceSelect={onSearchSelect}
             placeholder="Type to search for address or location..."
             className="w-full"

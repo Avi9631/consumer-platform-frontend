@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import OlaMapSearch from "@/components/maps/OlaMapSearch";
-import OlaMapViewer from "@/components/maps/OlaMapViewer";
+import GoogleMapSearch from "@/components/maps/GoogleMapSearch";
+import GoogleMapViewer from "@/components/maps/GoogleMapViewer";
 
 /**
  * LocationSheet Component
@@ -52,7 +52,7 @@ export default function LocationSheet({
 
             {/* Search Bar in Sheet */}
             <div className="w-full">
-              <OlaMapSearch
+              <GoogleMapSearch
                 onPlaceSelect={onSearchSelect}
                 placeholder="Type to search for address or location..."
                 className="w-full"
@@ -63,7 +63,7 @@ export default function LocationSheet({
 
           {/* Map Viewer - Full Height */}
           <div className="flex-1 relative">
-            <OlaMapViewer
+            <GoogleMapViewer
               center={mapCenter}
               zoom={16}
               marker={mapMarker}

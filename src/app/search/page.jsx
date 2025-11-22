@@ -25,8 +25,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import OlaMapSearch from "@/components/maps/OlaMapSearch";
-import OlaMapViewer from "@/components/maps/OlaMapViewer";
+import GoogleMapSearch from "@/components/maps/GoogleMapSearch";
+import GoogleMapViewer from "@/components/maps/GoogleMapViewer";
 import { getMockProperties } from "@/lib/services/propertyService";
 import Header from "@/components/Header";
 import FilterSheet from "@/components/FilterSheet";
@@ -310,7 +310,7 @@ export default function PropertySearchPage() {
           <div className="px-2 sm:px-4 py-2 sm:py-3">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 max-w-screen-2xl mx-auto">
               <div className="flex-1 w-full sm:max-w-2xl">
-                <OlaMapSearch
+                <GoogleMapSearch
                   onPlaceSelect={handleLocationSelect}
                   placeholder="Search address, city..."
                   initialValue={location?.formattedAddress || ""}

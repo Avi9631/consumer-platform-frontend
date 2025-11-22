@@ -1,6 +1,7 @@
 /**
  * Map Constants
  * Centralized configuration and magic numbers for map functionality
+ * Updated for Google Maps integration
  */
 
 // Default Map Settings
@@ -29,10 +30,30 @@ export const GEOLOCATION_OPTIONS = {
   maximumAge: 0,
 };
 
-// Map Style URLs
+// Google Maps Libraries
+export const GOOGLE_MAPS_LIBRARIES = ['places', 'geometry'];
+
+// Map Styles for Google Maps
 export const MAP_STYLES = {
-  DEFAULT_LIGHT: 'https://api.olamaps.io/tiles/vector/v1/styles/default-light-standard/style.json',
-  DEFAULT_DARK: 'https://api.olamaps.io/tiles/vector/v1/styles/default-dark-standard/style.json',
+  // Hide some POI categories for cleaner look
+  DEFAULT_STYLE: [
+    {
+      featureType: 'poi.business',
+      stylers: [{ visibility: 'off' }],
+    },
+  ],
+  
+  // Custom styles can be added here
+  MINIMAL_STYLE: [
+    {
+      featureType: 'poi',
+      stylers: [{ visibility: 'off' }],
+    },
+    {
+      featureType: 'transit',
+      stylers: [{ visibility: 'off' }],
+    },
+  ],
 };
 
 // Marker Configuration
@@ -43,20 +64,32 @@ export const MARKER_CONFIG = {
     color: '#ea580c', // orange-600
     strokeColor: '#fff',
     strokeWidth: 2,
+    scale: 8,
+  },
+  MULTIPLE_MARKERS_ICON: {
+    width: 24,
+    height: 24,
+    color: '#ea580c', // orange-600
+    strokeColor: '#fff',
+    strokeWidth: 2,
+    scale: 6,
   },
 };
 
 // API Error Messages
 export const ERROR_MESSAGES = {
-  API_KEY_MISSING: 'Ola Maps API key not found. Please add NEXT_PUBLIC_OLA_MAPS_API_KEY to your .env.local file',
-  SDK_LOAD_FAILED: 'Failed to load Ola Maps SDK from CDN',
-  SDK_NOT_AVAILABLE: 'OlaMaps SDK loaded but OlaMaps object not available',
-  MAP_INIT_FAILED: 'Failed to initialize map',
+  API_KEY_MISSING: 'Google Maps API key not found. Please add NEXT_PUBLIC_GOOGLE_MAPS_API_KEY to your .env file',
+  SDK_LOAD_FAILED: 'Failed to load Google Maps API from CDN',
+  SDK_NOT_AVAILABLE: 'Google Maps API loaded but google object not available',
+  MAP_INIT_FAILED: 'Failed to initialize Google Maps',
   GEOLOCATION_NOT_SUPPORTED: 'Geolocation is not supported by your browser',
   GEOLOCATION_FAILED: 'Unable to get your current location. Please check your browser settings.',
   SEARCH_FAILED: 'Search failed. Please try again.',
   GEOCODE_FAILED: 'Failed to get coordinates for the location',
   REVERSE_GEOCODE_FAILED: 'Failed to get address for the coordinates',
+  PLACES_API_ERROR: 'Google Places API error occurred',
+  BILLING_NOT_ENABLED: 'Google Cloud billing not enabled for this project',
+  API_RESTRICTIONS: 'API key restrictions prevent access from this domain',
 };
 
 // Address Component Types

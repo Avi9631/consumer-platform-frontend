@@ -124,7 +124,7 @@ const filteredProperties = usePropertyFilter(properties, location, radius);
 
 **Features**:
 - Animated entrance (framer-motion)
-- Integrated OlaMapSearch
+- Integrated GoogleMapSearch
 - Sunset gradient effects
 - Responsive text sizing
 
@@ -283,11 +283,11 @@ page.js
 │   └── ui/sheet
 ├── HeroSection.jsx
 │   ├── framer-motion
-│   ├── maps/OlaMapSearch
+│   ├── maps/GoogleMapSearch
 │   └── next/image
 ├── LocationSheet.jsx
-│   ├── maps/OlaMapSearch
-│   ├── maps/OlaMapViewer
+│   ├── maps/GoogleMapSearch
+│   ├── maps/GoogleMapViewer
 │   └── ui/sheet, badge, button
 ├── CarouselSection.jsx
 │   └── ui/button

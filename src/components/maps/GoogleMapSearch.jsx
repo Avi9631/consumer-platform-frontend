@@ -4,22 +4,22 @@ import { useEffect, useRef } from 'react';
 import { Search, MapPin, Loader2, X, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useOlaMapSearch } from '@/hooks/useOlaMapSearch';
+import { useGoogleMapSearch } from '@/hooks/useGoogleMapSearch';
 import { SEARCH_CONFIG } from '@/lib/constants/maps';
 import { cn } from '@/lib/utils';
 
 /**
- * OlaMapSearch Component
- * Provides autocomplete search functionality using Ola Maps API
+ * GoogleMapSearch Component
+ * Provides autocomplete search functionality using Google Places API
  */
-export default function OlaMapSearch({ 
+export default function GoogleMapSearch({ 
   onPlaceSelect, 
   placeholder = "Search for location...",
   className = "",
   initialValue = ""
 }) {
   const searchRef = useRef(null);
-  const [state, handlers] = useOlaMapSearch({ onPlaceSelect, initialValue });
+  const [state, handlers] = useGoogleMapSearch({ onPlaceSelect, initialValue });
   
   const {
     searchQuery,
@@ -88,7 +88,7 @@ export default function OlaMapSearch({
       {error && (
         <div className="absolute z-50 w-full mt-2 bg-destructive/10 border-2 border-destructive/50 rounded-lg shadow-lg p-3">
           <div className="flex items-center gap-2 text-sm text-destructive">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <AlertCircle className="w-4 h-4 shrink-0" />
             <p>{error}</p>
           </div>
         </div>
@@ -108,7 +108,7 @@ export default function OlaMapSearch({
                   selectedIndex === index && "bg-orange-50 dark:bg-orange-950/30"
                 )}
               >
-                <MapPin className="w-4 h-4 mt-0.5 text-orange-500 flex-shrink-0" />
+                <MapPin className="w-4 h-4 mt-0.5 text-orange-500 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground line-clamp-1">
                     {suggestion.structured_formatting?.main_text || suggestion.description}

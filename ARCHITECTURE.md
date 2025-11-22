@@ -47,7 +47,7 @@
              ▼                                             ▼
     ┌────────────────┐                          ┌──────────────────┐
     │     Header     │                          │   Search Page    │
-    │  (MapPin Icon) │                          │  (OlaMapSearch)  │
+    │  (MapPin Icon) │                          │  (GoogleMapSearch)  │
     └────────┬───────┘                          └────────┬─────────┘
              │                                            │
              │ onClick                                    │ onPlaceSelect
@@ -55,11 +55,11 @@
     ┌────────────────────────────────────────────────────────────┐
     │                    LocationSheet                           │
     │  ┌──────────────────────────────────────────────────┐     │
-    │  │         OlaMapSearch (Search Bar)                 │     │
+    │  │         GoogleMapSearch (Search Bar)                 │     │
     │  └────────────────┬─────────────────────────────────┘     │
     │                   │                                         │
     │  ┌────────────────▼─────────────────────────────────┐     │
-    │  │         OlaMapViewer (Interactive Map)            │     │
+    │  │         GoogleMapViewer (Interactive Map)            │     │
     │  │  - Marker dragging                                │     │
     │  │  - Map clicking                                   │     │
     │  └────────────────┬─────────────────────────────────┘     │
@@ -130,8 +130,8 @@ consumer-frontend/
 │  │  │  └─ Calls: updateFromSearchResult
 │  │  │
 │  │  └─ maps/
-│  │     ├─ OlaMapSearch.jsx
-│  │     └─ OlaMapViewer.jsx
+│  │     ├─ GoogleMapSearch.jsx
+│  │     └─ GoogleMapViewer.jsx
 │  │
 │  └─ lib/
 │     └─ services/

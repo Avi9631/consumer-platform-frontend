@@ -1,10 +1,10 @@
 /**
- * useOlaMapSearch Hook
- * Custom hook for managing map search functionality with debouncing
+ * useGoogleMapSearch Hook
+ * Custom hook for managing Google Maps search functionality with debouncing
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { searchPlaces, getPlaceDetails, geocodeAddress } from '@/lib/services/olaMapsService';
+import { searchPlaces, getPlaceDetails, geocodeAddress } from '@/lib/services/googleMapsService';
 import { SEARCH_CONFIG, ERROR_MESSAGES } from '@/lib/constants/maps';
 
 /**
@@ -27,13 +27,13 @@ import { SEARCH_CONFIG, ERROR_MESSAGES } from '@/lib/constants/maps';
  */
 
 /**
- * Custom hook for Ola Map search functionality
+ * Custom hook for Google Maps search functionality
  * @param {Object} options - Hook options
  * @param {(place: Object) => void} options.onPlaceSelect - Callback when place is selected
  * @param {string} options.initialValue - Initial search value
  * @returns {[SearchState, SearchHandlers]}
  */
-export function useOlaMapSearch({ onPlaceSelect, initialValue = '' } = {}) {
+export function useGoogleMapSearch({ onPlaceSelect, initialValue = '' } = {}) {
   const [searchQuery, setSearchQuery] = useState(initialValue);
   const [suggestions, setSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -109,19 +109,27 @@ export function useOlaMapSearch({ onPlaceSelect, initialValue = '' } = {}) {
       // Extract coordinates from place details
       if (placeDetails?.geometry?.location) {
         const loc = placeDetails.geometry.location;
-        if (typeof loc.lat === 'number' && typeof loc.lng === 'number') {
+        if (typeof loc.lat === 'function' && typeof loc.lng === 'function') {
+          // Google Maps LatLng object with functions
+          coordinates = { lat: loc.lat(), lng: loc.lng() };
+        } else if (typeof loc.lat === 'number' && typeof loc.lng === 'number') {
+          // Plain object with coordinates
           coordinates = { lat: loc.lat, lng: loc.lng };
+        }
+        
+        if (coordinates) {
           formattedAddress = placeDetails.formatted_address || place.description;
           addressComponents = placeDetails.address_components || [];
         }
       }
       
-      // If no coordinates, try geocoding
+      // If no coordinates from place details, try geocoding
       if (!coordinates) {
         const geocoded = await geocodeAddress(place.description);
         if (geocoded && typeof geocoded.lat === 'number' && typeof geocoded.lng === 'number') {
           coordinates = { lat: geocoded.lat, lng: geocoded.lng };
           formattedAddress = geocoded.formattedAddress || place.description;
+          addressComponents = geocoded.addressComponents || [];
         }
       }
       
