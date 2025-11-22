@@ -11,8 +11,10 @@ import { MapPin } from "lucide-react";
  * HeroSection Component
  * Main hero banner with search functionality
  */
-export default function HeroSection({ onSearchSelect, onOpenLocationSheet , selectedLocation}) {
+export default function HeroSection({ onSearchSelect, onOpenLocationSheet, selectedLocation}) {
   const location = useLocationStore((state) => state.location);
+  
+  console.log("HeroSection Props:", { onSearchSelect, onOpenLocationSheet, selectedLocation });
   return (
     <section className="relative min-h-[400px] md:h-[500px] flex items-center justify-center overflow-visible pt-16 bg-gradient-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#3d1f2f]">
       <div className="absolute inset-0 z-0">
@@ -84,14 +86,28 @@ export default function HeroSection({ onSearchSelect, onOpenLocationSheet , sele
         >
           <div className="relative group">
             {/* Glowing background effect */}
-            <div className="absolute -inset-1 bg-linear-to-r from-orange-600 via-primary to-orange-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-all duration-500"></div>
+            <div className="absolute -inset-1 bg-linear-to-r from-orange-600 via-primary to-orange-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition-all duration-500 pointer-events-none"></div>
             
             {/* Main button container */}
             <div className="relative bg-linear-to-r from-background/95 to-background/90 backdrop-blur-xl rounded-2xl border border-primary/20 shadow-[0_8px_32px_rgba(251,146,60,0.15)] overflow-hidden">
               <Button
                 variant="ghost"
-                onClick={onOpenLocationSheet}
-                className="w-full h-16 px-6 py-4 bg-transparent hover:bg-primary/5 border-0 rounded-2xl group/btn transition-all duration-300 hover:shadow-[0_0_30px_rgba(251,146,60,0.25)]"
+                onClick={(e) => {
+                  console.log("=== BUTTON CLICKED ===");
+                  console.log("Event target:", e.target);
+                  console.log("Event currentTarget:", e.currentTarget);
+                  console.log("onOpenLocationSheet function:", onOpenLocationSheet);
+                  console.log("typeof onOpenLocationSheet:", typeof onOpenLocationSheet);
+                  
+                  if (onOpenLocationSheet && typeof onOpenLocationSheet === 'function') {
+                    console.log("Calling onOpenLocationSheet...");
+                    onOpenLocationSheet();
+                    console.log("onOpenLocationSheet called successfully");
+                  } else {
+                    console.error("onOpenLocationSheet is not a function:", onOpenLocationSheet);
+                  }
+                }}
+                className="w-full h-16 px-6 py-4 bg-transparent hover:bg-primary/5 border-0 rounded-2xl group/btn transition-all duration-300 hover:shadow-[0_0_30px_rgba(251,146,60,0.25)] cursor-pointer"
               >
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center gap-4">
@@ -123,7 +139,7 @@ export default function HeroSection({ onSearchSelect, onOpenLocationSheet , sele
               </Button>
               
               {/* Subtle animated border */}
-              <div className="absolute inset-0 rounded-2xl border border-primary/10 group-hover:border-primary/30 transition-all duration-500"></div>
+              <div className="absolute inset-0 rounded-2xl border border-primary/10 group-hover:border-primary/30 transition-all duration-500 pointer-events-none"></div>
             </div>
             
             {/* Optional floating badge for premium feel */}

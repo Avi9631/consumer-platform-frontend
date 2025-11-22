@@ -195,8 +195,8 @@ export default function Home() {
         subtitle="Swipe to explore more assured properties"
         className="bg-gradient-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#3d1f2f]"
       >
-        {filteredProperties.length > 0 ? (
-          filteredProperties.map((property) => (
+        {PROPERTIES_DATA.length > 0 ? (
+          PROPERTIES_DATA.map((property) => (
             <PropertyCard key={property.id} property={property} />
           ))
         ) : (

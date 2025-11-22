@@ -4,6 +4,9 @@ import { Home, Bed, Bath, MapPin, Heart } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
+import Image from "next/image";
+import { Button } from "./ui/button";
+import { Phone } from "lucide-react";
 
 /**
  * PropertyCard Component
@@ -72,109 +75,65 @@ export default function PropertyCard({ property, onClick, variant = "horizontal"
   };
 
   return (
-    <Card
-      onClick={onClick}
-      className="hover:shadow-xl transition-all cursor-pointer overflow-hidden border-2 border-transparent hover:border-blue-500"
-    >
-      <div className="flex">
-        {/* Property Image */}
-        <div className="w-64 h-48 flex-shrink-0 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 relative">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Home className="w-12 h-12 text-gray-400" />
-          </div>
-          
-          {/* Favorite Button */}
-          <button 
-            onClick={handleFavoriteClick}
-            className="absolute top-2 right-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow hover:bg-gray-50 transition-colors"
-          >
-            <Heart 
-              className={`w-5 h-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
-            />
-          </button>
+<Card
+                  key={property.id}
+                  className="shrink-0 w-[220px] sm:w-[240px] md:w-[280px] group hover:shadow-[0_0_40px_rgba(251,146,60,0.3)] transition-all duration-300 overflow-hidden p-0 border-primary/10 hover:border-primary/30"
+                >
+                  <div className="relative aspect-3/4">
+                    <Image
+                      src={property.image}
+                      alt={property.name}
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20"></div>
 
-          {/* Property Status Badge */}
-          {property.isNewProperty && (
-            <Badge className="absolute top-2 left-2 bg-green-500">
-              New
-            </Badge>
-          )}
-        </div>
+                    {/* Top Actions */}
+                    <div className="absolute top-3 md:top-4 left-3 md:left-4 right-3 md:right-4 flex justify-between items-start">
+                      <Badge variant="secondary" className="backdrop-blur-md">
+                        {property.developer}
+                      </Badge>
+                      <div className="flex gap-1.5 md:gap-2">
+                        <Button
+                          variant="secondary"
+                          size="icon-sm"
+                          className="rounded-full backdrop-blur-md"
+                        >
+                          <Heart className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="secondary"
+                          size="icon-sm"
+                          className="rounded-full backdrop-blur-md"
+                        >
+                          <Phone className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
 
-        {/* Property Details */}
-        <div className="flex-1 p-4">
-          <div className="flex justify-between items-start mb-2">
-            <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {formatPrice(getPrice())}
-              </p>
-              <div className="flex items-center gap-3 mt-1 text-sm text-gray-600 dark:text-gray-400">
-                {bedrooms > 0 && (
-                  <span className="flex items-center gap-1">
-                    <Bed className="w-4 h-4" />
-                    {bedrooms} bd
-                  </span>
-                )}
-                {bathrooms > 0 && (
-                  <span className="flex items-center gap-1">
-                    <Bath className="w-4 h-4" />
-                    {bathrooms} ba
-                  </span>
-                )}
-                {getArea() && <span>{getArea()} sqft</span>}
-              </div>
-            </div>
-            <Badge variant="secondary" className="capitalize">
-              {property.propertyType}
-            </Badge>
-          </div>
-
-          <p className="text-sm text-gray-700 dark:text-gray-300 mb-1 font-medium">
-            {getPropertyName()}
-          </p>
-          
-          {property.description && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
-              {property.description}
-            </p>
-          )}
-
-          <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-3">
-            <MapPin className="w-4 h-4 mr-1" />
-            <span className="line-clamp-1">{getLocation()}</span>
-          </div>
-
-          {/* Additional Property Info */}
-          <div className="flex flex-wrap gap-2 mb-3">
-            {property.furnishingStatus && (
-              <Badge variant="outline" className="text-xs capitalize">
-                {property.furnishingStatus.replace('_', ' ')}
-              </Badge>
-            )}
-            {property.facing && (
-              <Badge variant="outline" className="text-xs capitalize">
-                {property.facing} Facing
-              </Badge>
-            )}
-            {property.possessionStatus && property.possessionStatus !== 'ready' && (
-              <Badge variant="outline" className="text-xs capitalize">
-                {property.possessionStatus.replace('_', ' ')}
-              </Badge>
-            )}
-          </div>
-
-          <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
-            {property.distance !== undefined && (
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {property.distance.toFixed(1)} km away
-              </p>
-            )}
-            <div className="text-xs text-gray-500 dark:text-gray-400">
-              {property.listingType === 'sale' ? 'For Sale' : property.listingType === 'rent' ? 'For Rent' : 'Listed by Agent'}
-            </div>
-          </div>
-        </div>
-      </div>
-    </Card>
+                    {/* Bottom Info */}
+                    <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
+                      <h3 className="text-base md:text-xl font-bold mb-1 text-white">
+                        {property.name}
+                      </h3>
+                      <p className="text-xs md:text-sm text-white/80 mb-2">
+                        {property.location}
+                      </p>
+                      <div className="flex justify-between items-end gap-2">
+                        <div className="flex-1">
+                          <p className="text-sm font-bold text-primary">
+                            {property.price}
+                          </p>
+                          <p className="text-xs  text-white/60">
+                            {property.bhk}
+                          </p>
+                        </div>
+                        <Button size="sm" className="whitespace-nowrap">
+                          BOOK VISIT
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
   );
 }

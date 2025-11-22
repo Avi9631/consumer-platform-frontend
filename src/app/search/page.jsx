@@ -310,14 +310,17 @@ export default function PropertySearchPage() {
           <div className="px-2 sm:px-4 py-2 sm:py-3">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 max-w-screen-2xl mx-auto">
               <div className="flex-1 w-full sm:max-w-2xl">
-                <GoogleMapSearch
+                {/* <GoogleMapSearch
                   onPlaceSelect={handleLocationSelect}
                   placeholder="Search address, city..."
                   initialValue={location?.formattedAddress || ""}
-                />
+                /> */}
+                <Button variant="ghost" className="border  bg-transparent hover:bg-primary/5">
+                  {location?.formattedAddress || ""}
+                </Button>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 ml-auto">
                 {/* <Button
                   variant="outline"
                   size="default"
