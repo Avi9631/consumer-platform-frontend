@@ -110,6 +110,13 @@ export default function GoogleMapViewer({
     const lat = event.latLng.lat();
     const lng = event.latLng.lng();
 
+    // Update current marker position immediately
+    setCurrentMarker({
+      lat,
+      lng,
+      draggable: true,
+    });
+
     try {
       console.log('🔍 Reverse geocoding (drag):', { lat, lng });
       const addressData = await reverseGeocode(lat, lng);
