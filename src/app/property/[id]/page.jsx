@@ -35,11 +35,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import GoogleMapViewer from "@/components/maps/GoogleMapViewer";
 import Header from "@/components/Header";
 import LocationSheet from "@/components/LocationSheet";
 import useLocationStore from "@/stores/locationStore";
 import { PROPERTIES_DATA } from "@/constants/propertyData";
+import { X } from "lucide-react";
 
 export default function PropertyDetailPage() {
   const params = useParams();
@@ -55,6 +62,8 @@ export default function PropertyDetailPage() {
   const [isLiked, setIsLiked] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [isLocationSheetOpen, setIsLocationSheetOpen] = useState(false);
+  const [isImageGalleryOpen, setIsImageGalleryOpen] = useState(false);
+  const [galleryImageIndex, setGalleryImageIndex] = useState(0);
   const [sheetMapCenter, setSheetMapCenter] = useState({
     lat: 19.0176,
     lng: 72.8562,
@@ -130,6 +139,23 @@ export default function PropertyDetailPage() {
 
   const prevImage = () => {
     setCurrentImageIndex((prev) => 
+      prev === 0 ? property.images.length - 1 : prev - 1
+    );
+  };
+
+  const openImageGallery = (index = 0) => {
+    setGalleryImageIndex(index);
+    setIsImageGalleryOpen(true);
+  };
+
+  const nextGalleryImage = () => {
+    setGalleryImageIndex((prev) => 
+      prev === property.images.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const prevGalleryImage = () => {
+    setGalleryImageIndex((prev) => 
       prev === 0 ? property.images.length - 1 : prev - 1
     );
   };
@@ -232,6 +258,92 @@ export default function PropertyDetailPage() {
           onSearchSelect={handleSheetSearchSelect}
           onMapInteraction={handleSheetMapInteraction}
         />
+
+        {/* Image Gallery Sheet */}
+        <Sheet open={isImageGalleryOpen} onOpenChange={setIsImageGalleryOpen}>
+          <SheetContent side="full" className="bg-black/95 backdrop-blur-xl border-none p-0 overflow-hidden [&>button]:hidden">
+            <div className="h-full flex flex-col">
+              {/* Header */}
+              <SheetHeader className="p-4 sm:p-6 bg-gradient-to-b from-black/80 to-transparent z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <SheetTitle className="text-white text-lg sm:text-xl font-bold text-left">
+                      {property.title}
+                    </SheetTitle>
+                    <p className="text-xs sm:text-sm text-gray-400 mt-1 text-left">
+                      {galleryImageIndex + 1} / {property.images.length}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsImageGalleryOpen(false)}
+                    className="rounded-full text-white hover:text-orange-400 hover:bg-white/10"
+                  >
+                    <X className="w-5 h-5" />
+                  </Button>
+                </div>
+              </SheetHeader>
+
+              {/* Main Image Display */}
+              <div className="flex-1 relative">
+                <div className="flex items-center justify-center h-full px-4 sm:px-16 py-20">
+                  <div className="relative w-full h-full max-w-6xl">
+                    <Image
+                      src={property.images[galleryImageIndex]}
+                      alt={`${property.title} - Image ${galleryImageIndex + 1}`}
+                      fill
+                      className="object-contain"
+                      priority
+                    />
+                  </div>
+                </div>
+
+                {/* Navigation Buttons */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-md text-white hover:bg-orange-500 hover:scale-110 z-10 transition-all duration-300 border border-white/10 h-12 w-12 p-0 rounded-full shadow-xl"
+                  onClick={prevGalleryImage}
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-md text-white hover:bg-orange-500 hover:scale-110 z-10 transition-all duration-300 border border-white/10 h-12 w-12 p-0 rounded-full shadow-xl"
+                  onClick={nextGalleryImage}
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </Button>
+              </div>
+
+              {/* Thumbnail Strip Footer */}
+              <div className="p-4 sm:p-6 bg-gradient-to-t from-black/80 to-transparent">
+                <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+                  {property.images.map((image, index) => (
+                    <button
+                      key={index}
+                      className={`relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden transition-all duration-300 ${
+                        index === galleryImageIndex
+                          ? 'ring-2 ring-orange-500 scale-110 shadow-lg shadow-orange-500/50'
+                          : 'ring-1 ring-white/20 hover:ring-white/50 opacity-60 hover:opacity-100'
+                      }`}
+                      onClick={() => setGalleryImageIndex(index)}
+                    >
+                      <Image
+                        src={image}
+                        alt={`Thumbnail ${index + 1}`}
+                        fill
+                        className="object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
         
         {/* Property Navigation Header */}
         <header className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 bg-slate-900/80 backdrop-blur-xl">
@@ -298,7 +410,13 @@ export default function PropertyDetailPage() {
                   <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent group-hover:from-black/40 transition-all duration-300"></div>
                   {/* Show "View all photos" on last image if there are more images */}
                   {index === 3 && property.images.length > 5 && (
-                    <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center group-hover:bg-black/80 transition-all duration-300">
+                    <div 
+                      className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center group-hover:bg-black/80 transition-all duration-300 cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openImageGallery(0);
+                      }}
+                    >
                       <div className="text-white text-center">
                         <Maximize2 className="w-4 h-4 sm:w-6 sm:h-6 mx-auto mb-1" />
                         <p className="text-xs sm:text-sm font-medium">+{property.images.length - 5} more</p>
@@ -387,11 +505,7 @@ export default function PropertyDetailPage() {
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3">
                   <span className="text-xl sm:text-2xl lg:text-3xl font-bold bg-linear-to-r from-orange-500 to-orange-400 bg-clip-text text-white">{property.price}</span>
-                  {property.discount && (
-                    <Badge className="bg-linear-to-r from-orange-500 to-orange-600 text-white border-none shadow-lg shadow-orange-500/30 text-xs sm:text-sm">
-                      {property.discount}
-                    </Badge>
-                  )}
+      
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full lg:w-auto">
@@ -525,7 +639,7 @@ export default function PropertyDetailPage() {
                     Locality
                   </h3>
                   <div className="h-64 sm:h-80 rounded-xl overflow-hidden border border-white/10 shadow-xl">
-                    <GoogleMapViewer 
+                    {/* <GoogleMapViewer 
                       center={property.coordinates}
                       markers={[{
                         lat: property.coordinates.lat,
@@ -533,8 +647,12 @@ export default function PropertyDetailPage() {
                         title: property.title
                       }]}
                       zoom={15}
-                    />
+                    /> */}
+                    
+                  <iframe src={`https://www.google.com/maps?q=${property.coordinates.lat},${property.coordinates.lng}&z=15&output=embed`} width="600" height="450" className="w-full"   loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
+
                   </div>
+ 
                 </div>
               </div>
             </div>
@@ -570,7 +688,6 @@ export default function PropertyDetailPage() {
               <Card className="bg-linear-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500">
                 <CardHeader>
                   <CardTitle className="text-orange-500 text-base sm:text-lg font-bold flex items-center gap-2">
-                    <div className="w-1 h-5 bg-linear-to-b from-orange-500 to-orange-600 rounded-full"></div>
                     Visit property from your home
                   </CardTitle>
           

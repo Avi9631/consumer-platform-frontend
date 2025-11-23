@@ -28,7 +28,7 @@ export default function LocationSheet({
 }) {
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent side="full" className="p-0 overflow-hidden">
+      <SheetContent side="full" className="p-0 overflow-hidden [&>button]:hidden">
         <div className="h-full flex flex-col">
           {/* Header with Search */}
           <SheetHeader className="p-4 md:p-6 border-b bg-background/95 backdrop-blur-sm z-10">
