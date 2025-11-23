@@ -122,7 +122,7 @@ export default function PropertyDetailPage() {
     },
     agent: {
       name: "Sukruth Shetty",
-      role: "Relationship Manager | Owner | Agent", 
+      role: "Relationship Manager", 
       image: "/api/placeholder/60/60",
       phone: "+91 98765 43210",
       email: "sukruth@lodha.com"
