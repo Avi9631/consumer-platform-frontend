@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import {
@@ -69,6 +69,8 @@ export default function PropertyDetailPage() {
     lng: 72.8562,
   });
   const [sheetMapMarker, setSheetMapMarker] = useState(null);
+  const scrollRef = useRef(null);
+  const [currentStatIndex, setCurrentStatIndex] = useState(0);
 
   // Mock property data - in real app, fetch based on propertyId
   const property = {
@@ -130,6 +132,62 @@ export default function PropertyDetailPage() {
        lng: 72.8562
     }
   };
+
+  // Quick Stats data
+  const quickStats = [
+    {
+      icon: Building2,
+      label: "Configuration",
+      value: property.configuration
+    },
+    {
+      icon: Square,
+      label: "Area",
+      value: property.area
+    },
+    {
+      icon: Calendar,
+      label: "Status",
+      value: property.status
+    },
+    {
+      icon: IndianRupee,
+      label: "Avg. Price",
+      value: property.avgPrice
+    },
+    {
+      icon: Building2,
+      label: "Configuration",
+      value: property.configuration
+    },
+    {
+      icon: Square,
+      label: "Area",
+      value: property.area
+    },
+    {
+      icon: Calendar,
+      label: "Status",
+      value: property.status
+    },
+    {
+      icon: IndianRupee,
+      label: "Avg. Price",
+      value: property.avgPrice
+    }
+  ];
+
+  // Auto-carousel effect for Quick Stats
+  useEffect(() => {
+    const CAROUSEL_INTERVAL = 3000; // milliseconds between slide changes
+    const totalSlides = Math.ceil(quickStats.length / 4);
+
+    const carouselInterval = setInterval(() => {
+      setCurrentStatIndex((prev) => (prev + 1) % totalSlides);
+    }, CAROUSEL_INTERVAL);
+
+    return () => clearInterval(carouselInterval);
+  }, [quickStats.length]);
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => 
@@ -522,36 +580,44 @@ export default function PropertyDetailPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
             {/* Left Content */}
             <div className="lg:col-span-2 space-y-6 sm:space-y-8">
-              {/* Quick Stats */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                <Card className="bg-linear-to-br from-slate-800/80 to-slate-900/80 border-white/10 backdrop-blur-xl hover:border-orange-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/20 hover:scale-105 group">
-                  <CardContent className="p-3 sm:p-4 text-center">
-                    <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500 mx-auto mb-2 group-hover:scale-110 transition-transform duration-300" />
-                    <p className="text-xs sm:text-sm text-gray-400 mb-1">Configuration</p>
-                    <p className="font-semibold text-white text-xs sm:text-sm">{property.configuration}</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-linear-to-br from-slate-800/80 to-slate-900/80 border-white/10 backdrop-blur-xl hover:border-orange-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/20 hover:scale-105 group">
-                  <CardContent className="p-3 sm:p-4 text-center">
-                    <Square className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500 mx-auto mb-2 group-hover:scale-110 transition-transform duration-300" />
-                    <p className="text-xs sm:text-sm text-gray-400 mb-1">Area</p>
-                    <p className="font-semibold text-white text-xs sm:text-sm">{property.area}</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-linear-to-br from-slate-800/80 to-slate-900/80 border-white/10 backdrop-blur-xl hover:border-orange-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/20 hover:scale-105 group">
-                  <CardContent className="p-3 sm:p-4 text-center">
-                    <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500 mx-auto mb-2 group-hover:scale-110 transition-transform duration-300" />
-                    <p className="text-xs sm:text-sm text-gray-400 mb-1">Status</p>
-                    <p className="font-semibold text-white text-xs sm:text-sm">{property.status}</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-linear-to-br from-slate-800/80 to-slate-900/80 border-white/10 backdrop-blur-xl hover:border-orange-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/20 hover:scale-105 group">
-                  <CardContent className="p-3 sm:p-4 text-center">
-                    <IndianRupee className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500 mx-auto mb-2 group-hover:scale-110 transition-transform duration-300" />
-                    <p className="text-xs sm:text-sm text-gray-400 mb-1">Avg. Price</p>
-                    <p className="font-semibold text-white text-xs sm:text-sm">{property.avgPrice}</p>
-                  </CardContent>
-                </Card>
+              {/* Quick Stats Carousel */}
+              <div className="relative">
+                <div className="overflow-hidden">
+                  <div 
+                    ref={scrollRef}
+                    className="flex gap-3 sm:gap-4 transition-transform duration-700 ease-in-out"
+                    style={{ transform: `translateX(-${currentStatIndex * 100}%)` }}
+                  >
+                    {Array.from({ length: Math.ceil(quickStats.length / 4) }).map((_, slideIndex) => (
+                      <div key={slideIndex} className="min-w-full grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                        {quickStats.slice(slideIndex * 4, (slideIndex + 1) * 4).map((stat, index) => (
+                          <Card key={index} className="bg-linear-to-br from-slate-800/80 to-slate-900/80 border-white/10 backdrop-blur-xl hover:border-orange-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/20 hover:scale-105 group">
+                            <CardContent className="p-3 sm:p-4 text-center">
+                              <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500 mx-auto mb-2 group-hover:scale-110 transition-transform duration-300" />
+                              <p className="text-xs sm:text-sm text-gray-400 mb-1">{stat.label}</p>
+                              <p className="font-semibold text-white text-xs sm:text-sm">{stat.value}</p>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Carousel Indicators */}
+                <div className="flex justify-center gap-2 mt-4">
+                  {Array.from({ length: Math.ceil(quickStats.length / 4) }).map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentStatIndex(index)}
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        index === currentStatIndex 
+                          ? 'bg-orange-500 w-8 shadow-lg shadow-orange-500/50' 
+                          : 'bg-white/30 hover:bg-white/50 w-2'
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
 
               {/* Overview Section */}
