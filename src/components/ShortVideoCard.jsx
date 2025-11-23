@@ -11,7 +11,7 @@ import { getYouTubeEmbedUrl } from "@/lib/utils/videoHelpers";
  * VirtualTourCard Component
  * Displays virtual tour with video playback on hover
  */
-export default function VirtualTourCard({ tour, isHovered, onHover }) {
+export default function ShortVideoCard({ tour, isHovered, onHover }) {
   const videoRef = useRef(null);
 
   const handleMouseEnter = () => {

@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
 import CarouselSection from "@/components/CarouselSection";
-import VirtualTourCard from "@/components/VirtualTourCard";
+import VirtualTourCard from "@/components/ShortVideoCard";
 import PropertyCard from "@/components/PropertyCard";
 import LocationSheet from "@/components/LocationSheet";
 

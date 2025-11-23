@@ -1,0 +1,103 @@
+/* Property Detail Page Custom Styles */
+
+.bg-linear-to-br {
+  background: linear-gradient(to bottom right, var(--tw-gradient-stops));
+}
+
+.bg-linear-to-bl {
+  background: linear-gradient(to bottom left, var(--tw-gradient-stops));
+}
+
+.bg-linear-to-tr {
+  background: linear-gradient(to top right, var(--tw-gradient-stops));
+}
+
+.bg-linear-to-t {
+  background: linear-gradient(to top, var(--tw-gradient-stops));
+}
+
+/* Orange ray effects */
+.orange-rays::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0deg,
+    rgba(249, 115, 22, 0.1) 45deg,
+    transparent 90deg,
+    rgba(249, 115, 22, 0.1) 135deg,
+    transparent 180deg,
+    rgba(249, 115, 22, 0.1) 225deg,
+    transparent 270deg,
+    rgba(249, 115, 22, 0.1) 315deg,
+    transparent 360deg
+  );
+  animation: rotate 20s linear infinite;
+  pointer-events: none;
+}
+
+.orange-rays-slow::before {
+  animation: rotate 30s linear infinite reverse;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Glowing effects */
+.glow-orange {
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.3);
+}
+
+.glow-orange-intense {
+  box-shadow: 0 0 40px rgba(249, 115, 22, 0.5);
+}
+
+/* Custom scrollbar for dark theme */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #374151;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #f97316;
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #ea580c;
+}
+
+/* Image gallery transitions */
+.image-transition {
+  transition: opacity 0.5s ease-in-out;
+}
+
+/* Property card hover effects */
+.property-card-hover {
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.property-card-hover:hover {
+  border-color: rgba(249, 115, 22, 0.5);
+  box-shadow: 0 8px 32px rgba(249, 115, 22, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Button hover effects */
+.btn-orange-glow:hover {
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.4);
+}

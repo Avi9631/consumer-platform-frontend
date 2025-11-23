@@ -71,9 +71,21 @@
   .bg-linear-to-br {
     background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
   }
+  
+  .bg-linear-to-bl {
+    background-image: linear-gradient(to bottom left, var(--tw-gradient-stops));
+  }
+  
+  .bg-linear-to-tr {
+    background-image: linear-gradient(to top right, var(--tw-gradient-stops));
+  }
 
   .bg-gradient-radial {
     background-image: radial-gradient(circle, var(--tw-gradient-stops));
+  }
+  
+  .bg-gradient-conic {
+    background-image: conic-gradient(var(--tw-gradient-stops));
   }
   
   .scrollbar-hide {
@@ -99,6 +111,20 @@
   
   .animate-pulse-glow {
     animation: pulse-glow 3s ease-in-out infinite;
+  }
+  
+  /* Slow spin animation for decorative elements */
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  .animate-spin-slow {
+    animation: spin-slow 20s linear infinite;
   }
 }
 

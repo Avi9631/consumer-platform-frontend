@@ -31,8 +31,9 @@ import { getMockProperties } from "@/lib/services/propertyService";
 import Header from "@/components/Header";
 import FilterSheet from "@/components/FilterSheet";
 import LocationSheet from "@/components/LocationSheet";
-import PropertyCard from "@/components/PropertyCard";
+import PropertyListingCard from "@/components/PropertyListingCard";
 import useLocationStore from "@/stores/locationStore";
+import { PROPERTIES_DATA, VIRTUAL_TOURS_DATA } from "@/constants/propertyData";
 
 export default function PropertySearchPage() {
   // Zustand store for global location state
@@ -200,7 +201,7 @@ export default function PropertySearchPage() {
         );
       }
 
-      setProperties(filteredResults);
+      setProperties(results);
     } catch (error) {
       console.error("Error searching properties:", error);
       setProperties([]);
@@ -304,48 +305,35 @@ export default function PropertySearchPage() {
         onMapInteraction={handleSheetMapInteraction}
       />
 
-      <div className="flex flex-col h-screen bg-white dark:bg-gray-900 pt-16">
+      <div className="flex flex-col h-screen bg-white dark:bg-gray-900 pt-4 w-full overflow-x-hidden">
         {/* Top Navigation Bar */}
-        <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 sticky top-16 z-40">
+        <div className="border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 sticky top-14 z-40">
           <div className="px-2 sm:px-4 py-2 sm:py-3">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 max-w-screen-2xl mx-auto">
-              <div className="flex-1 w-full sm:max-w-2xl">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full max-w-screen-2xl mx-auto">
+              <div className="flex-1 w-full sm:max-w-2xl min-w-0">
                 {/* <GoogleMapSearch
                   onPlaceSelect={handleLocationSelect}
                   placeholder="Search address, city..."
                   initialValue={location?.formattedAddress || ""}
                 /> */}
-                <Button variant="ghost" className="border  bg-transparent hover:bg-primary/5">
-                  {location?.formattedAddress || ""}
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-start border bg-transparent hover:bg-primary/5 min-w-0 max-w-full cursor-pointer"
+                  onClick={handleOpenLocationSheet}
+                >
+                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-primary drop-shadow-[0_0_8px_rgba(251,146,60,0.8)] shrink-0" />
+                  <span className="truncate text-left ml-1 sm:ml-2 min-w-0">
+                    {location?.formattedAddress || "Select Location"}
+                  </span>
                 </Button>
               </div>
 
-              <div className="flex items-center gap-2 ml-auto">
-                {/* <Button
-                  variant="outline"
-                  size="default"
-                  onClick={() => setShowMap(!showMap)}
-                  className="gap-1 sm:gap-2 flex-1 sm:flex-none"
-                >
-                  {showMap ? (
-                    <>
-                      <List className="h-4 w-4" />
-                      <span className="hidden sm:inline">List View</span>
-                      <span className="sm:hidden">List</span>
-                    </>
-                  ) : (
-                    <>
-                      <Map className="h-4 w-4" />
-                      <span className="hidden sm:inline">Map View</span>
-                      <span className="sm:hidden">Map</span>
-                    </>
-                  )}
-                </Button> */}
-
+              <div className="flex items-center gap-2 shrink-0 ml-auto">
                 <Button
-                  variant="outline" size="lg"
+                  variant="outline" 
+                  size="sm"
                   onClick={() => setFilterSheetOpen(true)}
-                  className="gap-1 sm:gap-2 flex-1 sm:flex-none relative"
+                  className="gap-1 sm:gap-2 whitespace-nowrap relative"
                 >
                   <Filter className="h-4 w-4" />
                   <span className="hidden sm:inline">Filters</span>
@@ -388,13 +376,12 @@ export default function PropertySearchPage() {
         />
 
         {/* Main Content */}
-        <div className="flex flex-1 overflow-hidden">
- 
+        <div className="flex flex-1 overflow-hidden w-full mt-16">
           {/* Property Listings Section */}
           <div
             className={`${
               showMap ? "w-1/2" : "w-full"
-            } overflow-y-auto bg-gray-50 dark:bg-gray-900 transition-all duration-300`}
+            } overflow-y-auto bg-gray-50 dark:bg-gray-900 transition-all duration-300 min-w-0`}
           >
             {loading ? (
               <div className="flex flex-col items-center justify-center h-full space-y-4">
@@ -418,7 +405,7 @@ export default function PropertySearchPage() {
                   </p>
                 </div>
               </div>
-            ) : properties.length === 0 ? (
+            ) : PROPERTIES_DATA.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full space-y-4 text-center px-8">
                 <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
                   <Home className="w-10 h-10 text-gray-400" />
@@ -440,40 +427,11 @@ export default function PropertySearchPage() {
                 </div>
               </div>
             ) : (
-              <div className="p-4 space-y-3">
-                {/* Sort Bar */}
-                <div className="flex items-center justify-between pb-3 border-b border-gray-200 dark:border-gray-700">
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                      Homes for Sale near {location.city || "Selected Location"}
-                    </h2>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      {properties.length} result
-                      {properties.length !== 1 ? "s" : ""}
-                    </p>
-                  </div>
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Sort by" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="recommended">Recommended</SelectItem>
-                      <SelectItem value="price-low">
-                        Price (Low to High)
-                      </SelectItem>
-                      <SelectItem value="price-high">
-                        Price (High to Low)
-                      </SelectItem>
-                      <SelectItem value="newest">Newest</SelectItem>
-                      <SelectItem value="bedrooms">Bedrooms</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
+              <div className="p-2 sm:p-4 w-full">
                 {/* Property Cards */}
-                <div className="space-y-3">
-                  {properties.map((property) => (
-                    <PropertyCard
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full">
+                  {PROPERTIES_DATA.map((property) => (
+                    <PropertyListingCard
                       key={property.propertyId}
                       property={property}
                       onClick={() => {
