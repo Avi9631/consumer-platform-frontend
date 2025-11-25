@@ -211,6 +211,37 @@ export default function Home() {
           </div>
         )}
       </CarouselSection>
+
+
+      {/* PG HOSTELS COLIVING Properties Section */}
+      <CarouselSection
+        title={
+          <> ✨Top {" "}
+            <span className="text-primary drop-shadow-[0_0_20px_rgba(251,146,60,0.8)]">
+              Pg Hostel Co-living
+            </span>{" "}
+            
+          </>
+        }
+        subtitle="Swipe to explore more assured properties"
+        className="bg-gradient-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#3d1f2f]"
+      >
+        {PROPERTIES_DATA.length > 0 ? (
+          PROPERTIES_DATA.map((property) => (
+            <PropertyCard key={property.id} property={property} />
+          ))
+        ) : (
+          <div className="w-full text-center py-12">
+            <Card className="inline-block p-6">
+              <MapPin className="w-16 h-16 text-primary mx-auto mb-4" />
+              <h3 className="text-xl font-bold mb-2">No Properties Found</h3>
+              <p className="text-muted-foreground">
+                Try selecting a different location or zoom out on the map
+              </p>
+            </Card>
+          </div>
+        )}
+      </CarouselSection>
     </div>
   );
 }
