@@ -820,9 +820,9 @@ export default function PropertyDetailPage() {
               </div>
             </div>
  
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-7 gap-6 sm:gap-8">
             {/* Left Content */}
-            <div className="lg:col-span-2 space-y-6 sm:space-y-8">
+            <div className="lg:col-span-5 space-y-6 sm:space-y-8">
               {/* Quick Stats Carousel */}
               <div className="relative">
                 <div className="overflow-hidden">
@@ -1424,7 +1424,7 @@ export default function PropertyDetailPage() {
             </div>
 
             {/* Right Sidebar */}
-            <div className="space-y-4 sm:space-y-6">
+            <div className="lg:col-span-2 space-y-4 sm:space-y-6">
      
 
               {/* Contact Property Manager */}
@@ -1456,20 +1456,20 @@ export default function PropertyDetailPage() {
                       <span className="text-green-400 text-sm sm:text-base font-bold">{property.roomTypes.reduce((sum, room) => sum + room.availability.availableBeds, 0)}/{property.roomTypes.reduce((sum, room) => sum + room.availability.totalBeds, 0)}</span>
                     </div>
                   </div>
-                  <div className="space-y-2 sm:space-y-3">
-                    <Button className="w-full bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11">
+                  <div className="flex gap-4 flex-wrap  ">
+                    <Button className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
                       <Phone className="w-4 h-4 mr-2" />
                       Call Now
                     </Button>
-                    <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10 hover:border-green-500/50 transition-all duration-300 hover:scale-105 text-sm h-10 sm:h-11 font-medium bg-green-500/10">
+                    <Button    className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
                       <Phone className="w-4 h-4 mr-2" />
                       WhatsApp
                     </Button>
-                    <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10 hover:border-orange-500/50 transition-all duration-300 hover:scale-105 text-sm h-10 sm:h-11 font-medium">
+                    <Button    className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
                       <Calendar className="w-4 h-4 mr-2" />
                       Schedule Visit
                     </Button>
-                    <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10 hover:border-purple-500/50 transition-all duration-300 hover:scale-105 text-sm h-10 sm:h-11 font-medium">
+                    <Button   className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
                       <Play className="w-4 h-4 mr-2" />
                       Virtual Tour
                     </Button>
@@ -1477,64 +1477,21 @@ export default function PropertyDetailPage() {
                 </CardContent>
               </Card>
 
-              {/* Quick Booking */}
-              <Card className="bg-linear-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500">
-                <CardHeader>
-                  <CardTitle className="text-orange-500 text-base sm:text-lg font-bold flex items-center gap-2">
-                    <IndianRupee className="w-5 h-5" />
-                    Quick Booking
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="p-3 bg-white/5 rounded-lg">
-                      <p className="text-gray-400 text-xs mb-1">Starting From</p>
-                      <p className="text-orange-500 text-xl font-bold">{property.avgPrice}</p>
-                    </div>
-                    <Separator className="bg-white/10" />
-                    <div className="space-y-2 text-xs sm:text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Discount Available</span>
-                        <Badge className="bg-green-500/20 text-green-400 border-green-500/30">{property.discount}</Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Min. Booking</span>
-                        <span className="text-white font-semibold">₹2,000</span>
-                      </div>
-                    </div>
-                    <Button className="w-full bg-linear-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-xl shadow-green-500/30 hover:shadow-2xl hover:shadow-green-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11">
-                      Book Now
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
+ 
               {/* Chat Support */}
               <Card className="bg-linear-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500">
-                <CardContent className="pt-6">
-                     <p className="text-white font-medium mb-3 text-sm sm:text-base leading-relaxed">Need help? Our support team is available 24x7!</p>
-                    <Button className="w-full bg-linear-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-xl shadow-purple-500/30 hover:shadow-2xl hover:shadow-purple-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11">
+                <CardHeader className="text-white font-medium  text-sm sm:text-base leading-relaxed">
+                     Need help? Our support team is available 24x7! 
+                </CardHeader>
+                <CardContent>
+                    <Button  className="w-full bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-102 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
                       <Mail className="w-4 h-4 mr-2" />
                       Start Chat
                     </Button>
                  </CardContent>
               </Card>
               
-              {/* Owner Info (Internal - could be hidden from public) */}
-              <Card className="bg-linear-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500">
-                <CardHeader>
-                  <CardTitle className="text-orange-500 text-base sm:text-lg font-bold flex items-center gap-2">
-                    <Users className="w-5 h-5" />
-                    Property Owner
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center">
-                    <p className="text-white font-semibold mb-1 text-sm sm:text-base">{property.ownerName}</p>
-                    <p className="text-gray-400 text-xs">Property Owner</p>
-                  </div>
-                </CardContent>
-              </Card>
+ 
             </div>
           </div>
         </div>
