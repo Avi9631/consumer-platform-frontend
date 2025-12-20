@@ -82,7 +82,7 @@ export default function HeroSection({ onSearchSelect, onOpenLocationSheet, selec
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
-          className="max-w-4xl mx-auto px-4 relative z-50"
+          className="max-w-7xl mx-auto px-4 relative z-50"
         >
           <div className="relative group">
             {/* Glowing background effect */}

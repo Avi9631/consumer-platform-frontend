@@ -346,7 +346,7 @@ export default function PropertyDetailPage() {
               {/* Main Image Display */}
               <div className="flex-1 relative">
                 <div className="flex items-center justify-center h-full px-4 sm:px-16 py-20">
-                  <div className="relative w-full h-full max-w-6xl">
+                  <div className="relative w-full h-full max-w-7xl">
                     <Image
                       src={property.images[galleryImageIndex]}
                       alt={`${property.title} - Image ${galleryImageIndex + 1}`}
@@ -562,7 +562,7 @@ export default function PropertyDetailPage() {
                   <p className="text-gray-300 text-xs sm:text-sm lg:text-base leading-relaxed">{property.subtitle}</p>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <span className="text-xl sm:text-2xl lg:text-3xl font-bold bg-linear-to-r from-orange-500 to-orange-400 bg-clip-text text-white">{property.price}</span>
+                  <span className="text-xl sm:text-2xl  font-bold bg-linear-to-r from-orange-500 to-orange-400 bg-clip-text text-white">{property.price}</span>
       
                 </div>
               </div>

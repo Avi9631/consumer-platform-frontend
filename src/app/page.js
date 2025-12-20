@@ -10,6 +10,7 @@ import HeroSection from "@/components/HeroSection";
 import CarouselSection from "@/components/CarouselSection";
 import VirtualTourCard from "@/components/ShortVideoCard";
 import PropertyCard from "@/components/PropertyCard";
+import DeveloperCard from "@/components/DeveloperCard";
 import LocationSheet from "@/components/LocationSheet";
 
 // Hooks
@@ -20,7 +21,7 @@ import { usePropertyFilter } from "@/hooks/usePropertyFilter";
 import useLocationStore from "@/stores/locationStore";
 
 // Data
-import { PROPERTIES_DATA, VIRTUAL_TOURS_DATA } from "@/constants/propertyData";
+import { PROPERTIES_DATA, VIRTUAL_TOURS_DATA, DEVELOPERS_DATA } from "@/constants/propertyData";
 
 export default function Home() {
   // Zustand store for global location state
@@ -212,6 +213,28 @@ export default function Home() {
         )}
       </CarouselSection>
 
+
+      {/* Trusted Developers Section */}
+      <CarouselSection
+        title={
+          <>
+            <span className="text-primary drop-shadow-[0_0_20px_rgba(251,146,60,0.8)]">
+              Trusted
+            </span>{" "}
+            Developers
+          </>
+        }
+        subtitle="Explore projects by India's leading real estate developers"
+        className="bg-gradient-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#3d1f2f]"
+      >
+        {DEVELOPERS_DATA.map((developer) => (
+          <DeveloperCard
+            key={developer.id}
+            developer={developer}
+            onClick={() => console.log(`Developer clicked: ${developer.name}`)}
+          />
+        ))}
+      </CarouselSection>
 
       {/* PG HOSTELS COLIVING Properties Section */}
       <CarouselSection

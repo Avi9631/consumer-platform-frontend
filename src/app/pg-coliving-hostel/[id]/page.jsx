@@ -529,17 +529,20 @@ export default function PropertyDetailPage() {
 
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-white relative overflow-hidden">
-      {/* Premium gradient background with decorative elements */}
-      <div className="absolute inset-0 bg-linear-to-br from-orange-500/10 via-transparent to-purple-500/5"></div>
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute inset-0 animate-spin-slow">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-conic from-orange-500/20 via-transparent to-orange-500/20 rounded-full blur-3xl"></div>
-        </div>
+    <div className="min-h-screen bg-gradient-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#1a0f1f] text-white relative overflow-hidden">
+      {/* Sunset Ambient Glow Effects - matching home page */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute top-20 left-1/2 w-[700px] h-[700px] bg-gradient-radial from-orange-500/20 via-orange-600/10 to-transparent rounded-full blur-[120px] -translate-x-1/2 animate-pulse"></div>
+        <div
+          className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-gradient-radial from-purple-500/15 via-purple-600/5 to-transparent rounded-full blur-[100px] animate-pulse"
+          style={{ animationDelay: '1s' }}
+        ></div>
+        <div
+          className="absolute bottom-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-radial from-amber-500/15 via-amber-600/5 to-transparent rounded-full blur-[100px] animate-pulse"
+          style={{ animationDelay: '2s' }}
+        ></div>
+        <div className="absolute inset-x-0 top-1/4 h-[300px] bg-gradient-to-b from-orange-500/5 via-rose-500/5 to-transparent"></div>
       </div>
-      <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-linear-to-bl from-orange-500/20 to-transparent blur-3xl"></div>
-      <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-linear-to-tr from-purple-600/10 to-transparent blur-3xl"></div>
-      <div className="absolute top-1/3 right-1/3 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl animate-pulse"></div>
 
       <div className="relative z-10">
         {/* Header */}
@@ -589,7 +592,7 @@ export default function PropertyDetailPage() {
               {/* Main Image Display */}
               <div className="flex-1 relative">
                 <div className="flex items-center justify-center h-full px-4 sm:px-16 py-20">
-                  <div className="relative w-full h-full max-w-6xl">
+                  <div className="relative w-full h-full max-w-7xl">
                     <Image
                       src={property.images[galleryImageIndex]}
                       alt={`${property.title} - Image ${galleryImageIndex + 1}`}
@@ -647,7 +650,7 @@ export default function PropertyDetailPage() {
         </Sheet>
         
         {/* Property Navigation Header */}
-        <header className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 bg-slate-900/80 backdrop-blur-xl">
+        <header className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 bg-[#2d1b1f]/80 backdrop-blur-xl">
           <div className="flex items-center gap-2 sm:gap-4">
             <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 hover:text-orange-400 transition-all duration-300 group">
               <ChevronLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
@@ -805,7 +808,7 @@ export default function PropertyDetailPage() {
                   <p className="text-gray-300 text-xs sm:text-sm lg:text-base leading-relaxed">{property.subtitle}</p>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <span className="text-xl sm:text-2xl lg:text-3xl font-bold bg-linear-to-r from-orange-500 to-orange-400 bg-clip-text text-white">{property.price}</span>
+                  <span className="text-xl sm:text-2xl  font-bold bg-linear-to-r from-orange-500 to-orange-400 bg-clip-text text-white">{property.price}</span>
       
                 </div>
               </div>
@@ -905,7 +908,7 @@ export default function PropertyDetailPage() {
                 </div>
 
                 {/* Room Types & Pricing Section */}
-                <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
+                <div className="bg-gradient-to-br from-[#3d1f2f]/50 to-[#2d1b1f]/50 backdrop-blur-xl">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
                     <h3 className="text-orange-500 text-lg sm:text-2xl font-bold flex items-center gap-2">
                       <Bed className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -943,7 +946,7 @@ export default function PropertyDetailPage() {
                   <div className="relative">
                     <div ref={roomScrollRef} className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
                       {property.roomTypes.map((room) => (
-                        <Card key={room.id} className="shrink-0 w-[280px] sm:w-[320px] md:w-[350px] lg:w-[380px] bg-linear-to-br from-slate-700/60 to-slate-800/60 border-white/10 backdrop-blur-xl hover:border-orange-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/20 group overflow-hidden snap-start">
+                        <Card key={room.id} className="shrink-0 w-[280px] sm:w-[320px] md:w-[350px] lg:w-[380px] bg-gradient-to-br from-[#3d1f2f]/60 to-[#2d1b1f]/60 border-white/10 backdrop-blur-xl hover:border-orange-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/20 group overflow-hidden snap-start">
                           <CardContent className="p-4 sm:p-5">
                           <div className="mb-4">
                             <h4 className="font-bold text-white text-base sm:text-lg mb-2">{room.name}</h4>
@@ -1027,7 +1030,7 @@ export default function PropertyDetailPage() {
                 </div>
 
                           {/* Why choose this property? Section */}
-                <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
+                <div className="bg-gradient-to-br from-[#3d1f2f]/50 to-[#2d1b1f]/50 backdrop-blur-xl">
                   <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
                     <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
                     Why choose this property?
@@ -1043,7 +1046,7 @@ export default function PropertyDetailPage() {
                 </div>
 
                 {/* Common Amenities Section */}
-                <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
+                <div className="bg-gradient-to-br from-[#3d1f2f]/50 to-[#2d1b1f]/50 backdrop-blur-xl">
                   <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
                     <Building2 className="w-5 h-5 sm:w-6 sm:h-6" />
                     Common Amenities
@@ -1071,13 +1074,13 @@ export default function PropertyDetailPage() {
 
                 {/* Food & Mess Section */}
                 {property.foodMess.available && (
-                  <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
+                  <div className="bg-gradient-to-br from-[#3d1f2f]/50 to-[#2d1b1f]/50 backdrop-blur-xl">
                     <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
                       <Users className="w-5 h-5 sm:w-6 sm:h-6" />
                       Food & Mess
                     </h3>
                     <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
-                      <Card className="bg-linear-to-br from-slate-700/60 to-slate-800/60 border-white/10 backdrop-blur-xl">
+                      <Card className="bg-gradient-to-br from-[#3d1f2f]/60 to-[#2d1b1f]/60 border-white/10 backdrop-blur-xl">
                         <CardContent className="p-4 sm:p-5">
                           <h4 className="font-semibold text-white mb-4 text-sm sm:text-base">Meal Details</h4>
                           <div className="space-y-3">
@@ -1114,7 +1117,7 @@ export default function PropertyDetailPage() {
                         </CardContent>
                       </Card>
                       
-                      <Card className="bg-linear-to-br from-slate-700/60 to-slate-800/60 border-white/10 backdrop-blur-xl">
+                      <Card className="bg-gradient-to-br from-[#3d1f2f]/60 to-[#2d1b1f]/60 border-white/10 backdrop-blur-xl">
                         <CardContent className="p-4 sm:p-5">
                           <h4 className="font-semibold text-white mb-4 text-sm sm:text-base">Meal Timings</h4>
                           <div className="space-y-3">
@@ -1168,7 +1171,7 @@ export default function PropertyDetailPage() {
                           >
                             {property.foodMess.weeklyMenu.map((dayMenu, idx) => (
                               <div key={idx} className="min-w-full">
-                                <Card className="bg-linear-to-br from-slate-700/60 to-slate-800/60 backdrop-blur-xl border-2 border-orange-500/30 shadow-xl shadow-orange-500/10">
+                                <Card className="bg-gradient-to-br from-[#3d1f2f]/60 to-[#2d1b1f]/60 backdrop-blur-xl border-2 border-orange-500/30 shadow-xl shadow-orange-500/10">
                                   <CardContent className="p-4 sm:p-6">
                                     <div className="flex items-center justify-between mb-4">
                                       <h5 className="text-orange-500 font-bold text-base sm:text-xl flex items-center gap-2">
@@ -1334,7 +1337,7 @@ export default function PropertyDetailPage() {
                 )}
 
                 {/* Rules & Policies Section */}
-                <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
+                <div className="bg-gradient-to-br from-[#3d1f2f]/50 to-[#2d1b1f]/50 backdrop-blur-xl">
                   <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
                     <Shield className="w-5 h-5 sm:w-6 sm:h-6" />
                     Rules & Policies
@@ -1370,7 +1373,7 @@ export default function PropertyDetailPage() {
                 </div>
 
                 {/* Safety & Security Section */}
-                <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
+                <div className="bg-gradient-to-br from-[#3d1f2f]/50 to-[#2d1b1f]/50 backdrop-blur-xl">
                   <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
                     <Shield className="w-5 h-5 sm:w-6 sm:h-6" />
                     Safety & Security
@@ -1407,7 +1410,7 @@ export default function PropertyDetailPage() {
                 </div>
 
                 {/* Location & Nearby Section */}
-                <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
+                <div className="bg-gradient-to-br from-[#3d1f2f]/50 to-[#2d1b1f]/50 backdrop-blur-xl">
                   <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
                     <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
                     Location & Nearby
@@ -1428,7 +1431,7 @@ export default function PropertyDetailPage() {
      
 
               {/* Contact Property Manager */}
-              <Card className="bg-linear-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500">
+              <Card className="bg-gradient-to-br from-[#3d1f2f]/60 to-[#2d1b1f]/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500">
                 <CardHeader>
                   <CardTitle className="text-orange-500 text-base sm:text-lg font-bold flex items-center gap-2">
                     <Phone className="w-5 h-5" />
@@ -1479,7 +1482,7 @@ export default function PropertyDetailPage() {
 
  
               {/* Chat Support */}
-              <Card className="bg-linear-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500">
+              <Card className="bg-gradient-to-br from-[#3d1f2f]/60 to-[#2d1b1f]/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500">
                 <CardHeader className="text-white font-medium  text-sm sm:text-base leading-relaxed">
                      Need help? Our support team is available 24x7! 
                 </CardHeader>

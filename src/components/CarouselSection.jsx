@@ -33,7 +33,7 @@ export default function CarouselSection({
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 md:mb-8">
           <div className="flex items-center gap-3">
             {icon && icon}
-            <h2 className="text-xl md:text-2xl lg:text-3xl font-bold">
+            <h2 className="text-xl md:text-2xl  font-bold">
               {title}
             </h2>
           </div>
