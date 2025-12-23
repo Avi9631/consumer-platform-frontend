@@ -45,6 +45,8 @@ import GoogleMapViewer from "@/components/maps/GoogleMapViewer";
 import Header from "@/components/Header";
 import LocationSheet from "@/components/LocationSheet";
 import RoomTypeCard from "@/components/RoomTypeCard";
+import InterestDialog from "@/components/InterestDialog";
+import RoomTypeSelectionDialog from "@/components/RoomTypeSelectionDialog";
 import useLocationStore from "@/stores/locationStore";
 import { PROPERTIES_DATA } from "@/constants/propertyData";
 import { X } from "lucide-react";
@@ -57,7 +59,9 @@ export default function PropertyDetailPage() {
   // Zustand store for global location state
   const location = useLocationStore((state) => state.location);
   const searchResult = useLocationStore((state) => state.searchResult);
-  const updateFromSearchResult = useLocationStore((state) => state.updateFromSearchResult);
+  const updateFromSearchResult = useLocationStore(
+    (state) => state.updateFromSearchResult
+  );
 
   // State management
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -81,45 +85,50 @@ export default function PropertyDetailPage() {
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isInterestDialogOpen, setIsInterestDialogOpen] = useState(false);
+  const [isRoomSelectionOpen, setIsRoomSelectionOpen] = useState(false);
+  const [selectedRooms, setSelectedRooms] = useState([]);
 
   // Fetch property data from API
   useEffect(() => {
     const fetchPropertyData = async () => {
       if (!propertyId) return;
-      
+
       try {
         setLoading(true);
         setError(null);
-        
-        const response = await fetch(`http://localhost:3000/api/pg-hostel/${propertyId}`);
-        
+
+        const response = await fetch(
+          `http://localhost:3000/api/pg-hostel/${propertyId}`
+        );
+
         if (!response.ok) {
           throw new Error(`Failed to fetch property: ${response.statusText}`);
         }
-        
+
         const result = await response.json();
-        
+
         if (!result.success || !result.data) {
-          throw new Error(result.message || 'Failed to fetch property data');
+          throw new Error(result.message || "Failed to fetch property data");
         }
-        
+
         // Use API data directly - user-centric approach
         setProperty(result.data);
       } catch (err) {
-        console.error('Error fetching property:', err);
+        console.error("Error fetching property:", err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchPropertyData();
   }, [propertyId]);
 
   // Auto-carousel effect for Quick Stats
   useEffect(() => {
     if (!property) return;
-    
+
     const CAROUSEL_INTERVAL = 3000; // milliseconds between slide changes
     const quickStatsLength = 8; // Fixed length for stats
 
@@ -133,12 +142,18 @@ export default function PropertyDetailPage() {
 
   // Auto-carousel effect for Weekly Menu
   useEffect(() => {
-    if (!property?.foodMess?.weeklyMenu || property.foodMess.weeklyMenu.length === 0) return;
-    
+    if (
+      !property?.foodMess?.weeklyMenu ||
+      property.foodMess.weeklyMenu.length === 0
+    )
+      return;
+
     const MENU_CAROUSEL_INTERVAL = 5000; // 5 seconds per day
-    
+
     const menuCarouselInterval = setInterval(() => {
-      setCurrentMenuDayIndex((prev) => (prev + 1) % property.foodMess.weeklyMenu.length);
+      setCurrentMenuDayIndex(
+        (prev) => (prev + 1) % property.foodMess.weeklyMenu.length
+      );
     }, MENU_CAROUSEL_INTERVAL);
 
     return () => clearInterval(menuCarouselInterval);
@@ -167,8 +182,12 @@ export default function PropertyDetailPage() {
         <div className="container mx-auto px-4 py-20">
           <div className="flex flex-col items-center justify-center space-y-4">
             <div className="text-red-500 text-6xl">⚠️</div>
-            <h2 className="text-2xl font-bold text-gray-800">Property Not Found</h2>
-            <p className="text-gray-600">{error || 'Unable to load property details'}</p>
+            <h2 className="text-2xl font-bold text-gray-800">
+              Property Not Found
+            </h2>
+            <p className="text-gray-600">
+              {error || "Unable to load property details"}
+            </p>
             <Button onClick={() => window.history.back()} className="mt-4">
               Go Back
             </Button>
@@ -180,78 +199,94 @@ export default function PropertyDetailPage() {
 
   // Quick Stats - User-centric information
   const getMinRent = () => {
-    if (!property.roomTypes || property.roomTypes.length === 0) return 'N/A';
+    if (!property.roomTypes || property.roomTypes.length === 0) return "N/A";
     const prices = property.roomTypes
-      .map(r => r.pricing?.find(p => p.type === 'Monthly Rent')?.amount)
-      .filter(p => p > 0);
-    return prices.length > 0 ? `₹${Math.min(...prices).toLocaleString('en-IN')}` : 'N/A';
+      .map((r) => r.pricing?.find((p) => p.type === "Monthly Rent")?.amount)
+      .filter((p) => p > 0);
+    return prices.length > 0
+      ? `₹${Math.min(...prices).toLocaleString("en-IN")}`
+      : "N/A";
   };
 
   const getTotalBeds = () => {
     if (!property.roomTypes) return { available: 0, total: 0 };
-    return property.roomTypes.reduce((acc, room) => ({
-      available: acc.available + (room.availability?.availableBeds || 0),
-      total: acc.total + (room.availability?.totalBeds || 0)
-    }), { available: 0, total: 0 });
+    return property.roomTypes.reduce(
+      (acc, room) => ({
+        available: acc.available + (room.availability?.availableBeds || 0),
+        total: acc.total + (room.availability?.totalBeds || 0),
+      }),
+      { available: 0, total: 0 }
+    );
   };
 
   const quickStats = [
     {
       icon: Building2,
       label: "Property Type",
-      value: "PG / Hostel"
+      value: "PG / Hostel",
     },
     {
       icon: Users,
       label: "For",
-      value: property.genderAllowed || 'All'
+      value: property.genderAllowed || "All",
     },
     {
       icon: Bed,
       label: "Room Options",
-      value: property.roomTypes?.length ? `${property.roomTypes.length} Types` : 'Multiple'
+      value: property.roomTypes?.length
+        ? `${property.roomTypes.length} Types`
+        : "Multiple",
     },
     {
       icon: IndianRupee,
       label: "Rent Starts From",
-      value: getMinRent()
+      value: getMinRent(),
     },
     {
       icon: Wifi,
       label: "Food",
-      value: property.foodMess?.available ? `${property.foodMess.foodType}` : "Self Cooking"
+      value: property.foodMess?.available
+        ? `${property.foodMess.foodType}`
+        : "Self Cooking",
     },
     {
       icon: Shield,
       label: "Managed By",
-      value: property.isBrandManaged ? property.brandName : 'Owner'
+      value: property.isBrandManaged ? property.brandName : "Owner",
     },
     {
       icon: Calendar,
       label: "Move-in",
-      value: property.publishStatus === 'PUBLISHED' ? 'Immediate' : 'Contact Owner'
+      value:
+        property.publishStatus === "PUBLISHED" ? "Immediate" : "Contact Owner",
     },
     {
       icon: CheckCircle,
       label: "Available Beds",
-      value: (() => { const beds = getTotalBeds(); return `${beds.available}/${beds.total}`; })()
-    }
+      value: (() => {
+        const beds = getTotalBeds();
+        return `${beds.available}/${beds.total}`;
+      })(),
+    },
   ];
 
   // Helper: Get images from API data
-  const propertyImages = property.mediaData?.filter(m => m.type === 'image' && m.url).map(m => m.url) || 
-    ['https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&h=600&fit=crop'];
+  const propertyImages = property.mediaData
+    ?.filter((m) => m.type === "image" && m.url)
+    .map((m) => m.url) || [
+    "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&h=600&fit=crop",
+  ];
 
   const nextImage = () => {
     setMainImageError(false);
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === propertyImages.length - 1 ? 0 : prev + 1
     );
   };
 
   const prevImage = () => {
     setMainImageError(false);
-    setCurrentImageIndex((prev) => 
+    setCurrentImageIndex((prev) =>
       prev === 0 ? propertyImages.length - 1 : prev - 1
     );
   };
@@ -263,14 +298,14 @@ export default function PropertyDetailPage() {
 
   const nextGalleryImage = () => {
     setGalleryImageError(false);
-    setGalleryImageIndex((prev) => 
+    setGalleryImageIndex((prev) =>
       prev === propertyImages.length - 1 ? 0 : prev + 1
     );
   };
 
   const prevGalleryImage = () => {
     setGalleryImageError(false);
-    setGalleryImageIndex((prev) => 
+    setGalleryImageIndex((prev) =>
       prev === 0 ? propertyImages.length - 1 : prev - 1
     );
   };
@@ -279,7 +314,7 @@ export default function PropertyDetailPage() {
   const handleOpenLocationSheet = () => {
     const lat = parseFloat(property.lat) || 19.0176;
     const lng = parseFloat(property.lng) || 72.8562;
-    
+
     if (searchResult && searchResult.coordinates) {
       setSheetMapCenter({
         lat: searchResult.coordinates.lat,
@@ -335,8 +370,22 @@ export default function PropertyDetailPage() {
     updateFromSearchResult(place);
   };
 
- 
+  // Handle Show Interest from property page (opens room selection)
+  const handleShowPropertyInterest = () => {
+    if (property?.roomTypes && property.roomTypes.length > 0) {
+      setIsRoomSelectionOpen(true);
+    } else {
+      // If no room types, show dialog directly
+      setIsInterestDialogOpen(true);
+    }
+  };
 
+  // Handle room selection confirmation
+  const handleRoomSelectionConfirm = (rooms) => {
+    setSelectedRooms(rooms);
+    setIsRoomSelectionOpen(false);
+    setIsInterestDialogOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-white relative overflow-hidden">
@@ -358,7 +407,7 @@ export default function PropertyDetailPage() {
           selectedLocation={location}
           onOpenLocationSheet={handleOpenLocationSheet}
         />
-        
+
         {/* Location Sheet */}
         <LocationSheet
           isOpen={isLocationSheetOpen}
@@ -372,7 +421,10 @@ export default function PropertyDetailPage() {
 
         {/* Image Gallery Sheet */}
         <Sheet open={isImageGalleryOpen} onOpenChange={setIsImageGalleryOpen}>
-          <SheetContent side="full" className="bg-black/95 backdrop-blur-xl border-none p-0 overflow-hidden [&>button]:hidden">
+          <SheetContent
+            side="full"
+            className="bg-black/95 backdrop-blur-xl border-none p-0 overflow-hidden [&>button]:hidden"
+          >
             <div className="h-full flex flex-col">
               {/* Header */}
               <SheetHeader className="p-4 sm:p-6 bg-linear-to-b from-black/80 to-transparent z-10">
@@ -403,7 +455,9 @@ export default function PropertyDetailPage() {
                     {!galleryImageError ? (
                       <Image
                         src={propertyImages[galleryImageIndex]}
-                        alt={`${property.propertyName} - Image ${galleryImageIndex + 1}`}
+                        alt={`${property.propertyName} - Image ${
+                          galleryImageIndex + 1
+                        }`}
                         fill
                         className="object-contain"
                         priority
@@ -412,7 +466,9 @@ export default function PropertyDetailPage() {
                     ) : (
                       <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-800/80 to-slate-900/80">
                         <ImageIcon className="w-20 h-20 text-slate-500 mb-4" />
-                        <p className="text-slate-400 text-lg font-medium">Failed to load image</p>
+                        <p className="text-slate-400 text-lg font-medium">
+                          Failed to load image
+                        </p>
                       </div>
                     )}
                   </div>
@@ -445,8 +501,8 @@ export default function PropertyDetailPage() {
                       key={index}
                       className={`relative shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden transition-all duration-300 ${
                         index === galleryImageIndex
-                          ? 'ring-2 ring-orange-500 scale-110 shadow-lg shadow-orange-500/50'
-                          : 'ring-1 ring-white/20 hover:ring-white/50 opacity-60 hover:opacity-100'
+                          ? "ring-2 ring-orange-500 scale-110 shadow-lg shadow-orange-500/50"
+                          : "ring-1 ring-white/20 hover:ring-white/50 opacity-60 hover:opacity-100"
                       }`}
                       onClick={() => {
                         setGalleryImageIndex(index);
@@ -459,7 +515,12 @@ export default function PropertyDetailPage() {
                           alt={`Thumbnail ${index + 1}`}
                           fill
                           className="object-cover"
-                          onError={() => setThumbnailErrors(prev => ({ ...prev, [index]: true }))}
+                          onError={() =>
+                            setThumbnailErrors((prev) => ({
+                              ...prev,
+                              [index]: true,
+                            }))
+                          }
                         />
                       ) : (
                         <div className="absolute inset-0 bg-gradient-to-br from-slate-700/80 to-slate-800/80 flex items-center justify-center">
@@ -473,27 +534,39 @@ export default function PropertyDetailPage() {
             </div>
           </SheetContent>
         </Sheet>
-        
+
         {/* Property Navigation Header */}
         <header className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 bg-slate-900/80 backdrop-blur-xl">
           <div className="flex items-center gap-2 sm:gap-4">
-            <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 hover:text-orange-400 transition-all duration-300 group">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-white/10 hover:text-orange-400 transition-all duration-300 group"
+            >
               <ChevronLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
               <span className="hidden sm:inline">Back to Search</span>
               <span className="sm:hidden">Back</span>
             </Button>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 hover:text-orange-400 transition-all duration-300 hover:scale-110">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-white/10 hover:text-orange-400 transition-all duration-300 hover:scale-110"
+            >
               <Share2 className="w-4 h-4" />
             </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className={`transition-all duration-300 hover:scale-110 ${isLiked ? 'text-orange-500' : 'text-white hover:text-orange-400 hover:bg-white/10'}`}
+            <Button
+              variant="ghost"
+              size="sm"
+              className={`transition-all duration-300 hover:scale-110 ${
+                isLiked
+                  ? "text-orange-500"
+                  : "text-white hover:text-orange-400 hover:bg-white/10"
+              }`}
               onClick={() => setIsLiked(!isLiked)}
             >
-              <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
+              <Heart className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`} />
             </Button>
           </div>
         </header>
@@ -503,11 +576,14 @@ export default function PropertyDetailPage() {
           {/* Image Collage Grid */}
           <div className="grid grid-cols-4 grid-rows-2 gap-1 sm:gap-2 h-64 sm:h-96 lg:h-[500px] rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl shadow-orange-500/10">
             {/* Main large image */}
-            <div className="col-span-2 row-span-2 relative group cursor-pointer" onClick={() => setCurrentImageIndex(0)}>
+            <div
+              className="col-span-2 row-span-2 relative group cursor-pointer"
+              onClick={() => setCurrentImageIndex(0)}
+            >
               {!mainImageError ? (
                 <>
-                  <Image 
-                    src={propertyImages[currentImageIndex]} 
+                  <Image
+                    src={propertyImages[currentImageIndex]}
                     alt={property.propertyName}
                     fill
                     className="object-cover transition-all duration-700 group-hover:scale-110"
@@ -519,7 +595,9 @@ export default function PropertyDetailPage() {
               ) : (
                 <div className="absolute inset-0 bg-gradient-to-br from-slate-700/80 to-slate-800/80 flex flex-col items-center justify-center">
                   <ImageIcon className="w-16 h-16 text-slate-500 mb-3" />
-                  <p className="text-slate-400 text-base font-medium">Failed to load image</p>
+                  <p className="text-slate-400 text-base font-medium">
+                    Failed to load image
+                  </p>
                 </div>
               )}
               {/* Main image indicator */}
@@ -527,16 +605,18 @@ export default function PropertyDetailPage() {
                 {currentImageIndex + 1} / {propertyImages.length}
               </div>
             </div>
-            
+
             {/* Smaller images */}
             {propertyImages.slice(1, 5).map((image, index) => {
               const imageIndex = index + 1;
               const isActive = currentImageIndex === imageIndex;
               return (
-                <div 
-                  key={imageIndex} 
+                <div
+                  key={imageIndex}
                   className={`relative group cursor-pointer overflow-hidden rounded-md transition-all duration-300 ${
-                    isActive ? 'ring-2 ring-orange-500 shadow-lg shadow-orange-500/50' : 'hover:ring-2 hover:ring-white/30'
+                    isActive
+                      ? "ring-2 ring-orange-500 shadow-lg shadow-orange-500/50"
+                      : "hover:ring-2 hover:ring-white/30"
                   }`}
                   onClick={() => {
                     setCurrentImageIndex(imageIndex);
@@ -545,12 +625,19 @@ export default function PropertyDetailPage() {
                 >
                   {!thumbnailErrors[imageIndex] ? (
                     <>
-                      <Image 
-                        src={image} 
-                        alt={`${property.propertyName} - Image ${imageIndex + 1}`}
+                      <Image
+                        src={image}
+                        alt={`${property.propertyName} - Image ${
+                          imageIndex + 1
+                        }`}
                         fill
                         className="object-cover transition-all duration-500 group-hover:scale-110"
-                        onError={() => setThumbnailErrors(prev => ({ ...prev, [imageIndex]: true }))}
+                        onError={() =>
+                          setThumbnailErrors((prev) => ({
+                            ...prev,
+                            [imageIndex]: true,
+                          }))
+                        }
                       />
                       <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent group-hover:from-black/40 transition-all duration-300"></div>
                     </>
@@ -561,7 +648,7 @@ export default function PropertyDetailPage() {
                   )}
                   {/* Show "View all photos" on last image if there are more images */}
                   {index === 3 && propertyImages.length > 5 && (
-                    <div 
+                    <div
                       className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center group-hover:bg-black/80 transition-all duration-300 cursor-pointer"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -570,7 +657,9 @@ export default function PropertyDetailPage() {
                     >
                       <div className="text-white text-center">
                         <Maximize2 className="w-4 h-4 sm:w-6 sm:h-6 mx-auto mb-1" />
-                        <p className="text-xs sm:text-sm font-medium">+{propertyImages.length - 5} more</p>
+                        <p className="text-xs sm:text-sm font-medium">
+                          +{propertyImages.length - 5} more
+                        </p>
                       </div>
                     </div>
                   )}
@@ -578,18 +667,18 @@ export default function PropertyDetailPage() {
               );
             })}
           </div>
-          
+
           {/* Navigation buttons */}
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-md text-white hover:bg-orange-500 hover:scale-110 z-10 transition-all duration-300 border border-white/10 h-8 w-8 sm:h-10 sm:w-10 p-0 rounded-full shadow-xl"
             onClick={prevImage}
           >
             <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
           </Button>
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-md text-white hover:bg-orange-500 hover:scale-110 z-10 transition-all duration-300 border border-white/10 h-8 w-8 sm:h-10 sm:w-10 p-0 rounded-full shadow-xl"
             onClick={nextImage}
@@ -603,7 +692,9 @@ export default function PropertyDetailPage() {
               <button
                 key={index}
                 className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
-                  index === currentImageIndex ? 'bg-orange-500 w-6 sm:w-8 shadow-lg shadow-orange-500/50' : 'bg-white/40 hover:bg-white/70 w-1.5 sm:w-2'
+                  index === currentImageIndex
+                    ? "bg-orange-500 w-6 sm:w-8 shadow-lg shadow-orange-500/50"
+                    : "bg-white/40 hover:bg-white/70 w-1.5 sm:w-2"
                 }`}
                 onClick={() => setCurrentImageIndex(index)}
               />
@@ -646,67 +737,77 @@ export default function PropertyDetailPage() {
 
         {/* Main Content */}
         <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-6 sm:py-8">
-
-             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 lg:gap-6 text-white mb-8">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-linear-to-r from-white to-gray-300 bg-clip-text text-white">{property.propertyName}</h1>
-                  {property.verificationStatus === 'VERIFIED' && (
-                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                      <CheckCircle className="w-3 h-3 mr-1" />
-                      Verified
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 lg:gap-6 text-white mb-8">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-2xl sm:text-3xl lg:text-3xl font-bold bg-linear-to-r from-white to-gray-300 bg-clip-text text-white">
+                  {property.propertyName}
+                </h1>
+                {property.verificationStatus === "VERIFIED" && (
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                    <CheckCircle className="w-3 h-3 mr-1" />
+                    Verified
+                  </Badge>
+                )}
+              </div>
+              <div className="flex items-start gap-2 mb-3">
+                <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 mt-0.5 shrink-0" />
+                <p className="text-gray-300 text-xs sm:text-sm lg:text-base leading-relaxed">
+                  {property.addressText}
+                </p>
+              </div>
+              <div className="flex items-center gap-4 flex-wrap">
+                <span className="text-xl sm:text-2xl font-bold bg-linear-to-r from-orange-500 to-orange-400 bg-clip-text text-white">
+                  {getMinRent()}/month
+                </span>
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                    {property.genderAllowed}
+                  </Badge>
+                  {property.isBrandManaged && (
+                    <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+                      {property.brandName}
                     </Badge>
                   )}
                 </div>
-                <div className="flex items-start gap-2 mb-3">
-                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 mt-0.5 shrink-0" />
-                  <p className="text-gray-300 text-xs sm:text-sm lg:text-base leading-relaxed">{property.addressText}</p>
-                </div>
-                <div className="flex items-center gap-4 flex-wrap">
-                  <span className="text-xl sm:text-2xl font-bold bg-linear-to-r from-orange-500 to-orange-400 bg-clip-text text-white">
-                    {getMinRent()}/month
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                      {property.genderAllowed}
-                    </Badge>
-                    {property.isBrandManaged && (
-                      <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
-                        {property.brandName}
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full lg:w-auto">
-                <Button className="bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 border-none font-semibold text-sm sm:text-base h-10 sm:h-11">
-                  <Phone className="w-4 h-4 mr-2" />
-                  Contact Owner
-                </Button>
-                <Button className="bg-white/5 backdrop-blur-xl hover:bg-white/10 text-white border border-white/20 hover:border-orange-500/50 transition-all duration-300 hover:scale-105 shadow-lg font-medium text-sm sm:text-base h-10 sm:h-11">
-                  <MapPin className="w-4 h-4 mr-2" />
-                  View on Map
-                </Button>
               </div>
             </div>
- 
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full lg:w-auto">
+              <Button
+                className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm cursor-pointer h-10 sm:h-11"
+                onClick={handleShowPropertyInterest}
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Show Interest
+              </Button>
+              <Button 
+                className="bg-white/5 backdrop-blur-xl hover:bg-white/10 text-white border border-white/20 hover:border-orange-500/50 transition-all duration-300 hover:scale-105 shadow-lg font-medium text-sm sm:text-base h-10 sm:h-11"
+                onClick={() => {
+                  const lat = parseFloat(property.lat);
+                  const lng = parseFloat(property.lng);
+                  window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
+                }}
+              >
+                <MapPin className="w-4 h-4 mr-2" />
+                View on Map
+              </Button>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-7 gap-6 sm:gap-8">
             {/* Left Content */}
             <div className="lg:col-span-5 space-y-6 sm:space-y-8">
-         
-
               {/* Overview Section */}
               <div className="space-y-6 sm:space-y-8">
                 <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl ">
                   <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
-                     Overview
+                    Overview
                   </h3>
                   <div className="space-y-4 sm:space-y-6">
                     <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
-                      {property.description || 'Welcome to our premium PG/Hostel accommodation. We provide comfortable and affordable living spaces with modern amenities.'}
+                      {property.description ||
+                        "Welcome to our premium PG/Hostel accommodation. We provide comfortable and affordable living spaces with modern amenities."}
                     </p>
-                    
-        
                   </div>
                 </div>
 
@@ -724,7 +825,10 @@ export default function PropertyDetailPage() {
                         className="bg-white/5 hover:bg-white/10 text-white border border-white/10 h-8 w-8 p-0 rounded-full"
                         onClick={() => {
                           if (roomScrollRef.current) {
-                            roomScrollRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+                            roomScrollRef.current.scrollBy({
+                              left: -300,
+                              behavior: "smooth",
+                            });
                           }
                         }}
                       >
@@ -736,7 +840,10 @@ export default function PropertyDetailPage() {
                         className="bg-white/5 hover:bg-white/10 text-white border border-white/10 h-8 w-8 p-0 rounded-full"
                         onClick={() => {
                           if (roomScrollRef.current) {
-                            roomScrollRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+                            roomScrollRef.current.scrollBy({
+                              left: 300,
+                              behavior: "smooth",
+                            });
                           }
                         }}
                       >
@@ -744,10 +851,13 @@ export default function PropertyDetailPage() {
                       </Button>
                     </div>
                   </div>
-                  
+
                   {/* Horizontal Scroll Container */}
                   <div className="relative">
-                    <div ref={roomScrollRef} className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
+                    <div
+                      ref={roomScrollRef}
+                      className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide"
+                    >
                       {property.roomTypes.map((room) => (
                         <RoomTypeCard key={room.id} room={room} />
                       ))}
@@ -755,43 +865,55 @@ export default function PropertyDetailPage() {
                   </div>
                 </div>
 
- 
-
                 {/* Common Amenities Section */}
                 <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
                   <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
                     <Building2 className="w-5 h-5 sm:w-6 sm:h-6" />
                     Amenities & Facilities
                   </h3>
-                  <p className="text-gray-400 text-xs sm:text-sm mb-4">What you'll get at this property</p>
-                  
+
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                     {property.commonAmenities?.map((amenity, index) => {
                       // Map icon names from API to Lucide icons
                       const getIcon = (iconName) => {
                         const iconMap = {
-                          'CarIcon': CarIcon,
-                          'Shield': Shield,
-                          'Building2': Building2,
-                          'Users': Users,
-                          'Wifi': Wifi,
-                          'Waves': Waves,
-                          'Trees': Trees,
+                          CarIcon: CarIcon,
+                          Shield: Shield,
+                          Building2: Building2,
+                          Users: Users,
+                          Wifi: Wifi,
+                          Waves: Waves,
+                          Trees: Trees,
                         };
                         return iconMap[iconName] || Building2;
                       };
                       const IconComponent = getIcon(amenity.icon);
-                      
+
                       return (
-                        <div key={index} className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg transition-all duration-300 group ${
-                          amenity.available !== false ? 'bg-white/5 hover:bg-white/10' : 'bg-white/5 opacity-50'
-                        }`}>
-                          <IconComponent className={`w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform ${
-                            amenity.available !== false ? 'text-orange-500' : 'text-gray-500'
-                          }`} />
-                          <span className={`text-xs sm:text-sm font-medium ${
-                            amenity.available !== false ? 'text-white' : 'text-gray-500'
-                          }`}>{amenity.name}</span>
+                        <div
+                          key={index}
+                          className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg transition-all duration-300 group ${
+                            amenity.available !== false
+                              ? "bg-white/5 hover:bg-white/10"
+                              : "bg-white/5 opacity-50"
+                          }`}
+                        >
+                          <IconComponent
+                            className={`w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform ${
+                              amenity.available !== false
+                                ? "text-orange-500"
+                                : "text-gray-500"
+                            }`}
+                          />
+                          <span
+                            className={`text-xs sm:text-sm font-medium ${
+                              amenity.available !== false
+                                ? "text-white"
+                                : "text-gray-500"
+                            }`}
+                          >
+                            {amenity.name}
+                          </span>
                           {amenity.available !== false && (
                             <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
                           )}
@@ -811,56 +933,106 @@ export default function PropertyDetailPage() {
                     <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
                       <Card className="bg-linear-to-br from-slate-700/60 to-slate-800/60 border-white/10 backdrop-blur-xl">
                         <CardContent className="p-4 sm:p-5">
-                          <h4 className="font-semibold text-white mb-4 text-sm sm:text-base">Meal Details</h4>
+                          <h4 className="font-semibold text-white mb-4 text-sm sm:text-base">
+                            Meal Details
+                          </h4>
                           <div className="space-y-3">
                             <div className="flex justify-between items-center">
-                              <span className="text-gray-400 text-xs sm:text-sm">Available Meals</span>
+                              <span className="text-gray-400 text-xs sm:text-sm">
+                                Available Meals
+                              </span>
                               <div className="flex gap-1">
                                 {property.foodMess.meals.map((meal, idx) => (
-                                  <Badge key={idx} className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">{meal}</Badge>
+                                  <Badge
+                                    key={idx}
+                                    className="bg-green-500/20 text-green-400 border-green-500/30 text-xs"
+                                  >
+                                    {meal}
+                                  </Badge>
                                 ))}
                               </div>
                             </div>
                             <Separator className="bg-white/10" />
                             <div className="flex justify-between items-center">
-                              <span className="text-gray-400 text-xs sm:text-sm">Food Type</span>
-                              <span className="text-white font-semibold text-xs sm:text-sm">{property.foodMess.foodType}</span>
+                              <span className="text-gray-400 text-xs sm:text-sm">
+                                Food Type
+                              </span>
+                              <span className="text-white font-semibold text-xs sm:text-sm">
+                                {property.foodMess.foodType}
+                              </span>
                             </div>
                             <div className="flex justify-between items-center">
-                              <span className="text-gray-400 text-xs sm:text-sm">Cooking Allowed</span>
-                              <span className="text-white font-semibold text-xs sm:text-sm">{property.foodMess.cookingAllowed ? 'Yes' : 'No'}</span>
+                              <span className="text-gray-400 text-xs sm:text-sm">
+                                Cooking Allowed
+                              </span>
+                              <span className="text-white font-semibold text-xs sm:text-sm">
+                                {property.foodMess.cookingAllowed
+                                  ? "Yes"
+                                  : "No"}
+                              </span>
                             </div>
                             <div className="flex justify-between items-center">
-                              <span className="text-gray-400 text-xs sm:text-sm">Tiffin Service</span>
-                              <span className="text-white font-semibold text-xs sm:text-sm">{property.foodMess.tiffinService ? 'Available' : 'Not Available'}</span>
+                              <span className="text-gray-400 text-xs sm:text-sm">
+                                Tiffin Service
+                              </span>
+                              <span className="text-white font-semibold text-xs sm:text-sm">
+                                {property.foodMess.tiffinService
+                                  ? "Available"
+                                  : "Not Available"}
+                              </span>
                             </div>
                             <div className="flex justify-between items-center">
-                              <span className="text-gray-400 text-xs sm:text-sm">RO Water</span>
-                              <span className="text-white font-semibold text-xs sm:text-sm">{property.foodMess.roWater ? 'Available' : 'Not Available'}</span>
+                              <span className="text-gray-400 text-xs sm:text-sm">
+                                RO Water
+                              </span>
+                              <span className="text-white font-semibold text-xs sm:text-sm">
+                                {property.foodMess.roWater
+                                  ? "Available"
+                                  : "Not Available"}
+                              </span>
                             </div>
                             <div className="flex items-center gap-2">
                               <Star className="w-4 h-4 text-orange-500 fill-current" />
-                              <span className="text-white font-semibold text-xs sm:text-sm">{property.foodMess.rating} Food Rating</span>
+                              <span className="text-white font-semibold text-xs sm:text-sm">
+                                {property.foodMess.rating} Food Rating
+                              </span>
                             </div>
                           </div>
                         </CardContent>
                       </Card>
-                      
+
                       <Card className="bg-linear-to-br from-slate-700/60 to-slate-800/60 border-white/10 backdrop-blur-xl">
                         <CardContent className="p-4 sm:p-5">
-                          <h4 className="font-semibold text-white mb-4 text-sm sm:text-base">Meal Timings</h4>
+                          <h4 className="font-semibold text-white mb-4 text-sm sm:text-base">
+                            Meal Timings
+                          </h4>
                           <div className="space-y-3">
                             <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
-                              <span className="text-gray-400 text-xs sm:text-sm">Breakfast</span>
-                              <span className="text-white font-semibold text-xs sm:text-sm">{property.foodMess.weeklyMenu?.[0]?.breakfastTiming || 'N/A'}</span>
+                              <span className="text-gray-400 text-xs sm:text-sm">
+                                Breakfast
+                              </span>
+                              <span className="text-white font-semibold text-xs sm:text-sm">
+                                {property.foodMess.weeklyMenu?.[0]
+                                  ?.breakfastTiming || "N/A"}
+                              </span>
                             </div>
                             <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
-                              <span className="text-gray-400 text-xs sm:text-sm">Lunch</span>
-                              <span className="text-white font-semibold text-xs sm:text-sm">{property.foodMess.weeklyMenu?.[0]?.lunchTiming || 'N/A'}</span>
+                              <span className="text-gray-400 text-xs sm:text-sm">
+                                Lunch
+                              </span>
+                              <span className="text-white font-semibold text-xs sm:text-sm">
+                                {property.foodMess.weeklyMenu?.[0]
+                                  ?.lunchTiming || "N/A"}
+                              </span>
                             </div>
                             <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
-                              <span className="text-gray-400 text-xs sm:text-sm">Dinner</span>
-                              <span className="text-white font-semibold text-xs sm:text-sm">{property.foodMess.weeklyMenu?.[0]?.dinnerTiming || 'N/A'}</span>
+                              <span className="text-gray-400 text-xs sm:text-sm">
+                                Dinner
+                              </span>
+                              <span className="text-white font-semibold text-xs sm:text-sm">
+                                {property.foodMess.weeklyMenu?.[0]
+                                  ?.dinnerTiming || "N/A"}
+                              </span>
                             </div>
                           </div>
                         </CardContent>
@@ -868,200 +1040,277 @@ export default function PropertyDetailPage() {
                     </div>
 
                     {/* Weekly Menu Carousel */}
-                    {property.foodMess.weeklyMenu && property.foodMess.weeklyMenu.length > 0 && (
-                      <div className="relative">
-                        <div className="flex items-center justify-between mb-4">
-                          <h4 className="text-white font-semibold text-sm sm:text-base">Weekly Menu</h4>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="bg-white/5 hover:bg-white/10 text-white border border-white/10 h-8 w-8 p-0 rounded-full"
-                              onClick={() => setCurrentMenuDayIndex((prev) => (prev - 1 + property.foodMess.weeklyMenu.length) % property.foodMess.weeklyMenu.length)}
-                            >
-                              <ChevronLeft className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="bg-white/5 hover:bg-white/10 text-white border border-white/10 h-8 w-8 p-0 rounded-full"
-                              onClick={() => setCurrentMenuDayIndex((prev) => (prev + 1) % property.foodMess.weeklyMenu.length)}
-                            >
-                              <ChevronRight className="w-4 h-4" />
-                            </Button>
+                    {property.foodMess.weeklyMenu &&
+                      property.foodMess.weeklyMenu.length > 0 && (
+                        <div className="relative">
+                          <div className="flex items-center justify-between mb-4">
+                            <h4 className="text-white font-semibold text-sm sm:text-base">
+                              Weekly Menu
+                            </h4>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="bg-white/5 hover:bg-white/10 text-white border border-white/10 h-8 w-8 p-0 rounded-full"
+                                onClick={() =>
+                                  setCurrentMenuDayIndex(
+                                    (prev) =>
+                                      (prev -
+                                        1 +
+                                        property.foodMess.weeklyMenu.length) %
+                                      property.foodMess.weeklyMenu.length
+                                  )
+                                }
+                              >
+                                <ChevronLeft className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="bg-white/5 hover:bg-white/10 text-white border border-white/10 h-8 w-8 p-0 rounded-full"
+                                onClick={() =>
+                                  setCurrentMenuDayIndex(
+                                    (prev) =>
+                                      (prev + 1) %
+                                      property.foodMess.weeklyMenu.length
+                                  )
+                                }
+                              >
+                                <ChevronRight className="w-4 h-4" />
+                              </Button>
+                            </div>
                           </div>
-                        </div>
 
-                        {/* Carousel Container */}
-                        <div className="overflow-hidden">
-                          <div 
-                            className="flex transition-transform duration-700 ease-in-out"
-                            style={{ transform: `translateX(-${currentMenuDayIndex * 100}%)` }}
-                          >
-                            {property.foodMess.weeklyMenu.map((dayMenu, idx) => (
-                              <div key={idx} className="min-w-full">
-                                <Card className="bg-linear-to-br from-slate-700/60 to-slate-800/60 backdrop-blur-xl border-2 border-orange-500/30 shadow-xl shadow-orange-500/10">
-                                  <CardContent className="p-4 sm:p-6">
-                                    <div className="flex items-center justify-between mb-4">
-                                      <h5 className="text-orange-500 font-bold text-base sm:text-xl flex items-center gap-2">
-                                        <Calendar className="w-5 h-5" />
-                                        {dayMenu.day}
-                                      </h5>
-                                      <Badge className="bg-orange-500/20 text-orange-500 border-orange-500/30">
-                                        Day {idx + 1}/7
-                                      </Badge>
-                                    </div>
-                                    
-                                    <div className="grid sm:grid-cols-3 gap-4">
-                                      {/* Breakfast */}
-                                      <div className="bg-white/5 p-3 sm:p-4 rounded-lg">
-                                        <div className="flex items-center gap-2 mb-3">
-                                          <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center">
-                                            <span className="text-orange-500 text-xs font-bold">B</span>
-                                          </div>
-                                          <p className="text-white font-semibold text-sm sm:text-base">Breakfast</p>
+                          {/* Carousel Container */}
+                          <div className="overflow-hidden">
+                            <div
+                              className="flex transition-transform duration-700 ease-in-out"
+                              style={{
+                                transform: `translateX(-${
+                                  currentMenuDayIndex * 100
+                                }%)`,
+                              }}
+                            >
+                              {property.foodMess.weeklyMenu.map(
+                                (dayMenu, idx) => (
+                                  <div key={idx} className="min-w-full">
+                                    <Card className="bg-linear-to-br from-slate-700/60 to-slate-800/60 backdrop-blur-xl border-2 border-orange-500/30 shadow-xl shadow-orange-500/10">
+                                      <CardContent className="p-4 sm:p-6">
+                                        <div className="flex items-center justify-between mb-4">
+                                          <h5 className="text-orange-500 font-bold text-base sm:text-xl flex items-center gap-2">
+                                            <Calendar className="w-5 h-5" />
+                                            {dayMenu.day}
+                                          </h5>
+                                          <Badge className="bg-orange-500/20 text-orange-500 border-orange-500/30">
+                                            Day {idx + 1}/7
+                                          </Badge>
                                         </div>
-                                        <div className="space-y-2">
-                                          <div className="bg-green-500/10 p-2 rounded border border-green-500/20">
-                                            <p className="text-xs text-green-400 font-medium mb-1.5 flex items-center gap-1">
-                                              <CheckCircle className="w-3 h-3" />
-                                              Veg Options
-                                            </p>
-                                            <ul className="text-xs text-gray-300 space-y-1">
-                                              {dayMenu.breakfast?.veg?.map((item, i) => (
-                                                <li key={i} className="flex items-start gap-1.5">
-                                                  <span className="text-orange-500 mt-0.5">•</span>
-                                                  <span>{item}</span>
-                                                </li>
-                                              ))}
-                                            </ul>
-                                          </div>
-                                          {dayMenu.breakfast?.nonVeg && (
-                                            <div className="bg-red-500/10 p-2 rounded border border-red-500/20">
-                                              <p className="text-xs text-red-400 font-medium mb-1.5 flex items-center gap-1">
-                                                <CheckCircle className="w-3 h-3" />
-                                                Non-Veg Options
-                                              </p>
-                                              <ul className="text-xs text-gray-300 space-y-1">
-                                                {dayMenu.breakfast?.nonVeg?.map((item, i) => (
-                                                  <li key={i} className="flex items-start gap-1.5">
-                                                    <span className="text-orange-500 mt-0.5">•</span>
-                                                    <span>{item}</span>
-                                                  </li>
-                                                ))}
-                                              </ul>
-                                            </div>
-                                          )}
-                                        </div>
-                                      </div>
 
-                                      {/* Lunch */}
-                                      <div className="bg-white/5 p-3 sm:p-4 rounded-lg">
-                                        <div className="flex items-center gap-2 mb-3">
-                                          <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center">
-                                            <span className="text-orange-500 text-xs font-bold">L</span>
-                                          </div>
-                                          <p className="text-white font-semibold text-sm sm:text-base">Lunch</p>
-                                        </div>
-                                        <div className="space-y-2">
-                                          <div className="bg-green-500/10 p-2 rounded border border-green-500/20">
-                                            <p className="text-xs text-green-400 font-medium mb-1.5 flex items-center gap-1">
-                                              <CheckCircle className="w-3 h-3" />
-                                              Veg Options
-                                            </p>
-                                            <ul className="text-xs text-gray-300 space-y-1">
-                                              {dayMenu.lunch?.veg?.map((item, i) => (
-                                                <li key={i} className="flex items-start gap-1.5">
-                                                  <span className="text-orange-500 mt-0.5">•</span>
-                                                  <span>{item}</span>
-                                                </li>
-                                              ))}
-                                            </ul>
-                                          </div>
-                                          {dayMenu.lunch?.nonVeg && (
-                                            <div className="bg-red-500/10 p-2 rounded border border-red-500/20">
-                                              <p className="text-xs text-red-400 font-medium mb-1.5 flex items-center gap-1">
-                                                <CheckCircle className="w-3 h-3" />
-                                                Non-Veg Options
+                                        <div className="grid sm:grid-cols-3 gap-4">
+                                          {/* Breakfast */}
+                                          <div className="bg-white/5 p-3 sm:p-4 rounded-lg">
+                                            <div className="flex items-center gap-2 mb-3">
+                                              <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center">
+                                                <span className="text-orange-500 text-xs font-bold">
+                                                  B
+                                                </span>
+                                              </div>
+                                              <p className="text-white font-semibold text-sm sm:text-base">
+                                                Breakfast
                                               </p>
-                                              <ul className="text-xs text-gray-300 space-y-1">
-                                                {dayMenu.lunch?.nonVeg?.map((item, i) => (
-                                                  <li key={i} className="flex items-start gap-1.5">
-                                                    <span className="text-orange-500 mt-0.5">•</span>
-                                                    <span>{item}</span>
-                                                  </li>
-                                                ))}
-                                              </ul>
                                             </div>
-                                          )}
-                                        </div>
-                                      </div>
+                                            <div className="space-y-2">
+                                              <div className="bg-green-500/10 p-2 rounded border border-green-500/20">
+                                                <p className="text-xs text-green-400 font-medium mb-1.5 flex items-center gap-1">
+                                                  <CheckCircle className="w-3 h-3" />
+                                                  Veg Options
+                                                </p>
+                                                <ul className="text-xs text-gray-300 space-y-1">
+                                                  {dayMenu.breakfast?.veg?.map(
+                                                    (item, i) => (
+                                                      <li
+                                                        key={i}
+                                                        className="flex items-start gap-1.5"
+                                                      >
+                                                        <span className="text-orange-500 mt-0.5">
+                                                          •
+                                                        </span>
+                                                        <span>{item}</span>
+                                                      </li>
+                                                    )
+                                                  )}
+                                                </ul>
+                                              </div>
+                                              {dayMenu.breakfast?.nonVeg && (
+                                                <div className="bg-red-500/10 p-2 rounded border border-red-500/20">
+                                                  <p className="text-xs text-red-400 font-medium mb-1.5 flex items-center gap-1">
+                                                    <CheckCircle className="w-3 h-3" />
+                                                    Non-Veg Options
+                                                  </p>
+                                                  <ul className="text-xs text-gray-300 space-y-1">
+                                                    {dayMenu.breakfast?.nonVeg?.map(
+                                                      (item, i) => (
+                                                        <li
+                                                          key={i}
+                                                          className="flex items-start gap-1.5"
+                                                        >
+                                                          <span className="text-orange-500 mt-0.5">
+                                                            •
+                                                          </span>
+                                                          <span>{item}</span>
+                                                        </li>
+                                                      )
+                                                    )}
+                                                  </ul>
+                                                </div>
+                                              )}
+                                            </div>
+                                          </div>
 
-                                      {/* Dinner */}
-                                      <div className="bg-white/5 p-3 sm:p-4 rounded-lg">
-                                        <div className="flex items-center gap-2 mb-3">
-                                          <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center">
-                                            <span className="text-orange-500 text-xs font-bold">D</span>
-                                          </div>
-                                          <p className="text-white font-semibold text-sm sm:text-base">Dinner</p>
-                                        </div>
-                                        <div className="space-y-2">
-                                          <div className="bg-green-500/10 p-2 rounded border border-green-500/20">
-                                            <p className="text-xs text-green-400 font-medium mb-1.5 flex items-center gap-1">
-                                              <CheckCircle className="w-3 h-3" />
-                                              Veg Options
-                                            </p>
-                                            <ul className="text-xs text-gray-300 space-y-1">
-                                              {dayMenu.dinner?.veg?.map((item, i) => (
-                                                <li key={i} className="flex items-start gap-1.5">
-                                                  <span className="text-orange-500 mt-0.5">•</span>
-                                                  <span>{item}</span>
-                                                </li>
-                                              ))}
-                                            </ul>
-                                          </div>
-                                          {dayMenu.dinner?.nonVeg && (
-                                            <div className="bg-red-500/10 p-2 rounded border border-red-500/20">
-                                              <p className="text-xs text-red-400 font-medium mb-1.5 flex items-center gap-1">
-                                                <CheckCircle className="w-3 h-3" />
-                                                Non-Veg Options
+                                          {/* Lunch */}
+                                          <div className="bg-white/5 p-3 sm:p-4 rounded-lg">
+                                            <div className="flex items-center gap-2 mb-3">
+                                              <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center">
+                                                <span className="text-orange-500 text-xs font-bold">
+                                                  L
+                                                </span>
+                                              </div>
+                                              <p className="text-white font-semibold text-sm sm:text-base">
+                                                Lunch
                                               </p>
-                                              <ul className="text-xs text-gray-300 space-y-1">
-                                                {dayMenu.dinner?.nonVeg?.map((item, i) => (
-                                                  <li key={i} className="flex items-start gap-1.5">
-                                                    <span className="text-orange-500 mt-0.5">•</span>
-                                                    <span>{item}</span>
-                                                  </li>
-                                                ))}
-                                              </ul>
                                             </div>
-                                          )}
+                                            <div className="space-y-2">
+                                              <div className="bg-green-500/10 p-2 rounded border border-green-500/20">
+                                                <p className="text-xs text-green-400 font-medium mb-1.5 flex items-center gap-1">
+                                                  <CheckCircle className="w-3 h-3" />
+                                                  Veg Options
+                                                </p>
+                                                <ul className="text-xs text-gray-300 space-y-1">
+                                                  {dayMenu.lunch?.veg?.map(
+                                                    (item, i) => (
+                                                      <li
+                                                        key={i}
+                                                        className="flex items-start gap-1.5"
+                                                      >
+                                                        <span className="text-orange-500 mt-0.5">
+                                                          •
+                                                        </span>
+                                                        <span>{item}</span>
+                                                      </li>
+                                                    )
+                                                  )}
+                                                </ul>
+                                              </div>
+                                              {dayMenu.lunch?.nonVeg && (
+                                                <div className="bg-red-500/10 p-2 rounded border border-red-500/20">
+                                                  <p className="text-xs text-red-400 font-medium mb-1.5 flex items-center gap-1">
+                                                    <CheckCircle className="w-3 h-3" />
+                                                    Non-Veg Options
+                                                  </p>
+                                                  <ul className="text-xs text-gray-300 space-y-1">
+                                                    {dayMenu.lunch?.nonVeg?.map(
+                                                      (item, i) => (
+                                                        <li
+                                                          key={i}
+                                                          className="flex items-start gap-1.5"
+                                                        >
+                                                          <span className="text-orange-500 mt-0.5">
+                                                            •
+                                                          </span>
+                                                          <span>{item}</span>
+                                                        </li>
+                                                      )
+                                                    )}
+                                                  </ul>
+                                                </div>
+                                              )}
+                                            </div>
+                                          </div>
+
+                                          {/* Dinner */}
+                                          <div className="bg-white/5 p-3 sm:p-4 rounded-lg">
+                                            <div className="flex items-center gap-2 mb-3">
+                                              <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center">
+                                                <span className="text-orange-500 text-xs font-bold">
+                                                  D
+                                                </span>
+                                              </div>
+                                              <p className="text-white font-semibold text-sm sm:text-base">
+                                                Dinner
+                                              </p>
+                                            </div>
+                                            <div className="space-y-2">
+                                              <div className="bg-green-500/10 p-2 rounded border border-green-500/20">
+                                                <p className="text-xs text-green-400 font-medium mb-1.5 flex items-center gap-1">
+                                                  <CheckCircle className="w-3 h-3" />
+                                                  Veg Options
+                                                </p>
+                                                <ul className="text-xs text-gray-300 space-y-1">
+                                                  {dayMenu.dinner?.veg?.map(
+                                                    (item, i) => (
+                                                      <li
+                                                        key={i}
+                                                        className="flex items-start gap-1.5"
+                                                      >
+                                                        <span className="text-orange-500 mt-0.5">
+                                                          •
+                                                        </span>
+                                                        <span>{item}</span>
+                                                      </li>
+                                                    )
+                                                  )}
+                                                </ul>
+                                              </div>
+                                              {dayMenu.dinner?.nonVeg && (
+                                                <div className="bg-red-500/10 p-2 rounded border border-red-500/20">
+                                                  <p className="text-xs text-red-400 font-medium mb-1.5 flex items-center gap-1">
+                                                    <CheckCircle className="w-3 h-3" />
+                                                    Non-Veg Options
+                                                  </p>
+                                                  <ul className="text-xs text-gray-300 space-y-1">
+                                                    {dayMenu.dinner?.nonVeg?.map(
+                                                      (item, i) => (
+                                                        <li
+                                                          key={i}
+                                                          className="flex items-start gap-1.5"
+                                                        >
+                                                          <span className="text-orange-500 mt-0.5">
+                                                            •
+                                                          </span>
+                                                          <span>{item}</span>
+                                                        </li>
+                                                      )
+                                                    )}
+                                                  </ul>
+                                                </div>
+                                              )}
+                                            </div>
+                                          </div>
                                         </div>
-                                      </div>
-                                    </div>
-                                  </CardContent>
-                                </Card>
-                              </div>
+                                      </CardContent>
+                                    </Card>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Carousel Indicators */}
+                          <div className="flex justify-center gap-2 mt-4">
+                            {property.foodMess.weeklyMenu.map((_, index) => (
+                              <button
+                                key={index}
+                                onClick={() => setCurrentMenuDayIndex(index)}
+                                className={`h-2 rounded-full transition-all duration-300 ${
+                                  index === currentMenuDayIndex
+                                    ? "bg-orange-500 w-8 shadow-lg shadow-orange-500/50"
+                                    : "bg-white/30 hover:bg-white/50 w-2"
+                                }`}
+                              />
                             ))}
                           </div>
                         </div>
-
-                        {/* Carousel Indicators */}
-                        <div className="flex justify-center gap-2 mt-4">
-                          {property.foodMess.weeklyMenu.map((_, index) => (
-                            <button
-                              key={index}
-                              onClick={() => setCurrentMenuDayIndex(index)}
-                              className={`h-2 rounded-full transition-all duration-300 ${
-                                index === currentMenuDayIndex 
-                                  ? 'bg-orange-500 w-8 shadow-lg shadow-orange-500/50' 
-                                  : 'bg-white/30 hover:bg-white/50 w-2'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                      )}
                   </div>
                 )}
 
@@ -1072,32 +1321,48 @@ export default function PropertyDetailPage() {
                     Rules & Policies
                   </h3>
                   <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
-                    {property.rules.map((rule, index) => (
+                    {property.rules.map((rule, index) =>
                       rule.key.toLowerCase() === "other" ? (
                         // Special handling for "Other" type rules - display as full-width text block
-                        <div key={index} className="sm:col-span-2 p-3 sm:p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg hover:bg-orange-500/15 transition-all duration-300">
+                        <div
+                          key={index}
+                          className="sm:col-span-2 p-3 sm:p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg hover:bg-orange-500/15 transition-all duration-300"
+                        >
                           <div className="flex items-start gap-2">
                             <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 mt-0.5 shrink-0" />
                             <div>
-                              <span className="text-orange-400 text-xs sm:text-sm font-semibold block mb-1">Additional Information</span>
-                              <p className="text-white text-xs sm:text-sm leading-relaxed">{rule.value}</p>
+                              <span className="text-orange-400 text-xs sm:text-sm font-semibold block mb-1">
+                                Additional Information
+                              </span>
+                              <p className="text-white text-xs sm:text-sm leading-relaxed">
+                                {rule.value}
+                              </p>
                             </div>
                           </div>
                         </div>
                       ) : (
                         // Standard rule display
-                        <div key={index} className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
-                          <span className="text-gray-400 text-xs sm:text-sm">{rule.key}</span>
-                          <span className={`font-semibold text-xs sm:text-sm ${
-                            rule.value.toLowerCase() === 'yes' ? 'text-green-400' : 
-                            rule.value.toLowerCase() === 'no' ? 'text-red-400' : 
-                            'text-white'
-                          }`}>
+                        <div
+                          key={index}
+                          className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300"
+                        >
+                          <span className="text-gray-400 text-xs sm:text-sm">
+                            {rule.key}
+                          </span>
+                          <span
+                            className={`font-semibold text-xs sm:text-sm ${
+                              rule.value.toLowerCase() === "yes"
+                                ? "text-green-400"
+                                : rule.value.toLowerCase() === "no"
+                                ? "text-red-400"
+                                : "text-white"
+                            }`}
+                          >
                             {rule.value}
                           </span>
                         </div>
                       )
-                    ))}
+                    )}
                   </div>
                 </div>
 
@@ -1108,36 +1373,54 @@ export default function PropertyDetailPage() {
                     Safety & Security
                   </h3>
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                    {property.commonAmenities?.some(a => a.name === 'Security Guard' && a.available) && (
+                    {property.commonAmenities?.some(
+                      (a) => a.name === "Security Guard" && a.available
+                    ) && (
                       <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
                         <CheckCircle className="w-5 h-5 text-green-500" />
-                        <span className="text-white text-xs sm:text-sm">Security Guard</span>
+                        <span className="text-white text-xs sm:text-sm">
+                          Security Guard
+                        </span>
                       </div>
                     )}
-                    {property.commonAmenities?.some(a => a.name === 'Biometric Access' && a.available) && (
+                    {property.commonAmenities?.some(
+                      (a) => a.name === "Biometric Access" && a.available
+                    ) && (
                       <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
                         <CheckCircle className="w-5 h-5 text-green-500" />
-                        <span className="text-white text-xs sm:text-sm">Biometric Access</span>
+                        <span className="text-white text-xs sm:text-sm">
+                          Biometric Access
+                        </span>
                       </div>
                     )}
                     <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
                       <CheckCircle className="w-5 h-5 text-gray-500" />
-                      <span className="text-white text-xs sm:text-sm">Fire Safety Certificate</span>
+                      <span className="text-white text-xs sm:text-sm">
+                        Fire Safety Certificate
+                      </span>
                     </div>
                     <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
                       <Shield className="w-5 h-5 text-orange-500" />
                       <div>
-                        <span className="text-white text-xs sm:text-sm block">CCTV Coverage</span>
-                        <span className="text-gray-400 text-xs">Check with Owner</span>
+                        <span className="text-white text-xs sm:text-sm block">
+                          CCTV Coverage
+                        </span>
+                        <span className="text-gray-400 text-xs">
+                          Check with Owner
+                        </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
                       <CheckCircle className="w-5 h-5 text-gray-500" />
-                      <span className="text-white text-xs sm:text-sm">Emergency Exit</span>
+                      <span className="text-white text-xs sm:text-sm">
+                        Emergency Exit
+                      </span>
                     </div>
                     <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
                       <CheckCircle className="w-5 h-5 text-gray-500" />
-                      <span className="text-white text-xs sm:text-sm">24x7 Guard Available</span>
+                      <span className="text-white text-xs sm:text-sm">
+                        24x7 Guard Available
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -1148,17 +1431,17 @@ export default function PropertyDetailPage() {
                     <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
                     Location & Nearby
                   </h3>
-                  
-                
 
                   {/* Map */}
                   <div className="h-64 sm:h-80 rounded-xl overflow-hidden border border-white/10 shadow-xl">
-                    <iframe 
-                      src={`https://www.google.com/maps?q=${parseFloat(property.lat)},${parseFloat(property.lng)}&z=15&output=embed`} 
-                      width="600" 
-                      height="450" 
-                      className="w-full h-full"   
-                      loading="lazy" 
+                    <iframe
+                      src={`https://www.google.com/maps?q=${parseFloat(
+                        property.lat
+                      )},${parseFloat(property.lng)}&z=15&output=embed`}
+                      width="600"
+                      height="450"
+                      className="w-full h-full"
+                      loading="lazy"
                       referrerPolicy="no-referrer-when-downgrade"
                       title={`Map of ${property.propertyName}`}
                     />
@@ -1169,8 +1452,6 @@ export default function PropertyDetailPage() {
 
             {/* Right Sidebar */}
             <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-     
-
               {/* Contact Property Manager */}
               <Card className="bg-linear-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500">
                 <CardHeader>
@@ -1182,56 +1463,73 @@ export default function PropertyDetailPage() {
                 <CardContent>
                   <div className="flex items-center gap-3 mb-4">
                     <Avatar className="w-12 h-12 sm:w-14 sm:h-14 ring-2 ring-orange-500/50">
-                      <AvatarImage src={property.user?.profileImage || "/api/placeholder/60/60"} />
+                      <AvatarImage
+                        src={
+                          property.user?.profileImage ||
+                          "/api/placeholder/60/60"
+                        }
+                      />
                       <AvatarFallback className="bg-linear-to-br from-orange-500 to-orange-600 text-white font-bold">
-                        {property.user?.firstName?.[0]}{property.user?.lastName?.[0]}
+                        {property.user?.firstName?.[0]}
+                        {property.user?.lastName?.[0]}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                       <h4 className="font-semibold text-white text-sm sm:text-base">
-                        {property.user ? `${property.user.firstName} ${property.user.lastName}` : 'Property Owner'}
+                        {property.user
+                          ? `${property.user.firstName} ${property.user.lastName}`
+                          : "Property Owner"}
                       </h4>
                       <p className="text-xs sm:text-sm text-gray-400">
-                        {property.isBrandManaged ? `${property.brandName} - Owner` : 'Property Owner'}
+                        {property.isBrandManaged
+                          ? `${property.brandName} - Owner`
+                          : "Property Owner"}
                       </p>
-                      <p className="text-xs text-gray-500 mt-0.5">Available 24x7</p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Available 24x7
+                      </p>
                     </div>
-                              
-                  
                   </div>
                   {/* Availability Status */}
-                  <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg mb-4">
+                  {/* <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg mb-4">
                     <div className="flex items-center justify-between">
                       <span className="text-green-400 text-xs sm:text-sm font-medium">Available Beds</span>
                       <span className="text-green-400 text-sm sm:text-base font-bold">
                         {(() => { const beds = getTotalBeds(); return `${beds.available}/${beds.total}`; })()}
                       </span>
                     </div>
-                  </div>
+                  </div> */}
                   <div className="flex gap-4 flex-wrap  ">
-                    <Button className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
+                    {/* <Button className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
                       <Phone className="w-4 h-4 mr-2" />
                       Call {property.user?.phone || 'Owner'}
-                    </Button>
-                    <Button    className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
+                    </Button> */}
+                    {/* <Button    className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
                       <Mail className="w-4 h-4 mr-2" />
                       WhatsApp
-                    </Button>
-                    <Button    className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
+                    </Button> */}
+                    {/* <Button    className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
                       <Calendar className="w-4 h-4 mr-2" />
                       Schedule Visit
-                    </Button>
-                    <Button   className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
+                    </Button> */}
+                    {/* <Button   className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
                       <Play className="w-4 h-4 mr-2" />
                       Virtual Tour
+                    </Button> */}
+
+                    <Button
+                      className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm cursor-pointer w-full"
+                      onClick={handleShowPropertyInterest}
+                    >
+                      <Play className="w-4 h-4 mr-2" />
+                      Show Interest
                     </Button>
                   </div>
                 </CardContent>
               </Card>
 
- 
               {/* Chat Support */}
-              <Card className="bg-linear-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500">
+              {/* <Card className="bg-linear-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500">
                 <CardHeader className="text-white font-medium  text-sm sm:text-base leading-relaxed">
                      Need help? Our support team is available 24x7! 
                 </CardHeader>
@@ -1241,12 +1539,46 @@ export default function PropertyDetailPage() {
                       Start Chat
                     </Button>
                  </CardContent>
-              </Card>
-              
- 
+              </Card> */}
             </div>
           </div>
         </div>
+
+        {/* Room Type Selection Dialog */}
+        <RoomTypeSelectionDialog
+          isOpen={isRoomSelectionOpen}
+          onOpenChange={setIsRoomSelectionOpen}
+          roomTypes={property?.roomTypes || []}
+          onConfirm={handleRoomSelectionConfirm}
+        />
+
+        {/* Interest Dialog */}
+        <InterestDialog
+          isOpen={isInterestDialogOpen}
+          onOpenChange={setIsInterestDialogOpen}
+          propertyName={property?.propertyName}
+          selectedRooms={selectedRooms.length > 0 ? selectedRooms : null}
+          propertyDetails={
+            selectedRooms.length === 0
+              ? [
+                  { label: "Property", value: property?.propertyName },
+                  {
+                    label: "Starting From",
+                    value: getMinRent(),
+                    className: "text-orange-400",
+                  },
+                  {
+                    label: "Available Beds",
+                    value: (() => {
+                      const beds = getTotalBeds();
+                      return `${beds.available}/${beds.total}`;
+                    })(),
+                    className: "text-green-400",
+                  },
+                ]
+              : null
+          }
+        />
       </div>
     </div>
   );

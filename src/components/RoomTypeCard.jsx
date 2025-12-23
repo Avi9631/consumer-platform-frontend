@@ -6,11 +6,25 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle, ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import InterestDialog from "@/components/InterestDialog";
+import { CheckCircle, ChevronLeft, ChevronRight, ImageIcon, Heart, User, Mail, Phone as PhoneIcon, Calendar, MessageSquare } from "lucide-react";
 
 export default function RoomTypeCard({ room }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageError, setImageError] = useState(false);
+  const [isInterestSheetOpen, setIsInterestSheetOpen] = useState(false);
+  const [isInterestDialogOpen, setIsInterestDialogOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    moveInDate: '',
+    message: ''
+  });
   const roomImages = room.images && room.images.length > 0 ? room.images : [];
 
   const handlePrevImage = (e) => {
@@ -30,7 +44,32 @@ export default function RoomTypeCard({ room }) {
     setCurrentImageIndex(index);
   };
 
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleShowInterestClick = () => {
+    setIsInterestDialogOpen(true);
+  };
+
+  const handleSubmitInterest = (e) => {
+    e.preventDefault();
+    console.log('Interest submitted:', { ...formData, roomId: room.id, roomName: room.name });
+    // TODO: Add API call to submit interest
+    setIsInterestSheetOpen(false);
+    // Reset form
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      moveInDate: '',
+      message: ''
+    });
+  };
+
   return (
+    <>
     <Card className="shrink-0 w-[280px] sm:w-[320px] md:w-[350px] lg:w-[380px] bg-linear-to-br from-slate-700/60 to-slate-800/60 border-white/10 backdrop-blur-xl hover:border-orange-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/20 group overflow-hidden snap-start">
       <CardContent className="p-0">
         {/* Room Image Carousel */}
@@ -174,12 +213,184 @@ export default function RoomTypeCard({ room }) {
                 <span className="text-white font-semibold">{room.availability.nextAvailability}</span>
               </div>
             </div>
-            <Button className="w-full bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg group-hover:shadow-orange-500/30 transition-all duration-300 text-xs sm:text-sm h-9">
-              Book Now - ₹{room.pricing.find(p => p.type === "Booking Amount")?.amount.toLocaleString() || "0"} Token
+            <Button 
+              className="w-full bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg group-hover:shadow-orange-500/30 transition-all duration-300 text-xs sm:text-sm h-9"
+              onClick={handleShowInterestClick}
+            >
+              <Heart className="w-3.5 h-3.5 mr-1.5" />
+              Show Interest
             </Button>
           </div>
         </div>
       </CardContent>
     </Card>
+
+    {/* Interest Dialog */}
+    <InterestDialog
+      isOpen={isInterestDialogOpen}
+      onOpenChange={setIsInterestDialogOpen}
+      propertyName={room.name}
+      propertyDetails={[
+        { label: "Room", value: room.name },
+        { label: "Monthly Rent", value: `₹${room.pricing.find(p => p.type === "Monthly Rent")?.amount.toLocaleString()}`, className: "text-orange-400" },
+        { label: "Availability", value: `${room.availability.availableBeds}/${room.availability.totalBeds} beds`, className: "text-green-400" }
+      ]}
+    />
+
+    {/* Interest Form Sheet */}
+    <Sheet open={isInterestSheetOpen} onOpenChange={setIsInterestSheetOpen}>
+      <SheetContent className="sm:max-w-md bg-gradient-to-br from-slate-900 to-slate-950 border-white/10 text-white">
+        <SheetHeader className="space-y-3">
+          <SheetTitle className="text-2xl font-bold text-orange-500">
+            Express Your Interest
+          </SheetTitle>
+          <SheetDescription className="text-gray-400 text-base">
+            Interested in <span className="font-semibold text-white">{room.name}</span>? Fill out the details below and we'll get back to you shortly.
+          </SheetDescription>
+        </SheetHeader>
+
+        <form onSubmit={handleSubmitInterest} className="space-y-6 mt-8">
+          {/* Room Summary Card */}
+          <div className="p-4 bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/20 rounded-lg space-y-2">
+            <h4 className="text-sm font-semibold text-orange-400 uppercase tracking-wide">Selected Room</h4>
+            <Separator className="bg-orange-500/20" />
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div>
+                <p className="text-gray-400 text-xs">Room Type</p>
+                <p className="text-white font-medium">{room.name}</p>
+              </div>
+              <div>
+                <p className="text-gray-400 text-xs">Monthly Rent</p>
+                <p className="text-orange-400 font-semibold">₹{room.pricing.find(p => p.type === "Monthly Rent")?.amount.toLocaleString() || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-gray-400 text-xs">Category</p>
+                <p className="text-white font-medium">{room.category}</p>
+              </div>
+              <div>
+                <p className="text-gray-400 text-xs">Availability</p>
+                <p className="text-green-400 font-medium">{room.availability.availableBeds}/{room.availability.totalBeds} beds</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Form Fields */}
+          <div className="space-y-5">
+            {/* Name Field */}
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-sm font-medium text-gray-200">
+                Full Name <span className="text-orange-500">*</span>
+              </Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={formData.name}
+                  onChange={handleFormChange}
+                  required
+                  className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:border-orange-500 h-11"
+                />
+              </div>
+            </div>
+
+            {/* Email Field */}
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-medium text-gray-200">
+                Email Address <span className="text-orange-500">*</span>
+              </Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="your.email@example.com"
+                  value={formData.email}
+                  onChange={handleFormChange}
+                  required
+                  className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:border-orange-500 h-11"
+                />
+              </div>
+            </div>
+
+            {/* Phone Field */}
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="text-sm font-medium text-gray-200">
+                Phone Number <span className="text-orange-500">*</span>
+              </Label>
+              <div className="relative">
+                <PhoneIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  placeholder="+91 XXXXX XXXXX"
+                  value={formData.phone}
+                  onChange={handleFormChange}
+                  required
+                  className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:border-orange-500 h-11"
+                />
+              </div>
+            </div>
+
+            {/* Move-in Date Field */}
+            <div className="space-y-2">
+              <Label htmlFor="moveInDate" className="text-sm font-medium text-gray-200">
+                Preferred Move-in Date
+              </Label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  id="moveInDate"
+                  name="moveInDate"
+                  type="date"
+                  value={formData.moveInDate}
+                  onChange={handleFormChange}
+                  className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:border-orange-500 h-11"
+                />
+              </div>
+            </div>
+
+            {/* Message Field */}
+            <div className="space-y-2">
+              <Label htmlFor="message" className="text-sm font-medium text-gray-200">
+                Additional Message
+              </Label>
+              <Textarea
+                id="message"
+                name="message"
+                placeholder="Any specific requirements, questions, or preferences..."
+                value={formData.message}
+                onChange={handleFormChange}
+                rows={4}
+                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-orange-500 focus-visible:border-orange-500 resize-none"
+              />
+            </div>
+          </div>
+
+          {/* Submit Actions */}
+          <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1 border-white/20 text-white hover:bg-white/10 hover:text-white h-11"
+              onClick={() => setIsInterestSheetOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              className="flex-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-orange-500/25 h-11 font-semibold"
+            >
+              Submit Interest
+            </Button>
+          </div>
+        </form>
+      </SheetContent>
+    </Sheet>
+    </>
   );
 }
