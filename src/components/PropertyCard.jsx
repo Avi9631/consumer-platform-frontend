@@ -53,20 +53,108 @@ export default function PropertyCard({ property, onClick, variant = "horizontal"
 
   // Get location string
   const getLocation = () => {
+    // If location is a string, return it
+    if (typeof property.location === 'string') {
+      return property.location;
+    }
+    
+    // Build location from locality and city
     if (property.locality && property.city) {
       return `${property.locality}, ${property.city}`;
     }
+    
+    // Try address_text (snake_case from backend)
+    if (property.address_text) {
+      const parts = property.address_text.split(',');
+      return parts.slice(0, 2).join(', ');
+    }
+    
+    // Try addressText (camelCase)
     if (property.addressText) {
-      // Extract first part of address
       const parts = property.addressText.split(',');
       return parts.slice(0, 2).join(', ');
     }
+    
+    // Fallback to city or locality
     return property.city || property.locality || 'Location';
   };
 
   // Get bedrooms and bathrooms
   const bedrooms = property.bedrooms ? (typeof property.bedrooms === 'string' ? parseInt(property.bedrooms) : property.bedrooms) : 0;
   const bathrooms = property.bathrooms ? (typeof property.bathrooms === 'string' ? parseInt(property.bathrooms) : property.bathrooms) : 0;
+
+  // Get image URL - handle both formats
+  const getImageUrl = () => {
+    // Direct image property
+    if (property.image) return property.image;
+    
+    // From media_data array
+    if (property.media_data && Array.isArray(property.media_data) && property.media_data.length > 0) {
+      const firstImage = property.media_data.find(media => media.type === 'image' || media.media_type === 'image');
+      return firstImage?.url || property.media_data[0]?.url;
+    }
+    
+    // Fallback placeholder
+    return '/placeholder-property.jpg';
+  };
+
+  // Get display name
+  const getDisplayName = () => {
+    return getPropertyName();
+  };
+
+  // Get display location
+  const getDisplayLocation = () => {
+    return getLocation();
+  };
+
+  // Get display price
+  const getDisplayPrice = () => {
+    // If price is already formatted as string
+    if (typeof property.price === 'string' && property.price.includes('₹')) {
+      return property.price;
+    }
+    
+    // Get numeric price
+    const numericPrice = getPrice();
+    if (numericPrice) {
+      return formatPrice(numericPrice);
+    }
+    
+    // For PG hostels with room_types
+    if (property.room_types && Array.isArray(property.room_types) && property.room_types.length > 0) {
+      const minPrice = Math.min(...property.room_types.map(rt => rt.price || 0).filter(p => p > 0));
+      if (minPrice) {
+        return `From ${formatPrice(minPrice)}/month`;
+      }
+    }
+    
+    return 'Price on request';
+  };
+
+  // Get BHK or room type info
+  const getBhkInfo = () => {
+    if (property.bhk) return property.bhk;
+    if (bedrooms > 0) return `${bedrooms} BHK`;
+    
+    // For PG hostels, show room types
+    if (property.room_types && Array.isArray(property.room_types)) {
+      const types = property.room_types.map(rt => rt.room_type || rt.type).filter(Boolean);
+      if (types.length > 0) {
+        return types.slice(0, 2).join(', ');
+      }
+    }
+    
+    return '';
+  };
+
+  // Get developer/brand name
+  const getDeveloperName = () => {
+    if (property.developer) return property.developer;
+    if (property.brand_name) return property.brand_name;
+    if (property.is_brand_managed) return 'Brand Managed';
+    return 'Independent';
+  };
 
   // Toggle favorite
   const handleFavoriteClick = (e) => {
@@ -81,8 +169,8 @@ export default function PropertyCard({ property, onClick, variant = "horizontal"
                 >
                   <div className="relative aspect-3/4">
                     <Image
-                      src={property.image}
-                      alt={property.name}
+                      src={getImageUrl()}
+                      alt={getDisplayName()}
                       fill
                       className="object-cover"
                     />
@@ -91,7 +179,7 @@ export default function PropertyCard({ property, onClick, variant = "horizontal"
                     {/* Top Actions */}
                     <div className="absolute top-3 md:top-4 left-3 md:left-4 right-3 md:right-4 flex justify-between items-start">
                       <Badge variant="secondary" className="backdrop-blur-md">
-                        {property.developer}
+                        {getDeveloperName()}
                       </Badge>
                       <div className="flex gap-1.5 md:gap-2">
                         <Button
@@ -114,18 +202,18 @@ export default function PropertyCard({ property, onClick, variant = "horizontal"
                     {/* Bottom Info */}
                     <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
                       <h3 className="text-base md:text-xl font-bold mb-1 text-white">
-                        {property.name}
+                        {getDisplayName()}
                       </h3>
                       <p className="text-xs md:text-sm text-white/80 mb-2">
-                        {property.location}
+                        {getDisplayLocation()}
                       </p>
                       <div className="flex justify-between items-end gap-2">
                         <div className="flex-1">
                           <p className="text-sm font-bold text-primary">
-                            {property.price}
+                            {getDisplayPrice()}
                           </p>
                           <p className="text-xs  text-white/60">
-                            {property.bhk}
+                            {getBhkInfo()}
                           </p>
                         </div>
                         <Button size="sm" className="whitespace-nowrap">

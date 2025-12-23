@@ -1,0 +1,256 @@
+{
+"status": 200,
+"success": true,
+"message": "PG/Hostel fetched successfully",
+"data": {
+"v_created_date": "23-Dec-2025",
+"v_created_time": "11:02:22",
+"v_updated_date": "23-Dec-2025",
+"v_updated_time": "11:02:22",
+"pgHostelId": 2,
+"userId": 8,
+"draftId": 113,
+"propertyName": "SUNRISE PG / HOSTELS",
+"slug": "sunrise-pg-hostels-1",
+"genderAllowed": "Unisex",
+"description": "SUNRISE PG / HOSTELSSUNRISE PG / HOSTELSSUNRISE PG / HOSTELSSUNRISE PG / HOSTELSSUNRISE PG / HOSTELS",
+"isBrandManaged": true,
+"brandName": "HelloWorld",
+"yearBuilt": 2021,
+"location": {
+"crs": {
+"type": "name",
+"properties": {
+"name": "EPSG:4326"
+}
+},
+"type": "Point",
+"coordinates": [
+77.70833859999999,
+12.9546113
+]
+},
+"lat": "12.95461130",
+"lng": "77.70833860",
+"city": "Bengaluru",
+"locality": "Rajasree Layout",
+"addressText": "#23, 2A Cross Rd, Rajasree Layout, Extension, Munnekollal, Bengaluru, Karnataka 560037, India",
+"landmark": "",
+"roomTypes": [
+{
+"name": "SINGLE SHARING LUXURIOUS WITH BALCONY",
+"images": [
+{
+"url": "https://fxleyozwnwxfzpvvjwwn.storage.supabase.co/storage/v1/s3/listing-buckets/listing-drafts/room-images/1765987623363_1ba076fe-ed56-49c3-b4b0-0e3d9b145751.jpg"
+}
+],
+"pricing": [
+{
+"type": "Monthly Rent",
+"amount": 8000,
+"currency": "INR",
+"mandatory": true
+},
+{
+"type": "Security Deposit",
+"amount": 8000,
+"currency": "INR",
+"mandatory": true,
+"refundable": true
+}
+],
+"category": "Single sharing",
+"roomSize": 500,
+"amenities": [
+{
+"name": "Single Bed",
+"available": true
+},
+{
+"name": "Premium Mattress",
+"available": true
+},
+{
+"name": "Mattress Included",
+"available": true
+},
+{
+"name": "Queen Size Bed",
+"available": true
+},
+{
+"name": "Double Bed",
+"available": true
+}
+],
+"availability": {
+"soldOut": false,
+"totalBeds": 1,
+"availableBeds": 1,
+"nextAvailability": "Immediate"
+},
+"refundPolicy": ""
+},
+{
+"name": "gweasgweGg",
+"images": [],
+"pricing": [
+{
+"type": "Monthly Rent",
+"amount": 0,
+"currency": "INR",
+"mandatory": true
+},
+{
+"type": "Security Deposit",
+"amount": 0,
+"currency": "INR",
+"mandatory": true,
+"refundable": true
+}
+],
+"category": "Single sharing",
+"roomSize": 400,
+"amenities": [
+{
+"name": "2 Single Beds",
+"available": true
+},
+{
+"name": "Large Cupboard",
+"available": true
+}
+],
+"availability": {
+"soldOut": false,
+"totalBeds": 1,
+"availableBeds": 1,
+"nextAvailability": "Immediate"
+},
+"refundPolicy": ""
+}
+],
+"commonAmenities": [
+{
+"icon": "CarIcon",
+"name": "2-Wheeler Parking",
+"available": true
+},
+{
+"icon": "Shield",
+"name": "Security Guard",
+"available": true
+},
+{
+"icon": "Building2",
+"name": "Gaming Room",
+"available": true
+},
+{
+"icon": "Shield",
+"name": "Biometric Access",
+"available": true
+},
+{
+"icon": "Users",
+"name": "Housekeeping",
+"available": true
+},
+{
+"icon": "CarIcon",
+"name": "4-Wheeler Parking",
+"available": true
+}
+],
+"commonAmenitiesLegacy": [],
+"roomAmenities": [],
+"foodMess": {
+"meals": [
+"Breakfast",
+"Lunch"
+],
+"foodType": "Veg & Non-veg",
+"available": true,
+"weeklyMenu": [
+{
+"day": "Friday",
+"lunch": {
+"veg": [
+"Dal Tadka",
+"Jeera Rice",
+"Roti",
+"Mixed Veg",
+"Salad"
+],
+"nonVeg": [
+"Chicken Curry"
+]
+},
+"breakfast": {
+"veg": [
+"Poha",
+"Upma",
+"Idli Sambhar"
+],
+"nonVeg": [
+"Omelette"
+]
+},
+"lunchTiming": "13:00",
+"dinnerTiming": "20:00",
+"breakfastTiming": "08:00"
+}
+],
+"cookingAllowed": false
+},
+"rules": [
+{
+"key": "Move Out Notice",
+"value": "15 days"
+}
+],
+"mediaData": [
+{
+"key": "listing-drafts/media/113/f8991dd8-6fff-4a66-9f34-acc8976e4339.png",
+"url": "https://fxleyozwnwxfzpvvjwwn.storage.supabase.co/storage/v1/s3/listing-buckets/listing-drafts/media/113/f8991dd8-6fff-4a66-9f34-acc8976e4339.png",
+"type": "image",
+"title": "BEDROOM",
+"docType": "pg",
+"category": "Virtual Tour",
+"mimetype": "image/png",
+"uploadedAt": "2025-12-14T06:35:31.548Z",
+"description": "",
+"originalName": "Untitled diagram-2025-11-02-152701.png"
+},
+{
+"id": "media-1765986954219-0.3853749330433981",
+"key": "listing-drafts/images/1765986954228_6b760fdc-d34c-4f41-aa83-8de057dcc5ce.jpg",
+"url": "https://fxleyozwnwxfzpvvjwwn.storage.supabase.co/storage/v1/s3/listing-buckets/listing-drafts/images/1765986954228_6b760fdc-d34c-4f41-aa83-8de057dcc5ce.jpg",
+"file": null,
+"type": "image",
+"title": "",
+"preview": "blob:http://localhost:7500/6ca74f8a-a7a3-4d3f-b678-b741adbfae93",
+"category": "",
+"uploading": false,
+"description": "",
+"uploadProgress": 100
+}
+],
+"publishStatus": "PUBLISHED",
+"verificationStatus": "VERIFIED",
+"pg_hostel_created_at": "2025-12-23T05:32:22.492Z",
+"pg_hostel_updated_at": "2025-12-23T05:32:22.492Z",
+"pg_hostel_deleted_at": null,
+"user_id": 8,
+"draft_id": 113,
+"user": {
+"userId": 8,
+"firstName": "TECHFUSION",
+"lastName": "STUDIO",
+"email": "techfusionstudio@gmail.com",
+"phone": "9631045873"
+}
+},
+"warnings": [],
+"error": null
+}

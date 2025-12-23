@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { MapPin, Card as CardIcon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { MapPin } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 // Components
@@ -10,6 +10,7 @@ import HeroSection from "@/components/HeroSection";
 import CarouselSection from "@/components/CarouselSection";
 import VirtualTourCard from "@/components/ShortVideoCard";
 import PropertyCard from "@/components/PropertyCard";
+import PgHostelCard from "@/components/PgHostelCard";
 import DeveloperCard from "@/components/DeveloperCard";
 import LocationSheet from "@/components/LocationSheet";
 
@@ -38,6 +39,9 @@ export default function Home() {
     lng: location.lng,
   });
   const [sheetMapMarker, setSheetMapMarker] = useState(null);
+  const [pgHostelData, setPgHostelData] = useState([]);
+  const [pgHostelLoading, setPgHostelLoading] = useState(false);
+  const [pgHostelError, setPgHostelError] = useState(null);
 
   // Custom hooks
   const scrolled = useScrollDetection(50);
@@ -46,6 +50,41 @@ export default function Home() {
     location,
     5
   );
+
+  // Fetch PG Hostel data
+  useEffect(() => {
+    const fetchPgHostelData = async () => {
+      setPgHostelLoading(true);
+      setPgHostelError(null);
+      
+      try {
+        const lat = location.lat || 12.95461130;
+        const lng = location.lng || 77.70833860;
+        const radius = 9;
+        
+        const response = await fetch(
+          `http://localhost:3000/api/pg-hostel/search-nearby?lat=${lat}&lng=${lng}&radius=${radius}`
+        );
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log("PG Hostel Data:", data);
+        setPgHostelData(data?.data?.pgHostels || data || []);
+        console.log("=== PG Hostel Data Fetched ===", data?.data?.pgHostels);
+      } catch (error) {
+        console.error("Error fetching PG hostel data:", error);
+        setPgHostelError(error.message);
+        setPgHostelData([]);
+      } finally {
+        setPgHostelLoading(false);
+      }
+    };
+
+    fetchPgHostelData();
+  }, [location.lat, location.lng]);
 
   // Event handlers using Zustand store
   const handleSearchSelect = (place) => {
@@ -246,20 +285,36 @@ export default function Home() {
             
           </>
         }
-        subtitle="Swipe to explore more assured properties"
+        subtitle="Swipe to explore more PG, Hostels & Co-living spaces"
         className="bg-gradient-to-b from-[#3d1f2f] via-[#2d1b1f to-[#1a0f1f]] "
       >
-        {PROPERTIES_DATA.length > 0 ? (
-          PROPERTIES_DATA.map((property) => (
-            <PropertyCard key={property.id} property={property} />
+        {pgHostelLoading ? (
+          <div className="w-full text-center py-12">
+            <Card className="inline-block p-6">
+              <MapPin className="w-16 h-16 text-primary mx-auto mb-4 animate-pulse" />
+              <h3 className="text-xl font-bold mb-2">Loading...</h3>
+              <p className="text-muted-foreground">Fetching nearby PG & Hostels</p>
+            </Card>
+          </div>
+        ) : pgHostelError ? (
+          <div className="w-full text-center py-12">
+            <Card className="inline-block p-6">
+              <MapPin className="w-16 h-16 text-destructive mx-auto mb-4" />
+              <h3 className="text-xl font-bold mb-2">Error Loading Data</h3>
+              <p className="text-muted-foreground">{pgHostelError}</p>
+            </Card>
+          </div>
+        ) : pgHostelData.length > 0 ? (
+          pgHostelData.map((property) => (
+            <PgHostelCard key={property.pgHostelId || property.pg_hostel_id || property.id} property={property} />
           ))
         ) : (
           <div className="w-full text-center py-12">
             <Card className="inline-block p-6">
               <MapPin className="w-16 h-16 text-primary mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-2">No Properties Found</h3>
+              <h3 className="text-xl font-bold mb-2">No PG/Hostels Found</h3>
               <p className="text-muted-foreground">
-                Try selecting a different location or zoom out on the map
+                Try selecting a different location or increasing the search radius
               </p>
             </Card>
           </div>

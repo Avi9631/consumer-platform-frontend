@@ -44,9 +44,11 @@ import {
 import GoogleMapViewer from "@/components/maps/GoogleMapViewer";
 import Header from "@/components/Header";
 import LocationSheet from "@/components/LocationSheet";
+import RoomTypeCard from "@/components/RoomTypeCard";
 import useLocationStore from "@/stores/locationStore";
 import { PROPERTIES_DATA } from "@/constants/propertyData";
 import { X } from "lucide-react";
+import { ImageIcon } from "lucide-react";
 
 export default function PropertyDetailPage() {
   const params = useParams();
@@ -64,6 +66,9 @@ export default function PropertyDetailPage() {
   const [isLocationSheetOpen, setIsLocationSheetOpen] = useState(false);
   const [isImageGalleryOpen, setIsImageGalleryOpen] = useState(false);
   const [galleryImageIndex, setGalleryImageIndex] = useState(0);
+  const [mainImageError, setMainImageError] = useState(false);
+  const [galleryImageError, setGalleryImageError] = useState(false);
+  const [thumbnailErrors, setThumbnailErrors] = useState({});
   const [sheetMapCenter, setSheetMapCenter] = useState({
     lat: 19.0176,
     lng: 72.8562,
@@ -73,355 +78,62 @@ export default function PropertyDetailPage() {
   const roomScrollRef = useRef(null);
   const [currentStatIndex, setCurrentStatIndex] = useState(0);
   const [currentMenuDayIndex, setCurrentMenuDayIndex] = useState(0);
+  const [property, setProperty] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock property data - in real app, fetch based on propertyId
-  const property = {
-    id: propertyId,
-    title: "Sky View PG & Hostel",
-    subtitle: "Sky View PG, Near IIT Gate, Powai, Mumbai, Maharashtra 400076",
-    propertyType: "PG / Hostel",
-    genderAllowed: "Gents / Ladies / Unisex",
-    description: {
-      short: "Premium PG accommodation near top colleges and IT parks with modern amenities",
-      long: "Sky View PG offers comfortable and affordable accommodation for students and working professionals. Located in the heart of Powai, we provide fully furnished rooms with all modern amenities including WiFi, housekeeping, and 24x7 security."
-    },
-    ownerName: "Rajesh Kumar",
-    managedByBrand: true,
-    brandName: "Sky Living",
-    yearBuilt: "2019",
-    lastRenovated: "2024",
-    price: "₹8,000 - ₹18,000/month",
-    discount: "10% off on 6-month advance",
-    configuration: "Single, Double, Triple Sharing",
-    status: "Available",
-    possession: "Immediate",
-    avgPrice: "₹12,000/month",
-    area: "80 - 150 sq.ft per room",
-    location: {
-      fullAddress: "Sky View PG, Plot No. 42, Near IIT Gate, Powai, Mumbai, Maharashtra 400076",
-      landmark: "Opposite Hiranandani Gardens",
-      pincode: "400076",
-      nearby: {
-        colleges: [
-          { name: "IIT Bombay", distance: "1.2 km" },
-          { name: "VJTI College", distance: "3.5 km" },
-          { name: "KJ Somaiya", distance: "2.8 km" }
-        ],
-        itParks: [
-          { name: "Powai IT Park", distance: "800 m" },
-          { name: "Mindspace Malad", distance: "4.2 km" }
-        ],
-        transport: [
-          { type: "Bus Stop", name: "IIT Main Gate", distance: "200 m" },
-          { type: "Metro", name: "Powai Metro Station", distance: "1.5 km" }
-        ],
-        hospitals: [
-          { name: "Hiranandani Hospital", distance: "2.1 km" },
-          { name: "Fortis Hospital", distance: "3.5 km" }
-        ]
-      }
-    },
-    roomTypes: [
-      {
-        id: 1,
-        name: "Single Occupancy AC",
-        category: "Single sharing",
-        ac: true,
-        attachedWashroom: true,
-        balcony: false,
-        roomSize: "120 sq.ft",
-        pricing: [
-          { type: "Monthly Rent", amount: 18000, currency: "INR", mandatory: true },
-          { type: "Security Deposit", amount: 18000, currency: "INR", mandatory: true, refundable: true },
-          { type: "Maintenance Charges", amount: 1000, currency: "INR", mandatory: true, frequency: "monthly" },
-          { type: "Food (Optional)", amount: 4500, currency: "INR", mandatory: false, frequency: "monthly" },
-          { type: "Electricity", amount: 8, currency: "INR", mandatory: true, unit: "per unit", note: "As per actual usage" },
-          { type: "Booking Amount", amount: 5000, currency: "INR", mandatory: true, note: "One-time token amount" }
-        ],
-        available: 2,
-        availability: {
-          totalBeds: 5,
-          availableBeds: 2,
-          soldOut: false,
-          nextAvailability: "Immediate",
-          seasonalPricing: false
-        },
-        refundPolicy: "100% refund if cancelled 15 days before move-in",
-        amenities: [
-          { icon: Bed, name: "Queen Size Bed", available: true },
-          { icon: Bed, name: "Premium Mattress", available: true },
-          { icon: Building2, name: "Large Cupboard", available: true },
-          { icon: Building2, name: "Study Table & Chair", available: true },
-          { icon: Building2, name: "AC", available: true },
-          { icon: Building2, name: "Attached Bathroom", available: true },
-          { icon: Wifi, name: "High Speed WiFi", available: true },
-          { icon: Building2, name: "Mini Refrigerator", available: true }
-        ]
-      },
-      {
-        id: 2,
-        name: "Double Sharing AC",
-        category: "Double sharing",
-        ac: true,
-        attachedWashroom: true,
-        balcony: true,
-        roomSize: "150 sq.ft",
-        pricing: [
-          { type: "Monthly Rent", amount: 12000, currency: "INR", mandatory: true },
-          { type: "Security Deposit", amount: 12000, currency: "INR", mandatory: true, refundable: true },
-          { type: "Maintenance Charges", amount: 800, currency: "INR", mandatory: true, frequency: "monthly" },
-          { type: "Food (Optional)", amount: 4500, currency: "INR", mandatory: false, frequency: "monthly" },
-          { type: "Electricity", amount: 8, currency: "INR", mandatory: true, unit: "per unit", note: "As per actual usage" },
-          { type: "Booking Amount", amount: 3000, currency: "INR", mandatory: true, note: "One-time token amount" }
-        ],
-        available: 5,
-        availability: {
-          totalBeds: 20,
-          availableBeds: 5,
-          soldOut: false,
-          nextAvailability: "Immediate",
-          seasonalPricing: false
-        },
-        refundPolicy: "100% refund if cancelled 15 days before move-in",
-        amenities: [
-          { icon: Bed, name: "2 Single Beds", available: true },
-          { icon: Bed, name: "Mattress Included", available: true },
-          { icon: Building2, name: "2 Cupboards", available: true },
-          { icon: Building2, name: "2 Study Tables", available: true },
-          { icon: Building2, name: "AC", available: true },
-          { icon: Building2, name: "Attached Bathroom", available: true },
-          { icon: Building2, name: "Balcony", available: true },
-          { icon: Wifi, name: "High Speed WiFi", available: true }
-        ]
-      },
-      {
-        id: 3,
-        name: "Triple Sharing Non-AC",
-        category: "Triple sharing",
-        ac: false,
-        attachedWashroom: false,
-        balcony: false,
-        roomSize: "140 sq.ft",
-        pricing: [
-          { type: "Monthly Rent", amount: 8000, currency: "INR", mandatory: true, note: "Food & electricity included" },
-          { type: "Security Deposit", amount: 8000, currency: "INR", mandatory: true, refundable: true },
-          { type: "Maintenance Charges", amount: 500, currency: "INR", mandatory: true, frequency: "monthly" },
-          { type: "Booking Amount", amount: 2000, currency: "INR", mandatory: true, note: "One-time token amount" }
-        ],
-        available: 8,
-        availability: {
-          totalBeds: 20,
-          availableBeds: 8,
-          soldOut: false,
-          nextAvailability: "Immediate",
-          seasonalPricing: false
-        },
-        refundPolicy: "100% refund if cancelled 15 days before move-in",
-        amenities: [
-          { icon: Bed, name: "3 Single Beds", available: true },
-          { icon: Bed, name: "Mattress Included", available: true },
-          { icon: Building2, name: "3 Cupboards", available: true },
-          { icon: Building2, name: "Study Tables", available: true },
-          { icon: Building2, name: "3 Fans", available: true },
-          { icon: Building2, name: "Common Bathroom", available: true },
-          { icon: Wifi, name: "High Speed WiFi", available: true },
-          { icon: Building2, name: "Shared Refrigerator", available: true }
-        ]
-      }
-    ],
-    images: [
-    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1586105251261-72a756497a11?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1599423300746-b62533397364?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1502005097973-6a7082348e28?w=800&h=600&fit=crop"
-],
-    commonAmenities: [
-      { icon: Wifi, name: "High Speed WiFi", available: true },
-      { icon: CarIcon, name: "2-Wheeler Parking", available: true },
-      { icon: CarIcon, name: "4-Wheeler Parking", available: false },
-      { icon: Shield, name: "CCTV Surveillance", available: true },
-      { icon: Shield, name: "Power Backup", available: true },
-      { icon: Building2, name: "Lift", available: true },
-      { icon: Users, name: "Housekeeping", available: true },
-      { icon: Waves, name: "Laundry Service", available: true },
-      { icon: Waves, name: "Water Purifier", available: true },
-      { icon: Shield, name: "Security Guard", available: true },
-      { icon: Shield, name: "Biometric Access", available: true },
-      { icon: Trees, name: "Rooftop Access", available: true }
-    ],
-    foodMess: {
-      available: true,
-      meals: ["Breakfast", "Lunch", "Dinner"],
-      foodType: "Veg & Non-veg",
-      cookingAllowed: false,
-      tiffinService: true,
-      roWater: true,
-      rating: 4.2,
-      timings: {
-        breakfast: "7:00 AM - 9:30 AM",
-        lunch: "12:30 PM - 2:30 PM",
-        dinner: "7:30 PM - 10:00 PM"
-      },
-      weeklyMenu: [
-        {
-          day: "Monday",
-          breakfast: { veg: ["Poha", "Tea/Coffee", "Banana"], nonVeg: null },
-          lunch: { veg: ["Dal Tadka", "Jeera Rice", "Roti", "Mixed Veg", "Salad"], nonVeg: ["Chicken Curry"] },
-          dinner: { veg: ["Paneer Butter Masala", "Roti", "Rice", "Dal", "Curd"], nonVeg: ["Chicken Biryani"] }
-        },
-        {
-          day: "Tuesday",
-          breakfast: { veg: ["Upma", "Tea/Coffee", "Boiled Eggs"], nonVeg: ["Omelette"] },
-          lunch: { veg: ["Rajma", "Rice", "Roti", "Aloo Gobi", "Papad"], nonVeg: ["Fish Fry"] },
-          dinner: { veg: ["Chole", "Bhature", "Rice", "Raita"], nonVeg: ["Mutton Curry"] }
-        },
-        {
-          day: "Wednesday",
-          breakfast: { veg: ["Idli Sambhar", "Tea/Coffee", "Chutney"], nonVeg: null },
-          lunch: { veg: ["Dal Fry", "Jeera Rice", "Roti", "Bhindi Masala", "Pickle"], nonVeg: ["Chicken Tikka"] },
-          dinner: { veg: ["Veg Pulao", "Raita", "Papad"], nonVeg: ["Egg Curry", "Rice"] }
-        },
-        {
-          day: "Thursday",
-          breakfast: { veg: ["Paratha", "Curd", "Tea/Coffee", "Pickle"], nonVeg: null },
-          lunch: { veg: ["Sambar", "Rice", "Roti", "Cabbage Curry", "Rasam"], nonVeg: ["Prawn Curry"] },
-          dinner: { veg: ["Kadai Paneer", "Naan", "Rice", "Dal"], nonVeg: ["Butter Chicken"] }
-        },
-        {
-          day: "Friday",
-          breakfast: { veg: ["Dosa", "Sambhar", "Chutney", "Tea/Coffee"], nonVeg: null },
-          lunch: { veg: ["Chana Dal", "Rice", "Roti", "Aloo Matar", "Salad"], nonVeg: ["Fish Curry"] },
-          dinner: { veg: ["Malai Kofta", "Roti", "Rice", "Dal Makhani"], nonVeg: ["Chicken 65", "Fried Rice"] }
-        },
-        {
-          day: "Saturday",
-          breakfast: { veg: ["Puri Bhaji", "Tea/Coffee", "Fruit"], nonVeg: null },
-          lunch: { veg: ["Dal Tadka", "Jeera Rice", "Roti", "Mix Veg", "Curd"], nonVeg: ["Mutton Korma"] },
-          dinner: { veg: ["Veg Biryani", "Raita", "Papad"], nonVeg: ["Chicken Biryani", "Raita"] }
-        },
-        {
-          day: "Sunday",
-          breakfast: { veg: ["Special Breakfast - Chole Bhature", "Tea/Coffee"], nonVeg: ["Chicken Sandwich"] },
-          lunch: { veg: ["Special Thali", "Sweet Dish"], nonVeg: ["Special Non-Veg Thali"] },
-          dinner: { veg: ["Paneer Tikka", "Naan", "Rice", "Dal", "Ice Cream"], nonVeg: ["Tandoori Chicken", "Special Non-Veg Meal"] }
+  // Fetch property data from API
+  useEffect(() => {
+    const fetchPropertyData = async () => {
+      if (!propertyId) return;
+      
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch(`http://localhost:3000/api/pg-hostel/${propertyId}`);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch property: ${response.statusText}`);
         }
-      ]
-    },
-    rules: [
-      { key: "Gate Closing Time", value: "11:00 PM" },
-      { key: "Visitor Policy", value: "Allowed till 9:00 PM with prior notice" },
-      { key: "Alcohol", value: "No" },
-      { key: "Smoking", value: "No" },
-      { key: "Non-veg", value: "Yes" },
-      { key: "Pets", value: "No" },
-      { key: "Noise Policy", value: "Silence after 10:30 PM" },
-      { key: "Minimum Stay", value: "3 months" },
-      { key: "Move Out Notice", value: "1 month" },
-      { key: "Other", value: "Please maintain cleanliness in common areas and respect fellow residents" }
-    ],
-    safety: {
-      fireSafetyCertificate: true,
-      policeVerification: true,
-      firstAidKit: true,
-      cctvCoverage: "95%",
-      emergencyExit: true,
-      nightGuard: true
-    },
-    highlights: [
-      "Premium PG accommodation in the heart of Powai",
-      "Walking distance to IIT Bombay and major IT parks",
-      "Fully furnished rooms with modern amenities and 24x7 WiFi",
-      "Hygienic food with veg & non-veg options",
-      "24x7 CCTV surveillance and biometric security",
-      "Professional housekeeping and laundry services",
-      "Flexible payment options with transparent pricing"
-    ],
-    propertyManager: {
-      name: "Sky Living",
-      logo: "/api/placeholder/60/60",
-      rating: 4.5,
-      properties: 12,
-      establishedYear: 2015
-    },
-    contact: {
-      name: "Sukruth Shetty",
-      role: "Property Manager", 
-      image: "/api/placeholder/60/60",
-      phone: "+91 98765 43210",
-      email: "sukruth@skyliving.com",
-      whatsapp: "+91 98765 43210"
-    },
-    coordinates: {
-      lat: 19.0176,
-       lng: 72.8562
-    }
-  };
-
-  // Quick Stats data
-  const quickStats = [
-    {
-      icon: Building2,
-      label: "Property Type",
-      value: property.propertyType
-    },
-    {
-      icon: Users,
-      label: "Gender Allowed",
-      value: property.genderAllowed
-    },
-    {
-      icon: Bed,
-      label: "Room Types",
-      value: property.configuration
-    },
-    {
-      icon: IndianRupee,
-      label: "Starting From",
-      value: property.avgPrice
-    },
-    {
-      icon: Wifi,
-      label: "Food Available",
-      value: property.foodMess.available ? "Yes" : "No"
-    },
-    {
-      icon: Shield,
-      label: "Security",
-      value: "24x7 CCTV"
-    },
-    {
-      icon: Calendar,
-      label: "Availability",
-      value: property.status
-    },
-    {
-      icon: CheckCircle,
-      label: "Available Beds",
-      value: `${property.roomTypes.reduce((sum, room) => sum + room.availability.availableBeds, 0)}/${property.roomTypes.reduce((sum, room) => sum + room.availability.totalBeds, 0)}`
-    }
-  ];
+        
+        const result = await response.json();
+        
+        if (!result.success || !result.data) {
+          throw new Error(result.message || 'Failed to fetch property data');
+        }
+        
+        // Use API data directly - user-centric approach
+        setProperty(result.data);
+      } catch (err) {
+        console.error('Error fetching property:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchPropertyData();
+  }, [propertyId]);
 
   // Auto-carousel effect for Quick Stats
   useEffect(() => {
+    if (!property) return;
+    
     const CAROUSEL_INTERVAL = 3000; // milliseconds between slide changes
-    const totalSlides = Math.ceil(quickStats.length / 4);
+    const quickStatsLength = 8; // Fixed length for stats
 
     const carouselInterval = setInterval(() => {
+      const totalSlides = Math.ceil(quickStatsLength / 4);
       setCurrentStatIndex((prev) => (prev + 1) % totalSlides);
     }, CAROUSEL_INTERVAL);
 
     return () => clearInterval(carouselInterval);
-  }, [quickStats.length]);
+  }, [property]);
 
   // Auto-carousel effect for Weekly Menu
   useEffect(() => {
-    if (!property.foodMess.weeklyMenu || property.foodMess.weeklyMenu.length === 0) return;
+    if (!property?.foodMess?.weeklyMenu || property.foodMess.weeklyMenu.length === 0) return;
     
     const MENU_CAROUSEL_INTERVAL = 5000; // 5 seconds per day
     
@@ -430,17 +142,117 @@ export default function PropertyDetailPage() {
     }, MENU_CAROUSEL_INTERVAL);
 
     return () => clearInterval(menuCarouselInterval);
-  }, [property.foodMess.weeklyMenu]);
+  }, [property?.foodMess?.weeklyMenu]);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+        <Header />
+        <div className="container mx-auto px-4 py-20">
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <p className="text-gray-600">Loading property details...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error || !property) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+        <Header />
+        <div className="container mx-auto px-4 py-20">
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <div className="text-red-500 text-6xl">⚠️</div>
+            <h2 className="text-2xl font-bold text-gray-800">Property Not Found</h2>
+            <p className="text-gray-600">{error || 'Unable to load property details'}</p>
+            <Button onClick={() => window.history.back()} className="mt-4">
+              Go Back
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Quick Stats - User-centric information
+  const getMinRent = () => {
+    if (!property.roomTypes || property.roomTypes.length === 0) return 'N/A';
+    const prices = property.roomTypes
+      .map(r => r.pricing?.find(p => p.type === 'Monthly Rent')?.amount)
+      .filter(p => p > 0);
+    return prices.length > 0 ? `₹${Math.min(...prices).toLocaleString('en-IN')}` : 'N/A';
+  };
+
+  const getTotalBeds = () => {
+    if (!property.roomTypes) return { available: 0, total: 0 };
+    return property.roomTypes.reduce((acc, room) => ({
+      available: acc.available + (room.availability?.availableBeds || 0),
+      total: acc.total + (room.availability?.totalBeds || 0)
+    }), { available: 0, total: 0 });
+  };
+
+  const quickStats = [
+    {
+      icon: Building2,
+      label: "Property Type",
+      value: "PG / Hostel"
+    },
+    {
+      icon: Users,
+      label: "For",
+      value: property.genderAllowed || 'All'
+    },
+    {
+      icon: Bed,
+      label: "Room Options",
+      value: property.roomTypes?.length ? `${property.roomTypes.length} Types` : 'Multiple'
+    },
+    {
+      icon: IndianRupee,
+      label: "Rent Starts From",
+      value: getMinRent()
+    },
+    {
+      icon: Wifi,
+      label: "Food",
+      value: property.foodMess?.available ? `${property.foodMess.foodType}` : "Self Cooking"
+    },
+    {
+      icon: Shield,
+      label: "Managed By",
+      value: property.isBrandManaged ? property.brandName : 'Owner'
+    },
+    {
+      icon: Calendar,
+      label: "Move-in",
+      value: property.publishStatus === 'PUBLISHED' ? 'Immediate' : 'Contact Owner'
+    },
+    {
+      icon: CheckCircle,
+      label: "Available Beds",
+      value: (() => { const beds = getTotalBeds(); return `${beds.available}/${beds.total}`; })()
+    }
+  ];
+
+  // Helper: Get images from API data
+  const propertyImages = property.mediaData?.filter(m => m.type === 'image' && m.url).map(m => m.url) || 
+    ['https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&h=600&fit=crop'];
 
   const nextImage = () => {
+    setMainImageError(false);
     setCurrentImageIndex((prev) => 
-      prev === property.images.length - 1 ? 0 : prev + 1
+      prev === propertyImages.length - 1 ? 0 : prev + 1
     );
   };
 
   const prevImage = () => {
+    setMainImageError(false);
     setCurrentImageIndex((prev) => 
-      prev === 0 ? property.images.length - 1 : prev - 1
+      prev === 0 ? propertyImages.length - 1 : prev - 1
     );
   };
 
@@ -450,19 +262,24 @@ export default function PropertyDetailPage() {
   };
 
   const nextGalleryImage = () => {
+    setGalleryImageError(false);
     setGalleryImageIndex((prev) => 
-      prev === property.images.length - 1 ? 0 : prev + 1
+      prev === propertyImages.length - 1 ? 0 : prev + 1
     );
   };
 
   const prevGalleryImage = () => {
+    setGalleryImageError(false);
     setGalleryImageIndex((prev) => 
-      prev === 0 ? property.images.length - 1 : prev - 1
+      prev === 0 ? propertyImages.length - 1 : prev - 1
     );
   };
 
   // Handle opening location sheet
   const handleOpenLocationSheet = () => {
+    const lat = parseFloat(property.lat) || 19.0176;
+    const lng = parseFloat(property.lng) || 72.8562;
+    
     if (searchResult && searchResult.coordinates) {
       setSheetMapCenter({
         lat: searchResult.coordinates.lat,
@@ -474,15 +291,8 @@ export default function PropertyDetailPage() {
         draggable: true,
       });
     } else {
-      setSheetMapCenter({
-        lat: property.coordinates.lat,
-        lng: property.coordinates.lng,
-      });
-      setSheetMapMarker({
-        lat: property.coordinates.lat,
-        lng: property.coordinates.lng,
-        draggable: true,
-      });
+      setSheetMapCenter({ lat, lng });
+      setSheetMapMarker({ lat, lng, draggable: true });
     }
     setIsLocationSheetOpen(true);
   };
@@ -529,20 +339,17 @@ export default function PropertyDetailPage() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#1a0f1f] text-white relative overflow-hidden">
-      {/* Sunset Ambient Glow Effects - matching home page */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-20 left-1/2 w-[700px] h-[700px] bg-gradient-radial from-orange-500/20 via-orange-600/10 to-transparent rounded-full blur-[120px] -translate-x-1/2 animate-pulse"></div>
-        <div
-          className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-gradient-radial from-purple-500/15 via-purple-600/5 to-transparent rounded-full blur-[100px] animate-pulse"
-          style={{ animationDelay: '1s' }}
-        ></div>
-        <div
-          className="absolute bottom-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-radial from-amber-500/15 via-amber-600/5 to-transparent rounded-full blur-[100px] animate-pulse"
-          style={{ animationDelay: '2s' }}
-        ></div>
-        <div className="absolute inset-x-0 top-1/4 h-[300px] bg-gradient-to-b from-orange-500/5 via-rose-500/5 to-transparent"></div>
+    <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-white relative overflow-hidden">
+      {/* Premium gradient background with decorative elements */}
+      <div className="absolute inset-0 bg-linear-to-br from-orange-500/10 via-transparent to-purple-500/5"></div>
+      <div className="absolute inset-0 opacity-20">
+        <div className="absolute inset-0 animate-spin-slow">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-conic from-orange-500/20 via-transparent to-orange-500/20 rounded-full blur-3xl"></div>
+        </div>
       </div>
+      <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-linear-to-bl from-orange-500/20 to-transparent blur-3xl"></div>
+      <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-linear-to-tr from-purple-600/10 to-transparent blur-3xl"></div>
+      <div className="absolute top-1/3 right-1/3 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl animate-pulse"></div>
 
       <div className="relative z-10">
         {/* Header */}
@@ -572,10 +379,10 @@ export default function PropertyDetailPage() {
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <SheetTitle className="text-white text-lg sm:text-xl font-bold text-left">
-                      {property.title}
+                      {property.propertyName}
                     </SheetTitle>
                     <p className="text-xs sm:text-sm text-gray-400 mt-1 text-left">
-                      {galleryImageIndex + 1} / {property.images.length}
+                      {galleryImageIndex + 1} / {propertyImages.length}
                     </p>
                   </div>
                   <Button
@@ -593,13 +400,21 @@ export default function PropertyDetailPage() {
               <div className="flex-1 relative">
                 <div className="flex items-center justify-center h-full px-4 sm:px-16 py-20">
                   <div className="relative w-full h-full max-w-7xl">
-                    <Image
-                      src={property.images[galleryImageIndex]}
-                      alt={`${property.title} - Image ${galleryImageIndex + 1}`}
-                      fill
-                      className="object-contain"
-                      priority
-                    />
+                    {!galleryImageError ? (
+                      <Image
+                        src={propertyImages[galleryImageIndex]}
+                        alt={`${property.propertyName} - Image ${galleryImageIndex + 1}`}
+                        fill
+                        className="object-contain"
+                        priority
+                        onError={() => setGalleryImageError(true)}
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-800/80 to-slate-900/80">
+                        <ImageIcon className="w-20 h-20 text-slate-500 mb-4" />
+                        <p className="text-slate-400 text-lg font-medium">Failed to load image</p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -625,7 +440,7 @@ export default function PropertyDetailPage() {
               {/* Thumbnail Strip Footer */}
               <div className="p-4 sm:p-6 bg-linear-to-t from-black/80 to-transparent">
                 <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-                  {property.images.map((image, index) => (
+                  {propertyImages.map((image, index) => (
                     <button
                       key={index}
                       className={`relative shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden transition-all duration-300 ${
@@ -633,14 +448,24 @@ export default function PropertyDetailPage() {
                           ? 'ring-2 ring-orange-500 scale-110 shadow-lg shadow-orange-500/50'
                           : 'ring-1 ring-white/20 hover:ring-white/50 opacity-60 hover:opacity-100'
                       }`}
-                      onClick={() => setGalleryImageIndex(index)}
+                      onClick={() => {
+                        setGalleryImageIndex(index);
+                        setGalleryImageError(false);
+                      }}
                     >
-                      <Image
-                        src={image}
-                        alt={`Thumbnail ${index + 1}`}
-                        fill
-                        className="object-cover"
-                      />
+                      {!thumbnailErrors[index] ? (
+                        <Image
+                          src={image}
+                          alt={`Thumbnail ${index + 1}`}
+                          fill
+                          className="object-cover"
+                          onError={() => setThumbnailErrors(prev => ({ ...prev, [index]: true }))}
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-slate-700/80 to-slate-800/80 flex items-center justify-center">
+                          <ImageIcon className="w-6 h-6 text-slate-500" />
+                        </div>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -650,7 +475,7 @@ export default function PropertyDetailPage() {
         </Sheet>
         
         {/* Property Navigation Header */}
-        <header className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 bg-[#2d1b1f]/80 backdrop-blur-xl">
+        <header className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/10 bg-slate-900/80 backdrop-blur-xl">
           <div className="flex items-center gap-2 sm:gap-4">
             <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 hover:text-orange-400 transition-all duration-300 group">
               <ChevronLeft className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
@@ -679,22 +504,32 @@ export default function PropertyDetailPage() {
           <div className="grid grid-cols-4 grid-rows-2 gap-1 sm:gap-2 h-64 sm:h-96 lg:h-[500px] rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl shadow-orange-500/10">
             {/* Main large image */}
             <div className="col-span-2 row-span-2 relative group cursor-pointer" onClick={() => setCurrentImageIndex(0)}>
-              <Image 
-                src={property.images[currentImageIndex]} 
-                alt={property.title}
-                fill
-                className="object-cover transition-all duration-700 group-hover:scale-110"
-                priority
-              />
-              <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent group-hover:from-black/60 transition-all duration-500"></div>
+              {!mainImageError ? (
+                <>
+                  <Image 
+                    src={propertyImages[currentImageIndex]} 
+                    alt={property.propertyName}
+                    fill
+                    className="object-cover transition-all duration-700 group-hover:scale-110"
+                    priority
+                    onError={() => setMainImageError(true)}
+                  />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent group-hover:from-black/60 transition-all duration-500"></div>
+                </>
+              ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-700/80 to-slate-800/80 flex flex-col items-center justify-center">
+                  <ImageIcon className="w-16 h-16 text-slate-500 mb-3" />
+                  <p className="text-slate-400 text-base font-medium">Failed to load image</p>
+                </div>
+              )}
               {/* Main image indicator */}
               <div className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-black/70 backdrop-blur-sm text-white px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-medium border border-white/10">
-                {currentImageIndex + 1} / {property.images.length}
+                {currentImageIndex + 1} / {propertyImages.length}
               </div>
             </div>
             
             {/* Smaller images */}
-            {property.images.slice(1, 5).map((image, index) => {
+            {propertyImages.slice(1, 5).map((image, index) => {
               const imageIndex = index + 1;
               const isActive = currentImageIndex === imageIndex;
               return (
@@ -703,17 +538,29 @@ export default function PropertyDetailPage() {
                   className={`relative group cursor-pointer overflow-hidden rounded-md transition-all duration-300 ${
                     isActive ? 'ring-2 ring-orange-500 shadow-lg shadow-orange-500/50' : 'hover:ring-2 hover:ring-white/30'
                   }`}
-                  onClick={() => setCurrentImageIndex(imageIndex)}
+                  onClick={() => {
+                    setCurrentImageIndex(imageIndex);
+                    setMainImageError(false);
+                  }}
                 >
-                  <Image 
-                    src={image} 
-                    alt={`${property.title} - Image ${imageIndex + 1}`}
-                    fill
-                    className="object-cover transition-all duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent group-hover:from-black/40 transition-all duration-300"></div>
+                  {!thumbnailErrors[imageIndex] ? (
+                    <>
+                      <Image 
+                        src={image} 
+                        alt={`${property.propertyName} - Image ${imageIndex + 1}`}
+                        fill
+                        className="object-cover transition-all duration-500 group-hover:scale-110"
+                        onError={() => setThumbnailErrors(prev => ({ ...prev, [imageIndex]: true }))}
+                      />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent group-hover:from-black/40 transition-all duration-300"></div>
+                    </>
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-700/80 to-slate-800/80 flex items-center justify-center">
+                      <ImageIcon className="w-8 h-8 text-slate-500" />
+                    </div>
+                  )}
                   {/* Show "View all photos" on last image if there are more images */}
-                  {index === 3 && property.images.length > 5 && (
+                  {index === 3 && propertyImages.length > 5 && (
                     <div 
                       className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center group-hover:bg-black/80 transition-all duration-300 cursor-pointer"
                       onClick={(e) => {
@@ -723,7 +570,7 @@ export default function PropertyDetailPage() {
                     >
                       <div className="text-white text-center">
                         <Maximize2 className="w-4 h-4 sm:w-6 sm:h-6 mx-auto mb-1" />
-                        <p className="text-xs sm:text-sm font-medium">+{property.images.length - 5} more</p>
+                        <p className="text-xs sm:text-sm font-medium">+{propertyImages.length - 5} more</p>
                       </div>
                     </div>
                   )}
@@ -752,7 +599,7 @@ export default function PropertyDetailPage() {
 
           {/* Image indicators */}
           <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2 z-10 bg-black/40 backdrop-blur-md px-3 py-2 rounded-full border border-white/10">
-            {property.images.map((_, index) => (
+            {propertyImages.map((_, index) => (
               <button
                 key={index}
                 className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
@@ -802,23 +649,43 @@ export default function PropertyDetailPage() {
 
              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 lg:gap-6 text-white mb-8">
               <div className="flex-1">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3 bg-linear-to-r from-white to-gray-300 bg-clip-text text-white">{property.title}</h1>
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-linear-to-r from-white to-gray-300 bg-clip-text text-white">{property.propertyName}</h1>
+                  {property.verificationStatus === 'VERIFIED' && (
+                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                      <CheckCircle className="w-3 h-3 mr-1" />
+                      Verified
+                    </Badge>
+                  )}
+                </div>
                 <div className="flex items-start gap-2 mb-3">
                   <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 mt-0.5 shrink-0" />
-                  <p className="text-gray-300 text-xs sm:text-sm lg:text-base leading-relaxed">{property.subtitle}</p>
+                  <p className="text-gray-300 text-xs sm:text-sm lg:text-base leading-relaxed">{property.addressText}</p>
                 </div>
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <span className="text-xl sm:text-2xl  font-bold bg-linear-to-r from-orange-500 to-orange-400 bg-clip-text text-white">{property.price}</span>
-      
+                <div className="flex items-center gap-4 flex-wrap">
+                  <span className="text-xl sm:text-2xl font-bold bg-linear-to-r from-orange-500 to-orange-400 bg-clip-text text-white">
+                    {getMinRent()}/month
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                      {property.genderAllowed}
+                    </Badge>
+                    {property.isBrandManaged && (
+                      <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+                        {property.brandName}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full lg:w-auto">
                 <Button className="bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 border-none font-semibold text-sm sm:text-base h-10 sm:h-11">
-                  Book Property
+                  <Phone className="w-4 h-4 mr-2" />
+                  Contact Owner
                 </Button>
                 <Button className="bg-white/5 backdrop-blur-xl hover:bg-white/10 text-white border border-white/20 hover:border-orange-500/50 transition-all duration-300 hover:scale-105 shadow-lg font-medium text-sm sm:text-base h-10 sm:h-11">
-                  <Play className="w-4 h-4 mr-2" />
-                  Take a Live Tour
+                  <MapPin className="w-4 h-4 mr-2" />
+                  View on Map
                 </Button>
               </div>
             </div>
@@ -826,45 +693,7 @@ export default function PropertyDetailPage() {
           <div className="grid grid-cols-1 lg:grid-cols-7 gap-6 sm:gap-8">
             {/* Left Content */}
             <div className="lg:col-span-5 space-y-6 sm:space-y-8">
-              {/* Quick Stats Carousel */}
-              <div className="relative">
-                <div className="overflow-hidden">
-                  <div 
-                    ref={scrollRef}
-                    className="flex gap-3 sm:gap-4 transition-transform duration-700 ease-in-out"
-                    style={{ transform: `translateX(-${currentStatIndex * 100}%)` }}
-                  >
-                    {Array.from({ length: Math.ceil(quickStats.length / 4) }).map((_, slideIndex) => (
-                      <div key={slideIndex} className="min-w-full grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                        {quickStats.slice(slideIndex * 4, (slideIndex + 1) * 4).map((stat, index) => (
-                          <Card key={index} className="bg-linear-to-br from-slate-800/80 to-slate-900/80 border-white/10 backdrop-blur-xl hover:border-orange-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/20 hover:scale-105 group">
-                            <CardContent className="p-3 sm:p-4 text-center">
-                              <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500 mx-auto mb-2 group-hover:scale-110 transition-transform duration-300" />
-                              <p className="text-xs sm:text-sm text-gray-400 mb-1">{stat.label}</p>
-                              <p className="font-semibold text-white text-xs sm:text-sm">{stat.value}</p>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Carousel Indicators */}
-                <div className="flex justify-center gap-2 mt-4">
-                  {Array.from({ length: Math.ceil(quickStats.length / 4) }).map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentStatIndex(index)}
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        index === currentStatIndex 
-                          ? 'bg-orange-500 w-8 shadow-lg shadow-orange-500/50' 
-                          : 'bg-white/30 hover:bg-white/50 w-2'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
+         
 
               {/* Overview Section */}
               <div className="space-y-6 sm:space-y-8">
@@ -874,41 +703,15 @@ export default function PropertyDetailPage() {
                   </h3>
                   <div className="space-y-4 sm:space-y-6">
                     <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
-                      {property.description.long}
+                      {property.description || 'Welcome to our premium PG/Hostel accommodation. We provide comfortable and affordable living spaces with modern amenities.'}
                     </p>
                     
-           
-                    <div className="grid sm:grid-cols-3 gap-3 sm:gap-4 p-4 sm:p-5 bg-linear-to-br from-slate-700/50 to-slate-800/50 rounded-xl border border-white/10">
-                      <div className="text-center sm:text-left">
-                        <p className="text-xs sm:text-sm text-gray-400 mb-1">Property Type</p>
-                        <p className="font-semibold text-white text-sm sm:text-base">{property.propertyType}</p>
-                      </div>
-                      <div className="text-center sm:text-left">
-                        <p className="text-xs sm:text-sm text-gray-400 mb-1">Gender Allowed</p>
-                        <p className="font-semibold text-white text-sm sm:text-base">{property.genderAllowed}</p>
-                      </div>
-                      <div className="text-center sm:text-left">
-                        <p className="text-xs sm:text-sm text-gray-400 mb-1">Year Built / Renovated</p>
-                        <p className="font-semibold text-white text-sm sm:text-base">{property.yearBuilt} / {property.lastRenovated}</p>
-                      </div>
-                      <div className="text-center sm:text-left">
-                        <p className="text-xs sm:text-sm text-gray-400 mb-1">Managed By</p>
-                        <p className="font-semibold text-white text-sm sm:text-base">{property.managedByBrand ? property.brandName : property.ownerName}</p>
-                      </div>
-                      <div className="text-center sm:text-left">
-                        <p className="text-xs sm:text-sm text-gray-400 mb-1">Available Beds</p>
-                        <p className="font-semibold text-white text-sm sm:text-base">{property.roomTypes.reduce((sum, room) => sum + room.availability.availableBeds, 0)} / {property.roomTypes.reduce((sum, room) => sum + room.availability.totalBeds, 0)}</p>
-                      </div>
-                      <div className="text-center sm:text-left">
-                        <p className="text-xs sm:text-sm text-gray-400 mb-1">Availability</p>
-                        <p className="font-semibold text-white text-sm sm:text-base">Immediate</p>
-                      </div>
-                    </div>
+        
                   </div>
                 </div>
 
                 {/* Room Types & Pricing Section */}
-                <div className="bg-gradient-to-br from-[#3d1f2f]/50 to-[#2d1b1f]/50 backdrop-blur-xl">
+                <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
                     <h3 className="text-orange-500 text-lg sm:text-2xl font-bold flex items-center gap-2">
                       <Bed className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -946,141 +749,67 @@ export default function PropertyDetailPage() {
                   <div className="relative">
                     <div ref={roomScrollRef} className="flex gap-4 sm:gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide">
                       {property.roomTypes.map((room) => (
-                        <Card key={room.id} className="shrink-0 w-[280px] sm:w-[320px] md:w-[350px] lg:w-[380px] bg-gradient-to-br from-[#3d1f2f]/60 to-[#2d1b1f]/60 border-white/10 backdrop-blur-xl hover:border-orange-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/20 group overflow-hidden snap-start">
-                          <CardContent className="p-4 sm:p-5">
-                          <div className="mb-4">
-                            <h4 className="font-bold text-white text-base sm:text-lg mb-2">{room.name}</h4>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <Badge className="bg-orange-500/20 text-orange-500 border-orange-500/30">{room.category}</Badge>
-                              {room.ac && <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">AC</Badge>}
-                              {room.attachedWashroom && <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">Attached Bathroom</Badge>}
-                              {room.balcony && <Badge className="bg-green-500/20 text-green-400 border-green-500/30">Balcony</Badge>}
-                            </div>
-                          </div>
-                          
-                          <div className="space-y-2 mb-4">
-                            <div className="flex justify-between items-center">
-                              <span className="text-gray-400 text-xs sm:text-sm">Room Size</span>
-                              <span className="text-white font-semibold text-xs sm:text-sm">{room.roomSize}</span>
-                            </div>
-                            <Separator className="bg-white/10" />
-                            
-                            {/* Dynamic Pricing List */}
-                            {room.pricing && room.pricing.map((price, idx) => {
-                              const isMainPrice = price.type === "Monthly Rent";
-                              return (
-                                <div key={idx} className="space-y-1">
-                                  <div className="flex justify-between items-start">
-                                    <div className="flex-1">
-                                      <span className={`text-xs sm:text-sm ${isMainPrice ? 'text-gray-300 font-medium' : 'text-gray-400'}`}>
-                                        {price.type}
-                                        {!price.mandatory && <span className="text-xs text-gray-500 ml-1">(Optional)</span>}
-                                      </span>
-                                      {price.note && (
-                                        <p className="text-xs text-gray-500 mt-0.5">{price.note}</p>
-                                      )}
-                                    </div>
-                                    <span className={`font-semibold text-xs sm:text-sm whitespace-nowrap ml-2 ${isMainPrice ? 'text-orange-500 font-bold text-sm sm:text-base' : 'text-white'}`}>
-                                      ₹{price.amount.toLocaleString()}
-                                      {price.unit && <span className="text-xs text-gray-400 ml-1">{price.unit}</span>}
-                                      {price.refundable && <span className="text-xs text-green-400 ml-1">(Refundable)</span>}
-                                    </span>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                          
-                          {/* Room Amenities */}
-                          {room.amenities && room.amenities.length > 0 && (
-                            <div className="mb-4">
-                              <h5 className="text-white font-semibold text-xs mb-2">Room Amenities</h5>
-                              <div className="grid grid-cols-2 gap-2">
-                                {room.amenities.map((amenity, idx) => (
-                                  <div key={idx} className="flex items-center gap-1.5 text-xs">
-                                    <CheckCircle className="w-3 h-3 text-green-500 shrink-0" />
-                                    <span className="text-gray-300 truncate">{amenity.name}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                          
-                          <div className="space-y-2">
-                            {/* Availability Status */}
-                            <div className="p-2 bg-green-500/10 border border-green-500/30 rounded-lg">
-                              <div className="flex items-center justify-between text-xs sm:text-sm mb-1">
-                                <span className="text-green-400 font-medium">Available Beds</span>
-                                <span className="text-green-400 font-bold">{room.availability.availableBeds}/{room.availability.totalBeds}</span>
-                              </div>
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-gray-400">Next Available</span>
-                                <span className="text-white font-semibold">{room.availability.nextAvailability}</span>
-                              </div>
-                            </div>
-                            <Button className="w-full bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg group-hover:shadow-orange-500/30 transition-all duration-300 text-xs sm:text-sm h-9">
-                              Book Now - ₹{room.pricing.find(p => p.type === "Booking Amount")?.amount.toLocaleString() || "0"} Token
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
+                        <RoomTypeCard key={room.id} room={room} />
                       ))}
                     </div>
                   </div>
                 </div>
 
-                          {/* Why choose this property? Section */}
-                <div className="bg-gradient-to-br from-[#3d1f2f]/50 to-[#2d1b1f]/50 backdrop-blur-xl">
-                  <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-                    Why choose this property?
-                  </h3>
-                   <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
-                        {property.highlights.map((highlight, index) => (
-                          <div key={index} className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300 group">
-                            <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform" />
-                            <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">{highlight}</p>
-                          </div>
-                        ))}
-                      </div>
-                </div>
+ 
 
                 {/* Common Amenities Section */}
-                <div className="bg-gradient-to-br from-[#3d1f2f]/50 to-[#2d1b1f]/50 backdrop-blur-xl">
+                <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
                   <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
                     <Building2 className="w-5 h-5 sm:w-6 sm:h-6" />
-                    Common Amenities
+                    Amenities & Facilities
                   </h3>
-                  <p className="text-gray-400 text-xs sm:text-sm mb-4">Shared facilities available for all residents</p>
+                  <p className="text-gray-400 text-xs sm:text-sm mb-4">What you'll get at this property</p>
                   
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                    {property.commonAmenities.map((amenity, index) => (
-                      <div key={index} className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg transition-all duration-300 group ${
-                        amenity.available ? 'bg-white/5 hover:bg-white/10' : 'bg-white/5 opacity-50'
-                      }`}>
-                        <amenity.icon className={`w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform ${
-                          amenity.available ? 'text-orange-500' : 'text-gray-500'
-                        }`} />
-                        <span className={`text-xs sm:text-sm font-medium ${
-                          amenity.available ? 'text-white' : 'text-gray-500'
-                        }`}>{amenity.name}</span>
-                        {amenity.available && (
-                          <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
-                        )}
-                      </div>
-                    ))}
+                    {property.commonAmenities?.map((amenity, index) => {
+                      // Map icon names from API to Lucide icons
+                      const getIcon = (iconName) => {
+                        const iconMap = {
+                          'CarIcon': CarIcon,
+                          'Shield': Shield,
+                          'Building2': Building2,
+                          'Users': Users,
+                          'Wifi': Wifi,
+                          'Waves': Waves,
+                          'Trees': Trees,
+                        };
+                        return iconMap[iconName] || Building2;
+                      };
+                      const IconComponent = getIcon(amenity.icon);
+                      
+                      return (
+                        <div key={index} className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg transition-all duration-300 group ${
+                          amenity.available !== false ? 'bg-white/5 hover:bg-white/10' : 'bg-white/5 opacity-50'
+                        }`}>
+                          <IconComponent className={`w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform ${
+                            amenity.available !== false ? 'text-orange-500' : 'text-gray-500'
+                          }`} />
+                          <span className={`text-xs sm:text-sm font-medium ${
+                            amenity.available !== false ? 'text-white' : 'text-gray-500'
+                          }`}>{amenity.name}</span>
+                          {amenity.available !== false && (
+                            <CheckCircle className="w-4 h-4 text-green-500 ml-auto" />
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
                 {/* Food & Mess Section */}
-                {property.foodMess.available && (
-                  <div className="bg-gradient-to-br from-[#3d1f2f]/50 to-[#2d1b1f]/50 backdrop-blur-xl">
+                {property.foodMess?.available && (
+                  <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
                     <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
                       <Users className="w-5 h-5 sm:w-6 sm:h-6" />
                       Food & Mess
                     </h3>
                     <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
-                      <Card className="bg-gradient-to-br from-[#3d1f2f]/60 to-[#2d1b1f]/60 border-white/10 backdrop-blur-xl">
+                      <Card className="bg-linear-to-br from-slate-700/60 to-slate-800/60 border-white/10 backdrop-blur-xl">
                         <CardContent className="p-4 sm:p-5">
                           <h4 className="font-semibold text-white mb-4 text-sm sm:text-base">Meal Details</h4>
                           <div className="space-y-3">
@@ -1117,21 +846,21 @@ export default function PropertyDetailPage() {
                         </CardContent>
                       </Card>
                       
-                      <Card className="bg-gradient-to-br from-[#3d1f2f]/60 to-[#2d1b1f]/60 border-white/10 backdrop-blur-xl">
+                      <Card className="bg-linear-to-br from-slate-700/60 to-slate-800/60 border-white/10 backdrop-blur-xl">
                         <CardContent className="p-4 sm:p-5">
                           <h4 className="font-semibold text-white mb-4 text-sm sm:text-base">Meal Timings</h4>
                           <div className="space-y-3">
                             <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
                               <span className="text-gray-400 text-xs sm:text-sm">Breakfast</span>
-                              <span className="text-white font-semibold text-xs sm:text-sm">{property.foodMess.timings.breakfast}</span>
+                              <span className="text-white font-semibold text-xs sm:text-sm">{property.foodMess.weeklyMenu?.[0]?.breakfastTiming || 'N/A'}</span>
                             </div>
                             <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
                               <span className="text-gray-400 text-xs sm:text-sm">Lunch</span>
-                              <span className="text-white font-semibold text-xs sm:text-sm">{property.foodMess.timings.lunch}</span>
+                              <span className="text-white font-semibold text-xs sm:text-sm">{property.foodMess.weeklyMenu?.[0]?.lunchTiming || 'N/A'}</span>
                             </div>
                             <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
                               <span className="text-gray-400 text-xs sm:text-sm">Dinner</span>
-                              <span className="text-white font-semibold text-xs sm:text-sm">{property.foodMess.timings.dinner}</span>
+                              <span className="text-white font-semibold text-xs sm:text-sm">{property.foodMess.weeklyMenu?.[0]?.dinnerTiming || 'N/A'}</span>
                             </div>
                           </div>
                         </CardContent>
@@ -1171,7 +900,7 @@ export default function PropertyDetailPage() {
                           >
                             {property.foodMess.weeklyMenu.map((dayMenu, idx) => (
                               <div key={idx} className="min-w-full">
-                                <Card className="bg-gradient-to-br from-[#3d1f2f]/60 to-[#2d1b1f]/60 backdrop-blur-xl border-2 border-orange-500/30 shadow-xl shadow-orange-500/10">
+                                <Card className="bg-linear-to-br from-slate-700/60 to-slate-800/60 backdrop-blur-xl border-2 border-orange-500/30 shadow-xl shadow-orange-500/10">
                                   <CardContent className="p-4 sm:p-6">
                                     <div className="flex items-center justify-between mb-4">
                                       <h5 className="text-orange-500 font-bold text-base sm:text-xl flex items-center gap-2">
@@ -1199,7 +928,7 @@ export default function PropertyDetailPage() {
                                               Veg Options
                                             </p>
                                             <ul className="text-xs text-gray-300 space-y-1">
-                                              {dayMenu.breakfast.veg.map((item, i) => (
+                                              {dayMenu.breakfast?.veg?.map((item, i) => (
                                                 <li key={i} className="flex items-start gap-1.5">
                                                   <span className="text-orange-500 mt-0.5">•</span>
                                                   <span>{item}</span>
@@ -1207,14 +936,14 @@ export default function PropertyDetailPage() {
                                               ))}
                                             </ul>
                                           </div>
-                                          {dayMenu.breakfast.nonVeg && (
+                                          {dayMenu.breakfast?.nonVeg && (
                                             <div className="bg-red-500/10 p-2 rounded border border-red-500/20">
                                               <p className="text-xs text-red-400 font-medium mb-1.5 flex items-center gap-1">
                                                 <CheckCircle className="w-3 h-3" />
                                                 Non-Veg Options
                                               </p>
                                               <ul className="text-xs text-gray-300 space-y-1">
-                                                {dayMenu.breakfast.nonVeg.map((item, i) => (
+                                                {dayMenu.breakfast?.nonVeg?.map((item, i) => (
                                                   <li key={i} className="flex items-start gap-1.5">
                                                     <span className="text-orange-500 mt-0.5">•</span>
                                                     <span>{item}</span>
@@ -1241,7 +970,7 @@ export default function PropertyDetailPage() {
                                               Veg Options
                                             </p>
                                             <ul className="text-xs text-gray-300 space-y-1">
-                                              {dayMenu.lunch.veg.map((item, i) => (
+                                              {dayMenu.lunch?.veg?.map((item, i) => (
                                                 <li key={i} className="flex items-start gap-1.5">
                                                   <span className="text-orange-500 mt-0.5">•</span>
                                                   <span>{item}</span>
@@ -1249,14 +978,14 @@ export default function PropertyDetailPage() {
                                               ))}
                                             </ul>
                                           </div>
-                                          {dayMenu.lunch.nonVeg && (
+                                          {dayMenu.lunch?.nonVeg && (
                                             <div className="bg-red-500/10 p-2 rounded border border-red-500/20">
                                               <p className="text-xs text-red-400 font-medium mb-1.5 flex items-center gap-1">
                                                 <CheckCircle className="w-3 h-3" />
                                                 Non-Veg Options
                                               </p>
                                               <ul className="text-xs text-gray-300 space-y-1">
-                                                {dayMenu.lunch.nonVeg.map((item, i) => (
+                                                {dayMenu.lunch?.nonVeg?.map((item, i) => (
                                                   <li key={i} className="flex items-start gap-1.5">
                                                     <span className="text-orange-500 mt-0.5">•</span>
                                                     <span>{item}</span>
@@ -1283,7 +1012,7 @@ export default function PropertyDetailPage() {
                                               Veg Options
                                             </p>
                                             <ul className="text-xs text-gray-300 space-y-1">
-                                              {dayMenu.dinner.veg.map((item, i) => (
+                                              {dayMenu.dinner?.veg?.map((item, i) => (
                                                 <li key={i} className="flex items-start gap-1.5">
                                                   <span className="text-orange-500 mt-0.5">•</span>
                                                   <span>{item}</span>
@@ -1291,14 +1020,14 @@ export default function PropertyDetailPage() {
                                               ))}
                                             </ul>
                                           </div>
-                                          {dayMenu.dinner.nonVeg && (
+                                          {dayMenu.dinner?.nonVeg && (
                                             <div className="bg-red-500/10 p-2 rounded border border-red-500/20">
                                               <p className="text-xs text-red-400 font-medium mb-1.5 flex items-center gap-1">
                                                 <CheckCircle className="w-3 h-3" />
                                                 Non-Veg Options
                                               </p>
                                               <ul className="text-xs text-gray-300 space-y-1">
-                                                {dayMenu.dinner.nonVeg.map((item, i) => (
+                                                {dayMenu.dinner?.nonVeg?.map((item, i) => (
                                                   <li key={i} className="flex items-start gap-1.5">
                                                     <span className="text-orange-500 mt-0.5">•</span>
                                                     <span>{item}</span>
@@ -1337,7 +1066,7 @@ export default function PropertyDetailPage() {
                 )}
 
                 {/* Rules & Policies Section */}
-                <div className="bg-gradient-to-br from-[#3d1f2f]/50 to-[#2d1b1f]/50 backdrop-blur-xl">
+                <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
                   <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
                     <Shield className="w-5 h-5 sm:w-6 sm:h-6" />
                     Rules & Policies
@@ -1373,44 +1102,48 @@ export default function PropertyDetailPage() {
                 </div>
 
                 {/* Safety & Security Section */}
-                <div className="bg-gradient-to-br from-[#3d1f2f]/50 to-[#2d1b1f]/50 backdrop-blur-xl">
+                <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
                   <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
                     <Shield className="w-5 h-5 sm:w-6 sm:h-6" />
                     Safety & Security
                   </h3>
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                    {property.commonAmenities?.some(a => a.name === 'Security Guard' && a.available) && (
+                      <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                        <span className="text-white text-xs sm:text-sm">Security Guard</span>
+                      </div>
+                    )}
+                    {property.commonAmenities?.some(a => a.name === 'Biometric Access' && a.available) && (
+                      <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                        <span className="text-white text-xs sm:text-sm">Biometric Access</span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
-                      <CheckCircle className={`w-5 h-5 ${property.safety.fireSafetyCertificate ? 'text-green-500' : 'text-gray-500'}`} />
+                      <CheckCircle className="w-5 h-5 text-gray-500" />
                       <span className="text-white text-xs sm:text-sm">Fire Safety Certificate</span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
-                      <CheckCircle className={`w-5 h-5 ${property.safety.policeVerification ? 'text-green-500' : 'text-gray-500'}`} />
-                      <span className="text-white text-xs sm:text-sm">Police Verification</span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
-                      <CheckCircle className={`w-5 h-5 ${property.safety.firstAidKit ? 'text-green-500' : 'text-gray-500'}`} />
-                      <span className="text-white text-xs sm:text-sm">First Aid Kit</span>
                     </div>
                     <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
                       <Shield className="w-5 h-5 text-orange-500" />
                       <div>
                         <span className="text-white text-xs sm:text-sm block">CCTV Coverage</span>
-                        <span className="text-gray-400 text-xs">{property.safety.cctvCoverage}</span>
+                        <span className="text-gray-400 text-xs">Check with Owner</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
-                      <CheckCircle className={`w-5 h-5 ${property.safety.emergencyExit ? 'text-green-500' : 'text-gray-500'}`} />
+                      <CheckCircle className="w-5 h-5 text-gray-500" />
                       <span className="text-white text-xs sm:text-sm">Emergency Exit</span>
                     </div>
                     <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
-                      <CheckCircle className={`w-5 h-5 ${property.safety.nightGuard ? 'text-green-500' : 'text-gray-500'}`} />
-                      <span className="text-white text-xs sm:text-sm">24x7 Night Guard</span>
+                      <CheckCircle className="w-5 h-5 text-gray-500" />
+                      <span className="text-white text-xs sm:text-sm">24x7 Guard Available</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Location & Nearby Section */}
-                <div className="bg-gradient-to-br from-[#3d1f2f]/50 to-[#2d1b1f]/50 backdrop-blur-xl">
+                <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
                   <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
                     <MapPin className="w-5 h-5 sm:w-6 sm:h-6" />
                     Location & Nearby
@@ -1420,7 +1153,15 @@ export default function PropertyDetailPage() {
 
                   {/* Map */}
                   <div className="h-64 sm:h-80 rounded-xl overflow-hidden border border-white/10 shadow-xl">
-                    <iframe src={`https://www.google.com/maps?q=${property.coordinates.lat},${property.coordinates.lng}&z=15&output=embed`} width="600" height="450" className="w-full"   loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
+                    <iframe 
+                      src={`https://www.google.com/maps?q=${parseFloat(property.lat)},${parseFloat(property.lng)}&z=15&output=embed`} 
+                      width="600" 
+                      height="450" 
+                      className="w-full h-full"   
+                      loading="lazy" 
+                      referrerPolicy="no-referrer-when-downgrade"
+                      title={`Map of ${property.propertyName}`}
+                    />
                   </div>
                 </div>
               </div>
@@ -1431,7 +1172,7 @@ export default function PropertyDetailPage() {
      
 
               {/* Contact Property Manager */}
-              <Card className="bg-gradient-to-br from-[#3d1f2f]/60 to-[#2d1b1f]/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500">
+              <Card className="bg-linear-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500">
                 <CardHeader>
                   <CardTitle className="text-orange-500 text-base sm:text-lg font-bold flex items-center gap-2">
                     <Phone className="w-5 h-5" />
@@ -1441,12 +1182,18 @@ export default function PropertyDetailPage() {
                 <CardContent>
                   <div className="flex items-center gap-3 mb-4">
                     <Avatar className="w-12 h-12 sm:w-14 sm:h-14 ring-2 ring-orange-500/50">
-                      <AvatarImage src={property.contact.image} />
-                      <AvatarFallback className="bg-linear-to-br from-orange-500 to-orange-600 text-white font-bold">SS</AvatarFallback>
+                      <AvatarImage src={property.user?.profileImage || "/api/placeholder/60/60"} />
+                      <AvatarFallback className="bg-linear-to-br from-orange-500 to-orange-600 text-white font-bold">
+                        {property.user?.firstName?.[0]}{property.user?.lastName?.[0]}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-white text-sm sm:text-base">{property.contact.name}</h4>
-                      <p className="text-xs sm:text-sm text-gray-400">{property.contact.role}</p>
+                      <h4 className="font-semibold text-white text-sm sm:text-base">
+                        {property.user ? `${property.user.firstName} ${property.user.lastName}` : 'Property Owner'}
+                      </h4>
+                      <p className="text-xs sm:text-sm text-gray-400">
+                        {property.isBrandManaged ? `${property.brandName} - Owner` : 'Property Owner'}
+                      </p>
                       <p className="text-xs text-gray-500 mt-0.5">Available 24x7</p>
                     </div>
                               
@@ -1456,16 +1203,18 @@ export default function PropertyDetailPage() {
                   <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg mb-4">
                     <div className="flex items-center justify-between">
                       <span className="text-green-400 text-xs sm:text-sm font-medium">Available Beds</span>
-                      <span className="text-green-400 text-sm sm:text-base font-bold">{property.roomTypes.reduce((sum, room) => sum + room.availability.availableBeds, 0)}/{property.roomTypes.reduce((sum, room) => sum + room.availability.totalBeds, 0)}</span>
+                      <span className="text-green-400 text-sm sm:text-base font-bold">
+                        {(() => { const beds = getTotalBeds(); return `${beds.available}/${beds.total}`; })()}
+                      </span>
                     </div>
                   </div>
                   <div className="flex gap-4 flex-wrap  ">
                     <Button className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
                       <Phone className="w-4 h-4 mr-2" />
-                      Call Now
+                      Call {property.user?.phone || 'Owner'}
                     </Button>
                     <Button    className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
-                      <Phone className="w-4 h-4 mr-2" />
+                      <Mail className="w-4 h-4 mr-2" />
                       WhatsApp
                     </Button>
                     <Button    className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
@@ -1482,7 +1231,7 @@ export default function PropertyDetailPage() {
 
  
               {/* Chat Support */}
-              <Card className="bg-gradient-to-br from-[#3d1f2f]/60 to-[#2d1b1f]/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500">
+              <Card className="bg-linear-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500">
                 <CardHeader className="text-white font-medium  text-sm sm:text-base leading-relaxed">
                      Need help? Our support team is available 24x7! 
                 </CardHeader>
