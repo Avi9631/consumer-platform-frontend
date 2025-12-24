@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Bed, Bath, MapPin, Heart } from "lucide-react";
+import { Home, Bed, Bath, MapPin, Heart, ImageIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
@@ -13,12 +13,17 @@ import { Phone } from "lucide-react";
  * Displays property information in a horizontal card layout for search results
  * Supports both legacy property format and new JSON structure
  */
-export default function PropertyListingCard({ property, onClick, variant = "horizontal" }) {
+export default function PropertyListingCard({
+  property,
+  onClick,
+  variant = "horizontal",
+}) {
   const [isFavorite, setIsFavorite] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   // Format price in INR
   const formatPrice = (price) => {
-    const numPrice = typeof price === 'string' ? parseInt(price) : price;
+    const numPrice = typeof price === "string" ? parseInt(price) : price;
     if (numPrice >= 10000000) {
       return `₹${(numPrice / 10000000).toFixed(2)} Cr`;
     } else if (numPrice >= 100000) {
@@ -30,7 +35,9 @@ export default function PropertyListingCard({ property, onClick, variant = "hori
   // Get price from pricing array or fallback to property.price
   const getPrice = () => {
     if (property.pricing && property.pricing.length > 0) {
-      const askingPrice = property.pricing.find(p => p.type === 'asking_price');
+      const askingPrice = property.pricing.find(
+        (p) => p.type === "asking_price"
+      );
       return askingPrice ? askingPrice.value : property.price;
     }
     return property.price;
@@ -41,7 +48,7 @@ export default function PropertyListingCard({ property, onClick, variant = "hori
     if (property.customPropertyName) return property.customPropertyName;
     if (property.projectName) return property.projectName;
     if (property.propertyName) return property.propertyName;
-    return property.title || 'Untitled Property';
+    return property.title || "Untitled Property";
   };
 
   // Get area to display
@@ -58,15 +65,23 @@ export default function PropertyListingCard({ property, onClick, variant = "hori
     }
     if (property.addressText) {
       // Extract first part of address
-      const parts = property.addressText.split(',');
-      return parts.slice(0, 2).join(', ');
+      const parts = property.addressText.split(",");
+      return parts.slice(0, 2).join(", ");
     }
-    return property.city || property.locality || 'Location';
+    return property.city || property.locality || "Location";
   };
 
   // Get bedrooms and bathrooms
-  const bedrooms = property.bedrooms ? (typeof property.bedrooms === 'string' ? parseInt(property.bedrooms) : property.bedrooms) : 0;
-  const bathrooms = property.bathrooms ? (typeof property.bathrooms === 'string' ? parseInt(property.bathrooms) : property.bathrooms) : 0;
+  const bedrooms = property.bedrooms
+    ? typeof property.bedrooms === "string"
+      ? parseInt(property.bedrooms)
+      : property.bedrooms
+    : 0;
+  const bathrooms = property.bathrooms
+    ? typeof property.bathrooms === "string"
+      ? parseInt(property.bathrooms)
+      : property.bathrooms
+    : 0;
 
   // Toggle favorite
   const handleFavoriteClick = (e) => {
@@ -75,65 +90,74 @@ export default function PropertyListingCard({ property, onClick, variant = "hori
   };
 
   return (
-<Card
-                  key={property.id}
-                  className="shrink-0  cursor-pointer group hover:shadow-[0_0_40px_rgba(251,146,60,0.3)] transition-all duration-300 overflow-hidden p-0 border-primary/10 hover:border-primary/30"
-                >
-                  <div className="relative aspect-3/4">
-                    <Image
-                      src={property.image}
-                      alt={property.name}
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20"></div>
+    <Card
+      key={property.id}
+      className="shrink-0  cursor-pointer group hover:shadow-[0_0_40px_rgba(251,146,60,0.3)] transition-all duration-300 overflow-hidden p-0 border-primary/10 hover:border-primary/30"
+    >
+      <div className="relative aspect-3/4">
+        {!imageError ? (
+          <>
+            <Image
+              src={property.image}
+              alt={property.name}
+              fill
+              className="object-cover"
+              onError={() => setImageError(true)}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20"></div>
+          </>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-800/80 to-slate-900/80 flex flex-col items-center justify-center">
+            <ImageIcon className="w-16 h-16 text-slate-500 mb-3" />
+            <p className="text-slate-400 text-sm font-medium">
+              Failed to load image
+            </p>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20"></div>
+          </div>
+        )}
 
-                    {/* Top Actions */}
-                    <div className="absolute top-3 md:top-4 left-3 md:left-4 right-3 md:right-4 flex justify-between items-start">
-                      <Badge variant="secondary" className="backdrop-blur-md">
-                        {property.developer}
-                      </Badge>
-                      <div className="flex gap-1.5 md:gap-2">
-                        <Button
-                          variant="secondary"
-                          size="icon-sm"
-                          className="rounded-full backdrop-blur-md"
-                        >
-                          <Heart className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="icon-sm"
-                          className="rounded-full backdrop-blur-md"
-                        >
-                          <Phone className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
+        {/* Top Actions */}
+        <div className="absolute top-3 md:top-4 left-3 md:left-4 right-3 md:right-4 flex justify-between items-start">
+          <Badge variant="secondary" className="backdrop-blur-md">
+            {property.developer}
+          </Badge>
+          <div className="flex gap-1.5 md:gap-2">
+            <Button
+              variant="secondary"
+              size="icon-sm"
+              className="rounded-full backdrop-blur-md"
+            >
+              <Heart className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="icon-sm"
+              className="rounded-full backdrop-blur-md"
+            >
+              <Phone className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
 
-                    {/* Bottom Info */}
-                    <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
-                      <h3 className="text-base md:text-xl font-bold mb-1 text-white">
-                        {property.name}
-                      </h3>
-                      <p className="text-xs md:text-sm text-white/80 mb-2">
-                        {property.location}
-                      </p>
-                      <div className="flex justify-between items-end gap-2">
-                        <div className="flex-1">
-                          <p className="text-sm font-bold text-primary">
-                            {property.price}
-                          </p>
-                          <p className="text-xs  text-white/60">
-                            {property.bhk}
-                          </p>
-                        </div>
-                        <Button size="sm" className="whitespace-nowrap">
-                          BOOK VISIT
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
+        {/* Bottom Info */}
+        <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
+          <h3 className="text-base md:text-xl font-bold mb-1 text-white">
+            {property.name}
+          </h3>
+          <p className="text-xs md:text-sm text-white/80 mb-2">
+            {property.location}
+          </p>
+          <div className="flex justify-between items-end gap-2">
+            <div className="flex-1">
+              <p className="text-sm font-bold text-primary">{property.price}</p>
+              <p className="text-xs  text-white/60">{property.bhk}</p>
+            </div>
+            <Button size="sm" className="whitespace-nowrap">
+              BOOK VISIT
+            </Button>
+          </div>
+        </div>
+      </div>
+    </Card>
   );
 }

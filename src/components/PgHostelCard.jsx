@@ -1,11 +1,20 @@
 "use client";
 
-import { Home, Users, Utensils, MapPin, Heart, Phone, BadgeCheck } from "lucide-react";
+import {
+  Home,
+  Users,
+  Utensils,
+  MapPin,
+  Heart,
+  Phone,
+  BadgeCheck,
+} from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import Image from "next/image";
+import { ImageIcon } from "lucide-react";
 
 /**
  * PgHostelCard Component
@@ -14,12 +23,13 @@ import Image from "next/image";
  */
 export default function PgHostelCard({ property, onClick }) {
   const [isFavorite, setIsFavorite] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   // Format price in INR
   const formatPrice = (price) => {
-    const numPrice = typeof price === 'string' ? parseFloat(price) : price;
-    if (!numPrice || numPrice === 0) return 'Contact for price';
-    
+    const numPrice = typeof price === "string" ? parseFloat(price) : price;
+    if (!numPrice || numPrice === 0) return "Contact for price";
+
     if (numPrice >= 10000000) {
       return `₹${(numPrice / 10000000).toFixed(2)} Cr`;
     } else if (numPrice >= 100000) {
@@ -32,7 +42,9 @@ export default function PgHostelCard({ property, onClick }) {
 
   // Get property name
   const getPropertyName = () => {
-    return property.propertyName || property.property_name || 'Untitled Property';
+    return (
+      property.propertyName || property.property_name || "Untitled Property"
+    );
   };
 
   // Get location string
@@ -42,27 +54,33 @@ export default function PgHostelCard({ property, onClick }) {
     }
     if (property.addressText || property.address_text) {
       const address = property.addressText || property.address_text;
-      const parts = address.split(',');
-      return parts.slice(0, 2).join(', ');
+      const parts = address.split(",");
+      return parts.slice(0, 2).join(", ");
     }
-    return property.city || property.locality || 'Location';
+    return property.city || property.locality || "Location";
   };
 
   // Get starting price from room types
   const getStartingPrice = () => {
-    if (!property.roomTypes || !Array.isArray(property.roomTypes) || property.roomTypes.length === 0) {
-      return 'Contact for price';
+    if (
+      !property.roomTypes ||
+      !Array.isArray(property.roomTypes) ||
+      property.roomTypes.length === 0
+    ) {
+      return "Contact for price";
     }
 
     const prices = property.roomTypes
-      .map(room => {
+      .map((room) => {
         if (!room.pricing || !Array.isArray(room.pricing)) return 0;
-        const monthlyRent = room.pricing.find(p => p.type === 'Monthly Rent' || p.type === 'monthly_rent');
+        const monthlyRent = room.pricing.find(
+          (p) => p.type === "Monthly Rent" || p.type === "monthly_rent"
+        );
         return monthlyRent?.amount || 0;
       })
-      .filter(price => price > 0);
+      .filter((price) => price > 0);
 
-    if (prices.length === 0) return 'Contact for price';
+    if (prices.length === 0) return "Contact for price";
 
     const minPrice = Math.min(...prices);
     return `Starting ${formatPrice(minPrice)}/mo`;
@@ -70,41 +88,59 @@ export default function PgHostelCard({ property, onClick }) {
 
   // Get room types summary
   const getRoomTypesSummary = () => {
-    if (!property.roomTypes || !Array.isArray(property.roomTypes) || property.roomTypes.length === 0) {
-      return 'Various rooms available';
+    if (
+      !property.roomTypes ||
+      !Array.isArray(property.roomTypes) ||
+      property.roomTypes.length === 0
+    ) {
+      return "Various rooms available";
     }
 
-    const categories = [...new Set(property.roomTypes.map(rt => rt.category).filter(Boolean))];
-    
+    const categories = [
+      ...new Set(property.roomTypes.map((rt) => rt.category).filter(Boolean)),
+    ];
+
     if (categories.length === 0) {
-      return `${property.roomTypes.length} room type${property.roomTypes.length > 1 ? 's' : ''}`;
+      return `${property.roomTypes.length} room type${
+        property.roomTypes.length > 1 ? "s" : ""
+      }`;
     }
 
-    return categories.slice(0, 2).join(', ');
+    return categories.slice(0, 2).join(", ");
   };
 
   // Get brand/management name
   const getBrandName = () => {
     if (property.isBrandManaged || property.is_brand_managed) {
-      return property.brandName || property.brand_name || 'Brand Managed';
+      return property.brandName || property.brand_name || "Brand Managed";
     }
-    return 'Independent';
+    return "Independent";
   };
 
   // Get main image from mediaData
   const getMainImage = () => {
+    // If image failed to load, return placeholder
+    if (imageError) {
+      return "/placeholder-pg.jpg";
+    }
+
     const mediaData = property.mediaData || property.media_data;
-    
+
     if (!mediaData || !Array.isArray(mediaData) || mediaData.length === 0) {
-      return '/placeholder-pg.jpg';
+      return "/placeholder-pg.jpg";
     }
 
     // Find first image
-    const firstImage = mediaData.find(media => 
-      media.type === 'image' && media.url
+    const firstImage = mediaData.find(
+      (media) => media.type === "image" && media.url
     );
 
-    return firstImage?.url || mediaData[0]?.url || '/placeholder-pg.jpg';
+    return firstImage?.url || mediaData[0]?.url || "/placeholder-pg.jpg";
+  };
+
+  // Handle image load error
+  const handleImageError = () => {
+    setImageError(true);
   };
 
   // Get gender badge
@@ -113,13 +149,16 @@ export default function PgHostelCard({ property, onClick }) {
     if (!gender) return null;
 
     const colors = {
-      'Male': 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-      'Female': 'bg-pink-500/20 text-pink-300 border-pink-500/30',
-      'Unisex': 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+      Male: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+      Female: "bg-pink-500/20 text-pink-300 border-pink-500/30",
+      Unisex: "bg-purple-500/20 text-purple-300 border-purple-500/30",
     };
 
     return (
-      <Badge variant="secondary" className={`backdrop-blur-md ${colors[gender] || ''}`}>
+      <Badge
+        variant="secondary"
+        className={`backdrop-blur-md ${colors[gender] || ""}`}
+      >
         {gender}
       </Badge>
     );
@@ -128,13 +167,17 @@ export default function PgHostelCard({ property, onClick }) {
   // Check if food is available
   const hasFoodService = () => {
     const foodMess = property.foodMess || property.food_mess;
-    return foodMess && (foodMess.available === true || foodMess.meals?.length > 0);
+    return (
+      foodMess && (foodMess.available === true || foodMess.meals?.length > 0)
+    );
   };
 
   // Check if verified
   const isVerified = () => {
-    return property.verificationStatus === 'VERIFIED' || 
-           property.verification_status === 'VERIFIED';
+    return (
+      property.verificationStatus === "VERIFIED" ||
+      property.verification_status === "VERIFIED"
+    );
   };
 
   // Toggle favorite
@@ -148,8 +191,7 @@ export default function PgHostelCard({ property, onClick }) {
     if (onClick) {
       onClick(property);
     } else {
-      // Navigate to detail page
-      const slug = property.slug || property.pgHostelId || property.pg_hostel_id;
+
       window.location.href = `/pg-coliving-hostel/${property.pgHostelId}`;
     }
   };
@@ -160,20 +202,36 @@ export default function PgHostelCard({ property, onClick }) {
       className="shrink-0 w-[220px] sm:w-[240px] md:w-[280px] group hover:shadow-[0_0_40px_rgba(251,146,60,0.3)] transition-all duration-300 overflow-hidden p-0 border-primary/10 hover:border-primary/30 cursor-pointer"
     >
       <div className="relative aspect-3/4">
-        <Image
-          src={getMainImage()}
-          alt={getPropertyName()}
-          fill
-          className="object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20"></div>
+        {!imageError ? (
+          <>
+            <Image
+              src={property.image}
+              alt={property.name}
+              fill
+              className="object-cover"
+              onError={() => setImageError(true)}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20"></div>
+          </>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-800/80 to-slate-900/80 flex flex-col items-center justify-center">
+            <ImageIcon className="w-16 h-16 text-slate-500 mb-3" />
+            <p className="text-slate-400 text-sm font-medium">
+              Failed to load image
+            </p>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20"></div>
+          </div>
+        )}
 
         {/* Top Actions */}
         <div className="absolute top-3 md:top-4 left-3 md:left-4 right-3 md:right-4 flex justify-between items-start gap-2">
           <div className="flex flex-wrap gap-1.5">
             {getGenderBadge()}
             {isVerified() && (
-              <Badge variant="secondary" className="backdrop-blur-md bg-green-500/20 text-green-300 border-green-500/30">
+              <Badge
+                variant="secondary"
+                className="backdrop-blur-md bg-green-500/20 text-green-300 border-green-500/30"
+              >
                 <BadgeCheck className="w-3 h-3 mr-1" />
                 Verified
               </Badge>
@@ -186,7 +244,11 @@ export default function PgHostelCard({ property, onClick }) {
               className="rounded-full backdrop-blur-md"
               onClick={handleFavoriteClick}
             >
-              <Heart className={`w-4 h-4 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
+              <Heart
+                className={`w-4 h-4 ${
+                  isFavorite ? "fill-red-500 text-red-500" : ""
+                }`}
+              />
             </Button>
             <Button
               variant="secondary"
@@ -209,7 +271,7 @@ export default function PgHostelCard({ property, onClick }) {
           <h3 className="text-base md:text-xl font-bold mb-1 text-white line-clamp-1">
             {getPropertyName()}
           </h3>
-          
+
           <div className="flex items-center gap-1 text-xs md:text-sm text-white/80 mb-2">
             <MapPin className="w-3 h-3" />
             <p className="line-clamp-1">{getLocation()}</p>
@@ -229,7 +291,9 @@ export default function PgHostelCard({ property, onClick }) {
             {property.commonAmenities?.length > 0 && (
               <div className="flex items-center gap-1">
                 <Users className="w-4 h-4" />
-                <span className="text-xs">{property.commonAmenities.length}</span>
+                <span className="text-xs">
+                  {property.commonAmenities.length}
+                </span>
               </div>
             )}
           </div>
