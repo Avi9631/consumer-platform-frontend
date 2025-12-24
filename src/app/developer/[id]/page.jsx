@@ -87,6 +87,7 @@ export default function DeveloperDetailPage() {
   const [currentStatIndex, setCurrentStatIndex] = useState(0);
   const [activeProjectTab, setActiveProjectTab] = useState("all");
   const [hoveredTourId, setHoveredTourId] = useState(null);
+  const [cityCarouselIndex, setCityCarouselIndex] = useState(0);
 
   // Mock developer data - in real app, fetch based on developerId
   const developer = {
@@ -108,8 +109,6 @@ export default function DeveloperDetailPage() {
     projectsCompleted: 280,
     projectsOngoing: 45,
     projectsUpcoming: 28,
-    totalAreaDeveloped: "150 Million sq.ft",
-    totalCustomers: "85,000+",
     images: [
       "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=600&fit=crop",
       "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&h=600&fit=crop",
@@ -119,54 +118,6 @@ export default function DeveloperDetailPage() {
       "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800&h=600&fit=crop",
       "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=800&h=600&fit=crop",
       "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=600&fit=crop",
-    ],
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-    certifications: [
-      { name: "ISO 9001:2015", icon: Award, verified: true },
-      { name: "IGBC Platinum", icon: Award, verified: true },
-      { name: "RERA Registered", icon: Shield, verified: true },
-      { name: "CREDAI Member", icon: CheckCircle, verified: true },
-    ],
-    awards: [
-      {
-        year: 2024,
-        title: "Best Residential Developer - South India",
-        organization: "Asia Pacific Property Awards",
-      },
-      {
-        year: 2023,
-        title: "Developer of the Year",
-        organization: "CNBC-Awaaz Real Estate Awards",
-      },
-      {
-        year: 2023,
-        title: "Excellence in Sustainability",
-        organization: "Indian Green Building Council",
-      },
-      {
-        year: 2022,
-        title: "Most Trusted Brand",
-        organization: "Brand Trust Report",
-      },
-    ],
-    specializations: [
-      "Luxury Apartments",
-      "Villa Communities",
-      "Commercial Complexes",
-      "IT Parks",
-      "Shopping Malls",
-      "Hospitality Projects",
-      "Integrated Townships",
-    ],
-    operatingCities: [
-      "Bangalore",
-      "Chennai",
-      "Hyderabad",
-      "Kochi",
-      "Mysore",
-      "Mangalore",
-      "Goa",
-      "Mumbai",
     ],
     projects: [
       {
@@ -314,36 +265,6 @@ export default function DeveloperDetailPage() {
         reraNumber: "TN/29/Building/0123/2024",
       },
     ],
-    keyPeople: [
-      {
-        name: "Irfan Razack",
-        designation: "Chairman & Managing Director",
-        image:
-          "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=200&h=200&fit=crop",
-        bio: "Visionary leader with 38+ years in real estate",
-      },
-      {
-        name: "Rezwan Razack",
-        designation: "Joint Managing Director",
-        image:
-          "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&h=200&fit=crop",
-        bio: "Expert in project execution and customer relations",
-      },
-      {
-        name: "Noaman Razack",
-        designation: "Joint Managing Director",
-        image:
-          "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop",
-        bio: "Specialist in commercial and retail development",
-      },
-    ],
-    financials: {
-      revenue: "₹12,500 Cr (FY 2023-24)",
-      marketCap: "₹45,000 Cr",
-      debtToEquity: "0.8:1",
-      listed: true,
-      stockSymbol: "PRESTIGE",
-    },
     contact: {
       corporateOffice:
         "Prestige Falcon Tower, Brunton Road, Bangalore - 560001",
@@ -359,27 +280,9 @@ export default function DeveloperDetailPage() {
       instagram: "https://instagram.com/prestigegroup",
       youtube: "https://youtube.com/prestigegroup",
     },
-    timeline: [
-      { year: 1986, event: "Founded in Bangalore" },
-      { year: 1995, event: "First Commercial Project" },
-      { year: 2010, event: "Listed on BSE & NSE" },
-      { year: 2015, event: "100th Project Milestone" },
-      { year: 2020, event: "Expansion to Multiple Cities" },
-      { year: 2024, event: "280+ Projects Delivered" },
-    ],
-    highlights: [
-      "38+ years of legacy and trust in real estate",
-      "280+ projects delivered across 150 million sq.ft",
-      "45 ongoing projects worth ₹25,000+ Crores",
-      "85,000+ happy families across India",
-      "IGBC Platinum & ISO 9001:2015 certified",
-      "Presence in 8+ major cities",
-      "Award-winning design and architecture",
-      "Timely delivery with quality commitment",
-    ],
   };
 
-  // Mock shorts data
+  // Mock shorts data - not currently used in UI
   const developerShorts = [
     {
       id: 1,
@@ -435,97 +338,7 @@ export default function DeveloperDetailPage() {
       price: "₹3.5Cr - 7Cr",
       location: "Varthur, Bangalore",
     },
-    {
-      id: 5,
-      title: "Shantiniketan Luxury",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      thumbnail:
-        "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=400&h=600&fit=crop",
-      price: "₹2.5Cr - 8Cr",
-      location: "Whitefield, Bangalore",
-    },
-    {
-      id: 6,
-      title: "Lakeside Habitat Villas",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      thumbnail:
-        "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=400&h=600&fit=crop",
-      price: "₹3.5Cr - 7Cr",
-      location: "Varthur, Bangalore",
-    },
-    {
-      id: 5,
-      title: "Shantiniketan Luxury",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      thumbnail:
-        "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=400&h=600&fit=crop",
-      price: "₹2.5Cr - 8Cr",
-      location: "Whitefield, Bangalore",
-    },
-    {
-      id: 6,
-      title: "Lakeside Habitat Villas",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      thumbnail:
-        "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=400&h=600&fit=crop",
-      price: "₹3.5Cr - 7Cr",
-      location: "Varthur, Bangalore",
-    },
   ];
-
-  // Quick Stats data
-  const quickStats = [
-    {
-      icon: Calendar,
-      label: "Established",
-      value: developer.establishedYear.toString(),
-    },
-    {
-      icon: TrendingUp,
-      label: "Experience",
-      value: `${developer.yearsOfExperience}+ Years`,
-    },
-    {
-      icon: Building2,
-      label: "Projects Completed",
-      value: `${developer.projectsCompleted}+`,
-    },
-    {
-      icon: Clock,
-      label: "Ongoing Projects",
-      value: developer.projectsOngoing.toString(),
-    },
-    {
-      icon: Users,
-      label: "Happy Customers",
-      value: developer.totalCustomers,
-    },
-    {
-      icon: Home,
-      label: "Area Developed",
-      value: developer.totalAreaDeveloped,
-    },
-    {
-      icon: Star,
-      label: "Rating",
-      value: `${developer.rating}/5.0`,
-    },
-    {
-      icon: Award,
-      label: "Certifications",
-      value: developer.certifications.length.toString(),
-    },
-  ];
-
-  // Auto-carousel effect for Quick Stats
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentStatIndex((prevIndex) =>
-        prevIndex + 3 >= quickStats.length ? 0 : prevIndex + 3
-      );
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [quickStats.length]);
 
   const nextImage = () => {
     setCurrentImageIndex((prevIndex) =>
@@ -878,8 +691,6 @@ export default function DeveloperDetailPage() {
           </div>
         </div>
 
- 
-
         {/* Main Content */}
         <div className="container mx-auto px-2 sm:px-3 md:px-4 lg:px-6 py-4 sm:py-6 md:py-8">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 sm:gap-4 lg:gap-6 text-white mb-4 sm:mb-6 md:mb-8">
@@ -917,14 +728,7 @@ export default function DeveloperDetailPage() {
                 </div>
               </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full lg:w-auto">
-              <Button
-                className="bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 border-none font-semibold text-sm sm:text-base h-10 sm:h-11"
-                onClick={() => setShowContactModal(true)}
-              >
-                Contact Developer
-              </Button>
-            </div>
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full lg:w-auto"></div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-7 gap-6 sm:gap-8">
@@ -944,30 +748,6 @@ export default function DeveloperDetailPage() {
                   </div>
                 </div>
               </div>
-
-              {/* Virtual Tours Carousel */}
-
-              <CarouselSection
-                title={
-                  <>
-                    <h3 className="text-orange-500 text-base sm:text-lg md:text-2xl font-bold mb-3 sm:mb-4 md:mb-6 flex items-center gap-2">
-                      <Camera className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-                      Media Coverage
-                    </h3>
-                  </>
-                }
-                subtitle="Hover over videos to auto-play • Swipe to explore more"
-                className="p-0"
-              >
-                {VIRTUAL_TOURS_DATA.map((tour) => (
-                  <ShortVideoCard
-                    key={tour.id}
-                    tour={tour}
-                    isHovered={hoveredTourId === tour.id}
-                    onHover={setHoveredTourId}
-                  />
-                ))}
-              </CarouselSection>
 
               {/* Projects Section */}
               <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-3  ">
@@ -1254,141 +1034,31 @@ export default function DeveloperDetailPage() {
                   </div>
                 )}
               </div>
+ 
 
-              {/* Specializations */}
-              <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl  p-3">
-                <h3 className="text-orange-500 text-base sm:text-lg md:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
-                  <Briefcase className="w-5 h-5" />
-                  Specializations
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {developer.specializations.map((spec, index) => (
-                    <Badge
-                      key={index}
-                      className="text-sm py-1 px-3 bg-orange-500/20 text-orange-300 border-orange-500/30 hover:bg-orange-500/30"
-                    >
-                      {spec}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
+              {/* Virtual Tours Carousel */}
 
-              {/* Operating Cities */}
-              <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl  p-3">
-                <h3 className="text-orange-500 text-base sm:text-lg md:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
-                  <MapPin className="w-5 h-5" />
-                  Operating Cities
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {developer.operatingCities.map((city, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-2 p-3 bg-slate-700/50 rounded-lg border border-white/10 hover:border-orange-500/50 transition-all duration-300"
-                    >
-                      <MapPin className="h-4 w-4 text-orange-500 flex-shrink-0" />
-                      <span className="text-sm font-medium text-gray-300">
-                        {city}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Awards & Recognition */}
-              <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl  p-3">
-                <h3 className="text-orange-500 text-base sm:text-lg md:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
-                  <Award className="w-5 h-5" />
-                  Awards & Recognition
-                </h3>
-                <div className="space-y-3">
-                  {developer.awards.map((award, index) => (
-                    <div
-                      key={index}
-                      className="flex gap-4 p-4 bg-linear-to-r from-yellow-900/20 to-orange-900/20 rounded-lg border border-yellow-500/20 hover:border-yellow-500/40 transition-all duration-300"
-                    >
-                      <div className="flex-shrink-0">
-                        <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center border border-yellow-500/30">
-                          <Award className="h-6 w-6 text-yellow-400" />
-                        </div>
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold text-white">
-                          {award.title}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          {award.organization}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {award.year}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Leadership Team */}
-              <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl  p-3">
-                <h3 className="text-orange-500 text-base sm:text-lg md:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  Leadership Team
-                </h3>
-                <div className="grid md:grid-cols-3 gap-4">
-                  {developer.keyPeople.map((person, index) => (
-                    <div
-                      key={index}
-                      className="text-center p-4 bg-slate-700/30 rounded-lg border border-white/10 hover:border-orange-500/50 transition-all duration-300"
-                    >
-                      <div className="w-24 h-24 mx-auto mb-3 rounded-full overflow-hidden ring-2 ring-orange-500/30">
-                        <Image
-                          src={person.image}
-                          alt={person.name}
-                          width={96}
-                          height={96}
-                          className="object-cover w-full h-full"
-                        />
-                      </div>
-                      <h3 className="font-semibold text-sm text-white">
-                        {person.name}
-                      </h3>
-                      <p className="text-xs text-gray-400 mb-2">
-                        {person.designation}
-                      </p>
-                      <p className="text-xs text-gray-500">{person.bio}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Company Timeline */}
-              <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl  p-3">
-                <h3 className="text-orange-500 text-base sm:text-lg md:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
-                  <Clock className="w-5 h-5" />
-                  Milestones
-                </h3>
-                <div className="space-y-4">
-                  {developer.timeline.map((milestone, index) => (
-                    <div key={index} className="flex gap-4">
-                      <div className="flex flex-col items-center">
-                        <div className="w-10 h-10 bg-orange-500/20 rounded-full flex items-center justify-center flex-shrink-0 border border-orange-500/30">
-                          <CheckCircle className="h-5 w-5 text-orange-500" />
-                        </div>
-                        {index < developer.timeline.length - 1 && (
-                          <div className="w-0.5 h-full bg-orange-500/30 mt-2" />
-                        )}
-                      </div>
-                      <div className="flex-1 pb-4">
-                        <p className="font-semibold text-orange-400">
-                          {milestone.year}
-                        </p>
-                        <p className="text-sm text-gray-300 mt-1">
-                          {milestone.event}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <CarouselSection
+                title={
+                  <>
+                    <h3 className="text-orange-500 text-base sm:text-lg md:text-2xl font-bold mb-3 sm:mb-4 md:mb-6 flex items-center gap-2">
+                      <Camera className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                      Media Coverage
+                    </h3>
+                  </>
+                }
+                subtitle="Hover over videos to auto-play • Swipe to explore more"
+                className="p-0"
+              >
+                {VIRTUAL_TOURS_DATA.map((tour) => (
+                  <ShortVideoCard
+                    key={tour.id}
+                    tour={tour}
+                    isHovered={hoveredTourId === tour.id}
+                    onHover={setHoveredTourId}
+                  />
+                ))}
+              </CarouselSection>
             </div>
 
             {/* Right Column - Sticky Sidebar */}
@@ -1463,83 +1133,7 @@ export default function DeveloperDetailPage() {
                       </div>
                     </div>
                   </div>
-
-                  <Button
-                    className="w-full gap-2 bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white border-none shadow-lg"
-                    onClick={() => setShowContactModal(true)}
-                  >
-                    <MessageCircle className="h-4 w-4" />
-                    Get in Touch
-                  </Button>
                 </div>
-
-                {/* Certifications */}
-                <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl  p-3">
-                  <h3 className="text-orange-500 text-base sm:text-lg font-bold mb-3 sm:mb-4 flex items-center gap-2">
-                    <Shield className="w-5 h-5" />
-                    Certifications
-                  </h3>
-                  <div className="space-y-3">
-                    {developer.certifications.map((cert, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-3 p-3 bg-green-900/20 rounded-lg border border-green-500/20 hover:border-green-500/40 transition-all duration-300"
-                      >
-                        <cert.icon className="h-5 w-5 text-green-400 flex-shrink-0" />
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-300">
-                            {cert.name}
-                          </p>
-                        </div>
-                        {cert.verified && (
-                          <CheckCircle className="h-4 w-4 text-green-400" />
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Financials */}
-                {developer.financials && (
-                  <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl  p-3">
-                    <h3 className="text-orange-500 text-base sm:text-lg font-bold mb-3 sm:mb-4 flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5" />
-                      Financial Highlights
-                    </h3>
-                    <div className="space-y-3">
-                      <div className="p-3 bg-slate-700/50 rounded-lg border border-white/10">
-                        <p className="text-xs text-gray-500 mb-1">
-                          Annual Revenue
-                        </p>
-                        <p className="text-sm font-semibold text-gray-300">
-                          {developer.financials.revenue}
-                        </p>
-                      </div>
-                      <div className="p-3 bg-slate-700/50 rounded-lg border border-white/10">
-                        <p className="text-xs text-gray-500 mb-1">Market Cap</p>
-                        <p className="text-sm font-semibold text-gray-300">
-                          {developer.financials.marketCap}
-                        </p>
-                      </div>
-                      <div className="p-3 bg-slate-700/50 rounded-lg border border-white/10">
-                        <p className="text-xs text-gray-500 mb-1">
-                          Stock Symbol
-                        </p>
-                        <p className="text-sm font-semibold text-gray-300">
-                          {developer.financials.stockSymbol}
-                        </p>
-                      </div>
-                      <div className="p-3 bg-slate-700/50 rounded-lg border border-white/10">
-                        <p className="text-xs text-gray-500 mb-1">
-                          Debt to Equity
-                        </p>
-                        <p className="text-sm font-semibold text-gray-300">
-                          {developer.financials.debtToEquity}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
 
                 {/* Social Media */}
                 <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl  p-3">
@@ -1593,25 +1187,6 @@ export default function DeveloperDetailPage() {
                       <PlayCircle className="h-5 w-5 text-red-400" />
                     </a>
                   </div>
-                </div>
-
-                {/* Key Highlights */}
-                <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl  p-3">
-                  <h3 className="text-orange-500 text-base sm:text-lg font-bold mb-3 sm:mb-4 flex items-center gap-2">
-                    <Star className="w-5 h-5" />
-                    Key Highlights
-                  </h3>
-                  <ul className="space-y-2">
-                    {developer.highlights.map((highlight, index) => (
-                      <li
-                        key={index}
-                        className="flex items-start gap-2 text-sm text-gray-300"
-                      >
-                        <CheckCircle className="h-4 w-4 text-green-400 flex-shrink-0 mt-0.5" />
-                        <span>{highlight}</span>
-                      </li>
-                    ))}
-                  </ul>
                 </div>
               </div>
             </div>
