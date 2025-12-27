@@ -318,11 +318,12 @@ export default function Home() {
           </div>
         ) : developerData.length > 0 ? (
           developerData.map((developer) => (
-            <DeveloperCard
-              key={developer.id}
-              developer={developer}
-              onClick={() => console.log(`Developer clicked: ${developer.name}`)}
-            />
+            <div key={developer.id} className="shrink-0 w-[240px] xs:w-[260px] sm:w-[270px]">
+              <DeveloperCard
+                developer={developer}
+                onClick={() => console.log(`Developer clicked: ${developer.name}`)}
+              />
+            </div>
           ))
         ) : (
           <div className="w-full text-center py-12">

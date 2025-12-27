@@ -1,9 +1,11 @@
 "use client";
 
-import { Building2, MapPin, Star, Briefcase, Award, Calendar } from "lucide-react";
+import { Building2, MapPin, Star, Briefcase, Award, Calendar, ArrowRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 /**
  * Enhanced DeveloperCard Component - Compact & Responsive
@@ -11,6 +13,8 @@ import Image from "next/image";
  * Optimized for mobile and desktop screens
  */
 export default function DeveloperCard({ developer, onClick }) {
+  const router = useRouter();
+  
   // Calculate total projects from statistics
   const statistics = developer?.statistics || {};
   const totalProjects = 
@@ -25,10 +29,15 @@ export default function DeveloperCard({ developer, onClick }) {
   const isVerified = developer?.metadata?.verificationStatus === "verified";
   const isFeatured = developer?.metadata?.featured;
 
+  const handleViewDetails = (e) => {
+    e.stopPropagation();
+    router.push(`/developer/${developer.id}`);
+  };
+
   return (
     <Card
       onClick={onClick}
-      className="shrink-0 w-[240px] xs:w-[260px] sm:w-[270px] group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-border/60 hover:border-primary/40 hover:-translate-y-1.5 bg-gradient-to-br from-background to-muted/20"
+      className="w-full group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-border/60 hover:border-primary/40 hover:-translate-y-1.5 bg-gradient-to-br from-background to-muted/20"
     >
       {/* Compact Header with Gradient */}
       <div className="relative h-10 bg-gradient-to-br from-primary via-primary/90 to-orange-500 overflow-hidden">
@@ -160,14 +169,23 @@ export default function DeveloperCard({ developer, onClick }) {
           </div>
         </div>
 
+        {/* View Details Button */}
+        <Button 
+          onClick={handleViewDetails}
+          className="w-full h-8 text-xs font-semibold bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white shadow-md hover:shadow-lg transition-all group/btn"
+        >
+          <span>View Details</span>
+          <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover/btn:translate-x-0.5 transition-transform" />
+        </Button>
+
         {/* Compact View Details Hint */}
-        <div className="pt-0.5 flex items-center justify-center">
+        {/* <div className="pt-0.5 flex items-center justify-center">
           <div className="text-[10px] text-muted-foreground/60 group-hover:text-primary/80 font-medium transition-colors flex items-center gap-1">
             <span className="hidden xs:inline">Click for details</span>
             <span className="xs:hidden">Tap for details</span>
             <span className="group-hover:translate-x-0.5 transition-transform">→</span>
           </div>
-        </div>
+        </div> */}
       </div>
     </Card>
   );
