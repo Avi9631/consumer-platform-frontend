@@ -1,90 +1,172 @@
 "use client";
 
-import { Building2, MapPin, Star, Award, TrendingUp } from "lucide-react";
+import { Building2, MapPin, Star, Briefcase, Award, Calendar } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 
 /**
- * DeveloperCard Component
- * Displays real estate developer information in a carousel card format
+ * Enhanced DeveloperCard Component - Compact & Responsive
+ * Displays real estate developer information with rich visual hierarchy
+ * Optimized for mobile and desktop screens
  */
 export default function DeveloperCard({ developer, onClick }) {
+  // Calculate total projects from statistics
+  const statistics = developer?.statistics || {};
+  const totalProjects = 
+    (statistics.projectsCompleted || 0) + 
+    (statistics.projectsOngoing || 0) + 
+    (statistics.projectsUpcoming || 0);
+  
+  // Get location from contact address
+  const location = developer?.contact?.address?.city || developer?.location;
+  
+  // Check if verified/featured
+  const isVerified = developer?.metadata?.verificationStatus === "verified";
+  const isFeatured = developer?.metadata?.featured;
+
   return (
     <Card
       onClick={onClick}
-      className="shrink-0 w-[220px] sm:w-[240px] md:w-[280px] group hover:shadow-[0_0_40px_rgba(251,146,60,0.3)] transition-all duration-300 overflow-hidden p-0 border-primary/10 hover:border-primary/30 cursor-pointer"
+      className="shrink-0 w-[240px] xs:w-[260px] sm:w-[270px] group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-border/60 hover:border-primary/40 hover:-translate-y-1.5 bg-gradient-to-br from-background to-muted/20"
     >
-      {/* Logo/Image Section */}
-      <div className="relative h-44 overflow-hidden bg-gradient-to-br from-primary/20 to-purple-500/20">
-        <Image
-          src={developer.logo}
-          alt={developer.name}
-          fill
-          className="object-cover group-hover:scale-110 transition-transform duration-500"
-          sizes="(max-width: 768px) 220px, 280px"
-        />
-        {developer.featured && (
-          <Badge className="absolute top-2 left-2 bg-orange-500/90 hover:bg-orange-500 text-white border-0 text-xs py-0 px-2">
-            <Award className="w-3 h-3 mr-1" />
-            Featured
-          </Badge>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+      {/* Compact Header with Gradient */}
+      <div className="relative h-10 bg-gradient-to-br from-primary via-primary/90 to-orange-500 overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,.05) 10px, rgba(255,255,255,.05) 20px)'
+          }} />
+        </div>
+        
+        {/* Compact Status Badges */}
+        <div className="absolute top-1.5 right-1.5 flex gap-1">
+          {isFeatured && (
+            <Badge className="h-4 px-1 text-[9px] bg-yellow-500/90 hover:bg-yellow-500 border-0 font-semibold">
+              <Star className="w-2 h-2 mr-0.5 fill-white" />
+              <span className="hidden xs:inline">Featured</span>
+            </Badge>
+          )}
+          {isVerified && (
+            <Badge className="h-4 px-1 text-[9px] bg-emerald-500/90 hover:bg-emerald-500 border-0 font-semibold">
+              <Award className="w-2 h-2" />
+            </Badge>
+          )}
+        </div>
       </div>
 
-      {/* Content Section */}
-      <div className="px-3 pb-3  space-y-2">
-        {/* Developer Name */}
-        <div>
-          <h3 className="font-bold text-base group-hover:text-primary transition-colors line-clamp-1">
+      {/* Compact Logo */}
+      <div className="relative -mt-7 px-3">
+        <div className="w-14 h-14 rounded-lg border-3 border-background bg-white shadow-lg overflow-hidden group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
+          <div className="relative w-full h-full">
+            <Image
+              src={developer.logo}
+              alt={`${developer.name} logo`}
+              fill
+              className="object-contain p-2"
+              sizes="56px"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Section - Compact */}
+      <div className="px-3 pt-2 pb-3 space-y-2">
+        {/* Developer Name & Location */}
+        <div className="space-y-0.5">
+          <h3 className="font-bold text-md leading-tight line-clamp-2 group-hover:text-primary transition-colors">
             {developer.name}
           </h3>
-        </div>
-
-        {/* Rating and Experience */}
-        <div className="flex items-center justify-between text-sm">
-          <div className="flex items-center gap-1">
-<Badge variant="secondary" className="text-xs py-0">
-          {developer.specialization}
-        </Badge>          </div>
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <TrendingUp className="w-3.5 h-3.5" />
-            <span className="text-xs">{developer.experience}</span>
-          </div>
-        </div>
- 
-
-        {/* Projects Stats */}
-        <div className="grid grid-cols-2 gap-2 pt-1.5 border-t border-border/50">
-          <div className="text-center">
-            <div className="text-base font-bold text-primary">
-              {developer.completedProjects}
+          
+          {developer.tagline && (
+            <p className="text-[10px] text-muted-foreground italic line-clamp-1">
+              "{developer.tagline}"
+            </p>
+          )}
+          
+          {location && (
+            <div className="flex items-center gap-0.5 text-muted-foreground">
+              <MapPin className="w-3 h-3 flex-shrink-0" />
+              <span className="text-[10px] font-medium line-clamp-1">{location}</span>
             </div>
-            <div className="text-xs text-muted-foreground">Completed</div>
-          </div>
-          <div className="text-center">
-            <div className="text-base font-bold text-green-500">
-              {developer.ongoingProjects}
+          )}
+        </div>
+
+        {/* Experience & Year - Compact Row */}
+        <div className="flex items-center gap-1.5 text-[10px]">
+          {developer.yearsOfExperience && (
+            <div className="flex items-center gap-1 py-1 px-2 rounded-full bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20">
+              <Briefcase className="w-3 h-3 text-primary flex-shrink-0" />
+              <span className="font-bold text-primary whitespace-nowrap">
+                {developer.yearsOfExperience}+ Yrs
+              </span>
             </div>
-            <div className="text-xs text-muted-foreground">Ongoing</div>
+          )}
+          
+          {developer.establishedYear && (
+            <div className="flex items-center gap-1 py-1 px-2 rounded-full bg-muted/60">
+              <Calendar className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+              <span className="font-semibold text-muted-foreground whitespace-nowrap">
+                {developer.establishedYear}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Compact Project Statistics */}
+        <div className="space-y-1.5">
+          {/* Total Projects - Compact */}
+          <div className="flex items-center gap-2 py-1.5 px-2 rounded-lg bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 group-hover:border-primary/30 transition-all">
+            <div className="w-7 h-7 rounded-md bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center flex-shrink-0">
+              <Building2 className="w-3.5 h-3.5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-lg font-extrabold text-primary leading-none">
+                {totalProjects}
+              </div>
+              <div className="text-[9px] text-muted-foreground font-semibold mt-0.5 uppercase tracking-wide">
+                Total Projects
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Grid - Compact */}
+          <div className="grid grid-cols-3 gap-1.5">
+            <div className="py-1.5 px-1.5 rounded-md bg-gradient-to-br from-emerald-50 to-emerald-50/50 dark:from-emerald-950/30 dark:to-emerald-950/10 border border-emerald-200/60 dark:border-emerald-800/40 text-center">
+              <div className="text-sm font-bold text-emerald-600 dark:text-emerald-500 leading-none">
+                {statistics.projectsCompleted || 0}
+              </div>
+              <div className="text-[9px] text-emerald-600/70 dark:text-emerald-500/70 font-semibold mt-0.5 uppercase">
+                Done
+              </div>
+            </div>
+            
+            <div className="py-1.5 px-1.5 rounded-md bg-gradient-to-br from-blue-50 to-blue-50/50 dark:from-blue-950/30 dark:to-blue-950/10 border border-blue-200/60 dark:border-blue-800/40 text-center">
+              <div className="text-sm font-bold text-blue-600 dark:text-blue-500 leading-none">
+                {statistics.projectsOngoing || 0}
+              </div>
+              <div className="text-[9px] text-blue-600/70 dark:text-blue-500/70 font-semibold mt-0.5 uppercase">
+                Active
+              </div>
+            </div>
+
+            <div className="py-1.5 px-1.5 rounded-md bg-gradient-to-br from-orange-50 to-orange-50/50 dark:from-orange-950/30 dark:to-orange-950/10 border border-orange-200/60 dark:border-orange-800/40 text-center">
+              <div className="text-sm font-bold text-orange-600 dark:text-orange-500 leading-none">
+                {statistics.projectsUpcoming || 0}
+              </div>
+              <div className="text-[9px] text-orange-600/70 dark:text-orange-500/70 font-semibold mt-0.5 uppercase">
+                Coming
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Locations */}
-        <div className="flex items-start gap-1.5 text-xs text-muted-foreground pt-1.5 border-t border-border/50">
-          <MapPin className="w-3 h-3 shrink-0 mt-0.5" />
-          <span className="line-clamp-1">
-            {developer.locations.join(" • ")}
-          </span>
-        </div>
-
-        {/* Total Projects Count */}
-        <div className="flex items-center justify-center gap-1.5 pt-1.5 text-sm">
-          <Building2 className="w-3.5 h-3.5 text-primary" />
-          <span className="font-semibold text-xs">
-            {developer.projectsCount} Total Projects
-          </span>
+        {/* Compact View Details Hint */}
+        <div className="pt-0.5 flex items-center justify-center">
+          <div className="text-[10px] text-muted-foreground/60 group-hover:text-primary/80 font-medium transition-colors flex items-center gap-1">
+            <span className="hidden xs:inline">Click for details</span>
+            <span className="xs:hidden">Tap for details</span>
+            <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+          </div>
         </div>
       </div>
     </Card>

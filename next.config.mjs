@@ -14,6 +14,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'fxleyozwnwxfzpvvjwwn.storage.supabase.co',
       },
+      {
+        protocol: 'https',
+        hostname: 'logos-api.apistemic.com',
+      },
     ],
   },
 };

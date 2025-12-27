@@ -42,6 +42,9 @@ export default function Home() {
   const [pgHostelData, setPgHostelData] = useState([]);
   const [pgHostelLoading, setPgHostelLoading] = useState(false);
   const [pgHostelError, setPgHostelError] = useState(null);
+  const [developerData, setDeveloperData] = useState([]);
+  const [developerLoading, setDeveloperLoading] = useState(false);
+  const [developerError, setDeveloperError] = useState(null);
 
   // Custom hooks
   const scrolled = useScrollDetection(50);
@@ -85,6 +88,37 @@ export default function Home() {
 
     fetchPgHostelData();
   }, [location.lat, location.lng]);
+
+  // Fetch Developer data
+  useEffect(() => {
+    const fetchDeveloperData = async () => {
+      setDeveloperLoading(true);
+      setDeveloperError(null);
+      
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/developer-consumer-api/list?page=1&limit=20`
+        );
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log("Developer Data:", result);
+        setDeveloperData(result?.data || []);
+        console.log("=== Developer Data Fetched ===", result?.data);
+      } catch (error) {
+        console.error("Error fetching developer data:", error);
+        setDeveloperError(error.message);
+        setDeveloperData([]);
+      } finally {
+        setDeveloperLoading(false);
+      }
+    };
+
+    fetchDeveloperData();
+  }, []);
 
   // Event handlers using Zustand store
   const handleSearchSelect = (place) => {
@@ -266,13 +300,41 @@ export default function Home() {
         subtitle="Explore projects by India's leading real estate developers"
         className="bg-gradient-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#3d1f2f]"
       >
-        {DEVELOPERS_DATA.map((developer) => (
-          <DeveloperCard
-            key={developer.id}
-            developer={developer}
-            onClick={() => console.log(`Developer clicked: ${developer.name}`)}
-          />
-        ))}
+        {developerLoading ? (
+          <div className="w-full text-center py-12">
+            <Card className="inline-block p-6">
+              <MapPin className="w-16 h-16 text-primary mx-auto mb-4 animate-pulse" />
+              <h3 className="text-xl font-bold mb-2">Loading...</h3>
+              <p className="text-muted-foreground">Fetching trusted developers</p>
+            </Card>
+          </div>
+        ) : developerError ? (
+          <div className="w-full text-center py-12">
+            <Card className="inline-block p-6">
+              <MapPin className="w-16 h-16 text-destructive mx-auto mb-4" />
+              <h3 className="text-xl font-bold mb-2">Error Loading Data</h3>
+              <p className="text-muted-foreground">{developerError}</p>
+            </Card>
+          </div>
+        ) : developerData.length > 0 ? (
+          developerData.map((developer) => (
+            <DeveloperCard
+              key={developer.id}
+              developer={developer}
+              onClick={() => console.log(`Developer clicked: ${developer.name}`)}
+            />
+          ))
+        ) : (
+          <div className="w-full text-center py-12">
+            <Card className="inline-block p-6">
+              <MapPin className="w-16 h-16 text-primary mx-auto mb-4" />
+              <h3 className="text-xl font-bold mb-2">No Developers Found</h3>
+              <p className="text-muted-foreground">
+                Unable to load developer data at the moment
+              </p>
+            </Card>
+          </div>
+        )}
       </CarouselSection>
 
       {/* PG HOSTELS COLIVING Properties Section */}

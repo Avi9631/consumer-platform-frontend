@@ -11,30 +11,18 @@ import {
   Mail,
   Building2,
   Calendar,
-  Award,
-  CheckCircle,
   ChevronLeft,
   ChevronRight,
   X,
-  Users,
   Home,
-  Clock,
-  Star,
-  TrendingUp,
-  Briefcase,
-  Shield,
-  FileText,
   ExternalLink,
-  Download,
-  Video,
   PlayCircle,
   Globe,
   Linkedin,
   Twitter,
   Facebook,
   Instagram,
-  MessageCircle,
-  Maximize2,
+  Camera,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -49,15 +37,9 @@ import {
 import LocationSheet from "@/components/LocationSheet";
 import useLocationStore from "@/stores/locationStore";
 import Header from "@/components/Header";
-import ShortsCarousel from "@/components/ShortsCarousel";
 import CarouselSection from "@/components/CarouselSection";
 import ShortVideoCard from "@/components/ShortVideoCard";
-import {
-  PROPERTIES_DATA,
-  VIRTUAL_TOURS_DATA,
-  DEVELOPERS_DATA,
-} from "@/constants/propertyData";
-import { Camera } from "lucide-react";
+import { VIRTUAL_TOURS_DATA } from "@/constants/propertyData";
 
 export default function DeveloperDetailPage() {
   const params = useParams();
@@ -71,6 +53,9 @@ export default function DeveloperDetailPage() {
   );
 
   // State management
+  const [developer, setDeveloper] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
@@ -82,271 +67,49 @@ export default function DeveloperDetailPage() {
     lng: 72.8562,
   });
   const [sheetMapMarker, setSheetMapMarker] = useState(null);
-  const scrollRef = useRef(null);
-  const projectScrollRef = useRef(null);
-  const [currentStatIndex, setCurrentStatIndex] = useState(0);
   const [activeProjectTab, setActiveProjectTab] = useState("all");
   const [hoveredTourId, setHoveredTourId] = useState(null);
-  const [cityCarouselIndex, setCityCarouselIndex] = useState(0);
 
-  // Mock developer data - in real app, fetch based on developerId
-  const developer = {
-    id: developerId,
-    name: "Prestige Group",
-    tagline: "Building Dreams Since 1986",
-    logo: "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=200&h=200&fit=crop",
-    type: "Real Estate Developer",
-    establishedYear: 1986,
-    yearsOfExperience: 38,
-    headquarters: "Bangalore, Karnataka",
-    description: {
-      short:
-        "Leading real estate developer with a legacy of trust and excellence across residential, commercial, and retail spaces.",
-      long: "Prestige Group is one of India's leading real estate developers with a track record of over 38 years. The group has developed properties across residential, commercial, retail, leisure, and hospitality segments. With a strong presence in South India and expanding footprint across major metros, Prestige Group has delivered over 280 projects spanning 150 million sq. ft. The company is known for its commitment to quality, timely delivery, and customer satisfaction.",
-    },
-    rating: 4.7,
-    totalReviews: 2847,
-    projectsCompleted: 280,
-    projectsOngoing: 45,
-    projectsUpcoming: 28,
-    images: [
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=800&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=800&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=800&h=600&fit=crop",
-      "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=600&fit=crop",
-    ],
-    projects: [
-      {
-        id: 1,
-        name: "Prestige City",
-        type: "Integrated Township",
-        status: "Ongoing",
-        location: "Sarjapur Road, Bangalore",
-        image:
-          "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&h=300&fit=crop",
-        price: "₹65 Lakhs - ₹2.5 Cr",
-        configuration: "1, 2, 3, 4 BHK",
-        size: "180 acres",
-        units: 10000,
-        completionDate: "Dec 2027",
-        possession: "Dec 2027",
-        highlights: [
-          "Largest Township in Bangalore",
-          "40+ Amenities",
-          "IGBC Gold Certified",
-        ],
-        reraNumber: "PRM/KA/RERA/1251/310/PR/171117/001526",
-      },
-      {
-        id: 2,
-        name: "Prestige Park Grove",
-        type: "Residential Apartments",
-        status: "Ready to Move",
-        location: "Whitefield, Bangalore",
-        image:
-          "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=300&fit=crop",
-        price: "₹1.2 Cr - ₹2.8 Cr",
-        configuration: "2, 3, 4 BHK",
-        size: "12 acres",
-        units: 1046,
-        completionDate: "Completed",
-        possession: "Immediate",
-        highlights: ["Prime Location", "24+ Amenities", "Vastu Compliant"],
-        reraNumber: "PRM/KA/RERA/1251/308/PR/171117/000693",
-      },
-      {
-        id: 3,
-        name: "Prestige Falcon City",
-        type: "Residential Apartments",
-        status: "Under Construction",
-        location: "Kanakapura Road, Bangalore",
-        image:
-          "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400&h=300&fit=crop",
-        price: "₹55 Lakhs - ₹1.8 Cr",
-        configuration: "1, 2, 3 BHK",
-        size: "47 acres",
-        units: 3570,
-        completionDate: "Jun 2026",
-        possession: "Jun 2026",
-        highlights: ["Club House", "Sports Facilities", "School Nearby"],
-        reraNumber: "PRM/KA/RERA/1251/309/PR/171117/001234",
-      },
-      {
-        id: 4,
-        name: "Prestige Tech Platina",
-        type: "Commercial Office",
-        status: "Completed",
-        location: "Outer Ring Road, Bangalore",
-        image:
-          "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=300&fit=crop",
-        price: "₹8,500/sq.ft",
-        configuration: "Office Spaces",
-        size: "8 acres",
-        units: "2.5 Million sq.ft",
-        completionDate: "Completed",
-        possession: "Ready",
-        highlights: ["Grade A Office", "100% Occupied", "LEED Platinum"],
-        reraNumber: "PRM/KA/RERA/1251/310/COM/171117/001892",
-      },
-      {
-        id: 5,
-        name: "Prestige Shantiniketan",
-        type: "Luxury Apartments",
-        status: "Completed",
-        location: "Whitefield, Bangalore",
-        image:
-          "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=400&h=300&fit=crop",
-        price: "₹2.5 Cr - ₹8 Cr",
-        configuration: "3, 4, 5 BHK",
-        size: "105 acres",
-        units: 2300,
-        completionDate: "Completed",
-        possession: "Immediate",
-        highlights: ["Ultra Luxury", "60+ Amenities", "Iconic Landmark"],
-        reraNumber: "PRM/KA/RERA/1251/308/PR/171117/000501",
-      },
-      {
-        id: 6,
-        name: "Prestige Lakeside Habitat",
-        type: "Villa Community",
-        status: "Under Construction",
-        location: "Varthur, Bangalore",
-        image:
-          "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=400&h=300&fit=crop",
-        price: "₹3.5 Cr - ₹7 Cr",
-        configuration: "3, 4, 5 BHK Villas",
-        size: "35 acres",
-        units: 268,
-        completionDate: "Mar 2026",
-        possession: "Mar 2026",
-        highlights: ["Lakefront Villas", "Gated Community", "Private Gardens"],
-        reraNumber: "PRM/KA/RERA/1251/309/PR/171117/002156",
-      },
-      {
-        id: 7,
-        name: "Prestige Mall",
-        type: "Retail & Entertainment",
-        status: "Operational",
-        location: "Brigade Road, Bangalore",
-        image:
-          "https://images.unsplash.com/photo-1555529902-5261145633bf?w=400&h=300&fit=crop",
-        price: "₹15,000/sq.ft",
-        configuration: "Retail Spaces",
-        size: "6 acres",
-        units: "1.2 Million sq.ft",
-        completionDate: "Completed",
-        possession: "Operational",
-        highlights: ["Premium Mall", "200+ Brands", "Multiplex"],
-        reraNumber: "PRM/KA/RERA/1251/310/RET/171117/001347",
-      },
-      {
-        id: 8,
-        name: "Prestige Ocean Pearl",
-        type: "Residential Apartments",
-        status: "New Launch",
-        location: "OMR, Chennai",
-        image:
-          "https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?w=400&h=300&fit=crop",
-        price: "₹85 Lakhs - ₹2.2 Cr",
-        configuration: "2, 3, 4 BHK",
-        size: "15 acres",
-        units: 856,
-        completionDate: "Dec 2028",
-        possession: "Dec 2028",
-        highlights: [
-          "Beachside Living",
-          "Resort-style Amenities",
-          "Smart Homes",
-        ],
-        reraNumber: "TN/29/Building/0123/2024",
-      },
-    ],
-    contact: {
-      corporateOffice:
-        "Prestige Falcon Tower, Brunton Road, Bangalore - 560001",
-      phone: "+91 80 2559 9000",
-      email: "info@prestigeconstructions.com",
-      website: "www.prestigeconstructions.com",
-      customerCare: "1800 123 4567",
-    },
-    socialMedia: {
-      linkedin: "https://linkedin.com/company/prestige-group",
-      twitter: "https://twitter.com/prestigegroup",
-      facebook: "https://facebook.com/prestigegroup",
-      instagram: "https://instagram.com/prestigegroup",
-      youtube: "https://youtube.com/prestigegroup",
-    },
-  };
+  // Fetch developer data from API
+  useEffect(() => {
+    const fetchDeveloperData = async () => {
+      if (!developerId) return;
 
-  // Mock shorts data - not currently used in UI
-  const developerShorts = [
-    {
-      id: 1,
-      title: "Prestige City Tour",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      thumbnail:
-        "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&h=600&fit=crop",
-      price: "₹65L - 2.5Cr",
-      location: "Sarjapur Road, Bangalore",
-    },
-    {
-      id: 2,
-      title: "Park Grove Walkthrough",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      thumbnail:
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&h=600&fit=crop",
-      price: "₹1.2Cr - 2.8Cr",
-      location: "Whitefield, Bangalore",
-    },
-    {
-      id: 3,
-      title: "Falcon City Highlights",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      thumbnail:
-        "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=400&h=600&fit=crop",
-      price: "₹55L - 1.8Cr",
-      location: "Kanakapura Road, Bangalore",
-    },
-    {
-      id: 4,
-      title: "Tech Platina Office Space",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      thumbnail:
-        "https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&h=600&fit=crop",
-      price: "₹8,500/sq.ft",
-      location: "Outer Ring Road",
-    },
-    {
-      id: 5,
-      title: "Shantiniketan Luxury",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      thumbnail:
-        "https://images.unsplash.com/photo-1577495508048-b635879837f1?w=400&h=600&fit=crop",
-      price: "₹2.5Cr - 8Cr",
-      location: "Whitefield, Bangalore",
-    },
-    {
-      id: 6,
-      title: "Lakeside Habitat Villas",
-      videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      thumbnail:
-        "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?w=400&h=600&fit=crop",
-      price: "₹3.5Cr - 7Cr",
-      location: "Varthur, Bangalore",
-    },
-  ];
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/developer-consumer-api/${developerId}`
+        );
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch developer data: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log(data.data)
+        setDeveloper(data?.data);
+      } catch (err) {
+        console.error('Error fetching developer:', err);
+        setError(err.message || 'Failed to load developer data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDeveloperData();
+  }, [developerId]);
 
   const nextImage = () => {
+    if (!developer?.images) return;
     setCurrentImageIndex((prevIndex) =>
       prevIndex === developer.images.length - 1 ? 0 : prevIndex + 1
     );
   };
 
   const prevImage = () => {
+    if (!developer?.images) return;
     setCurrentImageIndex((prevIndex) =>
       prevIndex === 0 ? developer.images.length - 1 : prevIndex - 1
     );
@@ -358,12 +121,14 @@ export default function DeveloperDetailPage() {
   };
 
   const nextGalleryImage = () => {
+    if (!developer?.images) return;
     setGalleryImageIndex((prevIndex) =>
       prevIndex === developer.images.length - 1 ? 0 : prevIndex + 1
     );
   };
 
   const prevGalleryImage = () => {
+    if (!developer?.images) return;
     setGalleryImageIndex((prevIndex) =>
       prevIndex === 0 ? developer.images.length - 1 : prevIndex - 1
     );
@@ -414,7 +179,7 @@ export default function DeveloperDetailPage() {
   };
 
   // Filter projects by status
-  const filteredProjects = developer.projects.filter((project) => {
+  const filteredProjects = developer?.projects ? developer.projects.filter((project) => {
     if (activeProjectTab === "all") return true;
     if (activeProjectTab === "ongoing")
       return (
@@ -429,7 +194,52 @@ export default function DeveloperDetailPage() {
     if (activeProjectTab === "upcoming")
       return project.status === "New Launch" || project.status === "Pre-Launch";
     return true;
-  });
+  }) : [];
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-linear-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#1a0f1f] text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading developer information...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-linear-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#1a0f1f] text-white flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-6 mb-4">
+            <Building2 className="w-12 h-12 text-red-500 mx-auto mb-3" />
+            <h2 className="text-xl font-bold text-white mb-2">Error Loading Developer</h2>
+            <p className="text-gray-300 mb-4">{error}</p>
+            <Button
+              onClick={() => window.location.reload()}
+              className="bg-orange-500 hover:bg-orange-600"
+            >
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // No data state
+  if (!developer) {
+    return (
+      <div className="min-h-screen bg-linear-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#1a0f1f] text-white flex items-center justify-center">
+        <div className="text-center">
+          <Building2 className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+          <p className="text-gray-400">Developer not found</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-linear-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#1a0f1f] text-white relative overflow-hidden">
@@ -472,6 +282,7 @@ export default function DeveloperDetailPage() {
             side="full"
             className="bg-black/95 backdrop-blur-xl border-none p-0 overflow-hidden [&>button]:hidden"
           >
+            {developer && (
             <div className="h-full flex flex-col">
               {/* Header */}
               <SheetHeader className="p-4 sm:p-6 bg-linear-to-b from-black/80 to-transparent z-10">
@@ -481,7 +292,7 @@ export default function DeveloperDetailPage() {
                       {developer.name}
                     </SheetTitle>
                     <p className="text-xs sm:text-sm text-gray-400 mt-1 text-left">
-                      {galleryImageIndex + 1} / {developer.images.length}
+                      {galleryImageIndex + 1} / {developer.images?.length || 0}
                     </p>
                   </div>
                   <Button
@@ -499,6 +310,7 @@ export default function DeveloperDetailPage() {
               <div className="flex-1 relative">
                 <div className="flex items-center justify-center h-full px-4 sm:px-16 py-20">
                   <div className="relative w-full h-full max-w-7xl">
+                    {developer?.images?.[galleryImageIndex] && (
                     <Image
                       src={developer.images[galleryImageIndex]}
                       alt={`${developer.name} - Image ${galleryImageIndex + 1}`}
@@ -506,6 +318,7 @@ export default function DeveloperDetailPage() {
                       className="object-contain"
                       priority
                     />
+                    )}
                   </div>
                 </div>
 
@@ -531,7 +344,7 @@ export default function DeveloperDetailPage() {
               {/* Thumbnail Strip Footer */}
               <div className="p-4 sm:p-6 bg-linear-to-t from-black/80 to-transparent">
                 <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-                  {developer.images.map((image, index) => (
+                  {developer?.images?.map((image, index) => (
                     <button
                       key={index}
                       className={`relative shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden transition-all duration-300 ${
@@ -552,6 +365,7 @@ export default function DeveloperDetailPage() {
                 </div>
               </div>
             </div>
+            )}
           </SheetContent>
         </Sheet>
 
@@ -591,141 +405,30 @@ export default function DeveloperDetailPage() {
           </div>
         </header>
 
-        {/* Hero Section with Image Collage */}
-        <div className="relative mt-4 sm:mt-6 md:mt-12 mx-2 sm:mx-3 md:mx-4 lg:mx-6">
-          {/* Image Collage Grid */}
-          <div className="grid grid-cols-4 grid-rows-2 gap-1 sm:gap-2 h-48 sm:h-64 md:h-80 lg:h-96 xl:h-[500px]  md:rounded-2xl overflow-hidden shadow-2xl shadow-orange-500/10">
-            {/* Main large image */}
-            <div
-              className="col-span-2 row-span-2 relative group cursor-pointer"
-              onClick={() => openImageGallery(currentImageIndex)}
-            >
-              <Image
-                src={developer.images[currentImageIndex]}
-                alt={developer.name}
-                fill
-                className="object-cover transition-all duration-700 group-hover:scale-110"
-                priority
-              />
-              <div className="absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent group-hover:from-black/60 transition-all duration-500"></div>
-              {/* Main image indicator */}
-              <div className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-black/70 backdrop-blur-sm text-white px-2 sm:px-3 py-1 rounded-lg text-xs sm:text-sm font-medium border border-white/10">
-                {currentImageIndex + 1} / {developer.images.length}
-              </div>
-            </div>
-
-            {/* Smaller images */}
-            {developer.images.slice(1, 5).map((image, index) => {
-              const imageIndex = index + 1;
-              const isActive = currentImageIndex === imageIndex;
-              return (
-                <div
-                  key={imageIndex}
-                  className={`relative group cursor-pointer overflow-hidden rounded-md transition-all duration-300 ${
-                    isActive
-                      ? "ring-2 ring-orange-500 shadow-lg shadow-orange-500/50"
-                      : "hover:ring-2 hover:ring-white/30"
-                  }`}
-                  onClick={() => setCurrentImageIndex(imageIndex)}
-                >
-                  <Image
-                    src={image}
-                    alt={`${developer.name} - Image ${imageIndex + 1}`}
-                    fill
-                    className="object-cover transition-all duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-linear-to-t from-black/20 via-transparent to-transparent group-hover:from-black/40 transition-all duration-300"></div>
-                  {/* Show "View all photos" on last image if there are more images */}
-                  {index === 3 && developer.images.length > 5 && (
-                    <div
-                      className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center group-hover:bg-black/80 transition-all duration-300 cursor-pointer"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openImageGallery(0);
-                      }}
-                    >
-                      <div className="text-white text-center">
-                        <Maximize2 className="w-4 h-4 sm:w-6 sm:h-6 mx-auto mb-1" />
-                        <p className="text-xs sm:text-sm font-medium">
-                          +{developer.images.length - 5} more
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Navigation buttons */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-md text-white hover:bg-orange-500 hover:scale-110 z-10 transition-all duration-300 border border-white/10 h-8 w-8 sm:h-10 sm:w-10 p-0 rounded-full shadow-xl"
-            onClick={prevImage}
-          >
-            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-black/60 backdrop-blur-md text-white hover:bg-orange-500 hover:scale-110 z-10 transition-all duration-300 border border-white/10 h-8 w-8 sm:h-10 sm:w-10 p-0 rounded-full shadow-xl"
-            onClick={nextImage}
-          >
-            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-          </Button>
-
-          {/* Image indicators */}
-          <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2 z-10 bg-black/40 backdrop-blur-md px-3 py-2 rounded-full border border-white/10">
-            {developer.images.map((_, index) => (
-              <button
-                key={index}
-                className={`h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
-                  index === currentImageIndex
-                    ? "bg-orange-500 w-6 sm:w-8 shadow-lg shadow-orange-500/50"
-                    : "bg-white/40 hover:bg-white/70 w-1.5 sm:w-2"
-                }`}
-                onClick={() => setCurrentImageIndex(index)}
-              />
-            ))}
-          </div>
-        </div>
-
         {/* Main Content */}
         <div className="container mx-auto px-2 sm:px-3 md:px-4 lg:px-6 py-4 sm:py-6 md:py-8">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 sm:gap-4 lg:gap-6 text-white mb-4 sm:mb-6 md:mb-8">
             <div className="flex-1">
-              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-1.5 sm:mb-2 md:mb-3 bg-linear-to-r from-white to-gray-300 bg-clip-text text-white">
-                {developer.name}
+              <h1 className="text-xl px-3 sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-1.5 sm:mb-2 md:mb-3 bg-linear-to-r from-white to-gray-300 bg-clip-text text-white">
+                {developer?.name || 'Developer'}
               </h1>
-              <div className="flex items-start gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-                <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 mt-0.5 shrink-0" />
-                <p className="text-gray-300 text-xs sm:text-sm lg:text-base leading-relaxed">
-                  {developer.tagline}
-                </p>
-              </div>
               <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full">
-                  <Star className="h-3 w-3 md:h-4 md:w-4 fill-yellow-400 text-yellow-400" />
-                  <span className="font-semibold text-sm">
-                    {developer.rating}
-                  </span>
-                  <span className="text-gray-300 text-xs">
-                    ({developer.totalReviews} reviews)
-                  </span>
-                </div>
+                {developer?.establishedYear && (
                 <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full">
                   <Calendar className="h-3 w-3 md:h-4 md:w-4" />
                   <span className="text-sm">
                     Since {developer.establishedYear}
                   </span>
                 </div>
+                )}
+                {developer?.projectsCompleted && (
                 <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full">
                   <Building2 className="h-3 w-3 md:h-4 md:w-4" />
                   <span className="text-sm">
                     {developer.projectsCompleted}+ Projects
                   </span>
                 </div>
+                )}
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full lg:w-auto"></div>
@@ -739,15 +442,38 @@ export default function DeveloperDetailPage() {
                 <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-3   ">
                   <h3 className="text-orange-500 text-base sm:text-lg md:text-2xl font-bold mb-3 sm:mb-4 md:mb-6 flex items-center gap-2">
                     <Building2 className="w-5 h-5 sm:w-6 sm:h-6" />
-                    About {developer.name}
+                    About {developer?.name || 'Developer'}
                   </h3>
                   <div className="space-y-4 sm:space-y-6">
                     <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
-                      {developer.description.long}
+                      {developer?.description || 'No description available.'}
                     </p>
                   </div>
                 </div>
               </div>
+
+              {/* Virtual Tours Carousel */}
+              <CarouselSection
+                title={
+                  <>
+                    <h3 className="text-orange-500 text-base sm:text-lg md:text-2xl font-bold mb-3 sm:mb-4 md:mb-6 flex items-center gap-2">
+                      <Camera className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                      Media Coverage
+                    </h3>
+                  </>
+                }
+                subtitle="Hover over videos to auto-play • Swipe to explore more"
+                className="p-0"
+              >
+                {VIRTUAL_TOURS_DATA.map((tour) => (
+                  <ShortVideoCard
+                    key={tour.id}
+                    tour={tour}
+                    isHovered={hoveredTourId === tour.id}
+                    onHover={setHoveredTourId}
+                  />
+                ))}
+              </CarouselSection>
 
               {/* Projects Section */}
               <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-3  ">
@@ -768,7 +494,7 @@ export default function DeveloperDetailPage() {
                         : "bg-slate-700/50 border-white/20 text-gray-300 hover:bg-slate-600/50"
                     }`}
                   >
-                    All ({developer.projects.length})
+                    All ({developer?.projects?.length || 0})
                   </Button>
                   <Button
                     variant={
@@ -784,11 +510,11 @@ export default function DeveloperDetailPage() {
                   >
                     Ongoing (
                     {
-                      developer.projects.filter(
+                      developer?.projects?.filter(
                         (p) =>
                           p.status === "Ongoing" ||
                           p.status === "Under Construction"
-                      ).length
+                      ).length || 0
                     }
                     )
                   </Button>
@@ -806,12 +532,12 @@ export default function DeveloperDetailPage() {
                   >
                     Completed (
                     {
-                      developer.projects.filter(
+                      developer?.projects?.filter(
                         (p) =>
                           p.status === "Completed" ||
                           p.status === "Ready to Move" ||
                           p.status === "Operational"
-                      ).length
+                      ).length || 0
                     }
                     )
                   </Button>
@@ -829,10 +555,10 @@ export default function DeveloperDetailPage() {
                   >
                     New (
                     {
-                      developer.projects.filter(
+                      developer?.projects?.filter(
                         (p) =>
                           p.status === "New Launch" || p.status === "Pre-Launch"
-                      ).length
+                      ).length || 0
                     }
                     )
                   </Button>
@@ -1034,31 +760,6 @@ export default function DeveloperDetailPage() {
                   </div>
                 )}
               </div>
- 
-
-              {/* Virtual Tours Carousel */}
-
-              <CarouselSection
-                title={
-                  <>
-                    <h3 className="text-orange-500 text-base sm:text-lg md:text-2xl font-bold mb-3 sm:mb-4 md:mb-6 flex items-center gap-2">
-                      <Camera className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-                      Media Coverage
-                    </h3>
-                  </>
-                }
-                subtitle="Hover over videos to auto-play • Swipe to explore more"
-                className="p-0"
-              >
-                {VIRTUAL_TOURS_DATA.map((tour) => (
-                  <ShortVideoCard
-                    key={tour.id}
-                    tour={tour}
-                    isHovered={hoveredTourId === tour.id}
-                    onHover={setHoveredTourId}
-                  />
-                ))}
-              </CarouselSection>
             </div>
 
             {/* Right Column - Sticky Sidebar */}
@@ -1072,6 +773,7 @@ export default function DeveloperDetailPage() {
                   </h3>
 
                   <div className="space-y-3 mb-4">
+                    {developer?.contact?.corporateOffice && (
                     <div className="flex items-start gap-3">
                       <Building2 className="h-4 w-4 text-gray-400 mt-1 flex-shrink-0" />
                       <div>
@@ -1083,9 +785,11 @@ export default function DeveloperDetailPage() {
                         </p>
                       </div>
                     </div>
+                    )}
 
-                    <Separator className="bg-white/10" />
+                    {developer?.contact?.corporateOffice && <Separator className="bg-white/10" />}
 
+                    {developer?.contact?.phone && (
                     <div className="flex items-center gap-3">
                       <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
                       <div>
@@ -1095,7 +799,9 @@ export default function DeveloperDetailPage() {
                         </p>
                       </div>
                     </div>
+                    )}
 
+                    {developer?.contact?.customerCare && (
                     <div className="flex items-center gap-3">
                       <Phone className="h-4 w-4 text-gray-400 flex-shrink-0" />
                       <div>
@@ -1107,7 +813,9 @@ export default function DeveloperDetailPage() {
                         </p>
                       </div>
                     </div>
+                    )}
 
+                    {developer?.contact?.email && (
                     <div className="flex items-center gap-3">
                       <Mail className="h-4 w-4 text-gray-400 flex-shrink-0" />
                       <div>
@@ -1117,7 +825,9 @@ export default function DeveloperDetailPage() {
                         </p>
                       </div>
                     </div>
+                    )}
 
+                    {developer?.contact?.website && (
                     <div className="flex items-center gap-3">
                       <Globe className="h-4 w-4 text-gray-400 flex-shrink-0" />
                       <div>
@@ -1132,15 +842,18 @@ export default function DeveloperDetailPage() {
                         </a>
                       </div>
                     </div>
+                    )}
                   </div>
                 </div>
 
                 {/* Social Media */}
+                {developer?.socialMedia && (
                 <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl  p-3">
                   <h3 className="text-orange-500 text-base sm:text-lg font-bold mb-3 sm:mb-4">
                     Follow Us
                   </h3>
                   <div className="grid grid-cols-5 gap-2">
+                    {developer.socialMedia.linkedin && (
                     <a
                       href={developer.socialMedia.linkedin}
                       target="_blank"
@@ -1150,6 +863,8 @@ export default function DeveloperDetailPage() {
                     >
                       <Linkedin className="h-5 w-5 text-blue-400" />
                     </a>
+                    )}
+                    {developer.socialMedia.twitter && (
                     <a
                       href={developer.socialMedia.twitter}
                       target="_blank"
@@ -1159,6 +874,8 @@ export default function DeveloperDetailPage() {
                     >
                       <Twitter className="h-5 w-5 text-sky-400" />
                     </a>
+                    )}
+                    {developer.socialMedia.facebook && (
                     <a
                       href={developer.socialMedia.facebook}
                       target="_blank"
@@ -1168,6 +885,8 @@ export default function DeveloperDetailPage() {
                     >
                       <Facebook className="h-5 w-5 text-blue-400" />
                     </a>
+                    )}
+                    {developer.socialMedia.instagram && (
                     <a
                       href={developer.socialMedia.instagram}
                       target="_blank"
@@ -1177,6 +896,8 @@ export default function DeveloperDetailPage() {
                     >
                       <Instagram className="h-5 w-5 text-pink-400" />
                     </a>
+                    )}
+                    {developer.socialMedia.youtube && (
                     <a
                       href={developer.socialMedia.youtube}
                       target="_blank"
@@ -1186,8 +907,10 @@ export default function DeveloperDetailPage() {
                     >
                       <PlayCircle className="h-5 w-5 text-red-400" />
                     </a>
+                    )}
                   </div>
                 </div>
+                )}
               </div>
             </div>
           </div>
@@ -1199,7 +922,7 @@ export default function DeveloperDetailPage() {
             <div className="w-full max-w-md bg-linear-to-br from-slate-800 to-slate-900 rounded-xl border border-white/20 p-6 shadow-2xl">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-semibold text-white">
-                  Contact {developer.name}
+                  Contact {developer?.name || 'Developer'}
                 </h3>
                 <button
                   onClick={() => setShowContactModal(false)}
