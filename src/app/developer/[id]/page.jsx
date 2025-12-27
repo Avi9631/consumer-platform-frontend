@@ -409,10 +409,30 @@ export default function DeveloperDetailPage() {
         <div className="container mx-auto px-2 sm:px-3 md:px-4 lg:px-6 py-4 sm:py-6 md:py-8">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 sm:gap-4 lg:gap-6 text-white mb-4 sm:mb-6 md:mb-8">
             <div className="flex-1">
-              <h1 className="text-xl px-3 sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-1.5 sm:mb-2 md:mb-3 bg-linear-to-r from-white to-gray-300 bg-clip-text text-white">
-                {developer?.name || 'Developer'}
-              </h1>
-              <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              <div className="flex items-start gap-3 mb-2 px-3">
+                {developer?.logo && (
+                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-white/5 border border-white/10 flex-shrink-0">
+                    <Image
+                      src={developer.logo}
+                      alt={`${developer.name} logo`}
+                      fill
+                      className="object-contain p-2"
+                      priority
+                    />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-1 bg-linear-to-r from-white to-gray-300 bg-clip-text text-white">
+                    {developer?.name || 'Developer'}
+                  </h1>
+                  {developer?.tagline && (
+                    <p className="text-xs sm:text-sm text-orange-400 italic mb-2">
+                      {developer.tagline}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap px-3">
                 {developer?.establishedYear && (
                 <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full">
                   <Calendar className="h-3 w-3 md:h-4 md:w-4" />
@@ -421,11 +441,19 @@ export default function DeveloperDetailPage() {
                   </span>
                 </div>
                 )}
-                {developer?.projectsCompleted && (
+                {developer?.statistics?.projectsDelivered && (
                 <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full">
                   <Building2 className="h-3 w-3 md:h-4 md:w-4" />
                   <span className="text-sm">
-                    {developer.projectsCompleted}+ Projects
+                    {developer.statistics.projectsDelivered}+ Projects
+                  </span>
+                </div>
+                )}
+                {developer?.yearsOfExperience && (
+                <div className="flex items-center gap-1 bg-black/40 backdrop-blur-sm px-3 py-1 rounded-full">
+                  <Home className="h-3 w-3 md:h-4 md:w-4" />
+                  <span className="text-sm">
+                    {developer.yearsOfExperience}+ Years
                   </span>
                 </div>
                 )}
@@ -439,7 +467,7 @@ export default function DeveloperDetailPage() {
             <div className="lg:col-span-5 space-y-6 sm:space-y-8">
               {/* About Section */}
               <div className="space-y-4 sm:space-y-6 md:space-y-8">
-                <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-3   ">
+                <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-3">
                   <h3 className="text-orange-500 text-base sm:text-lg md:text-2xl font-bold mb-3 sm:mb-4 md:mb-6 flex items-center gap-2">
                     <Building2 className="w-5 h-5 sm:w-6 sm:h-6" />
                     About {developer?.name || 'Developer'}
@@ -766,7 +794,7 @@ export default function DeveloperDetailPage() {
             <div className="lg:col-span-2">
               <div className="lg:sticky lg:top-4 space-y-4 sm:space-y-6">
                 {/* Contact Card */}
-                <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl  p-3">
+                <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-3">
                   <h3 className="text-orange-500 text-lg font-bold mb-4 flex items-center gap-2">
                     <Phone className="w-5 h-5" />
                     Contact Information
@@ -827,6 +855,18 @@ export default function DeveloperDetailPage() {
                     </div>
                     )}
 
+                    {developer?.contact?.supportEmail && (
+                    <div className="flex items-center gap-3">
+                      <Mail className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">Support Email</p>
+                        <p className="text-sm font-medium text-gray-300 break-all">
+                          {developer.contact.supportEmail}
+                        </p>
+                      </div>
+                    </div>
+                    )}
+
                     {developer?.contact?.website && (
                     <div className="flex items-center gap-3">
                       <Globe className="h-4 w-4 text-gray-400 flex-shrink-0" />
@@ -848,7 +888,7 @@ export default function DeveloperDetailPage() {
 
                 {/* Social Media */}
                 {developer?.socialMedia && (
-                <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl  p-3">
+                <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl p-3">
                   <h3 className="text-orange-500 text-base sm:text-lg font-bold mb-3 sm:mb-4">
                     Follow Us
                   </h3>
