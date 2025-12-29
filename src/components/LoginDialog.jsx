@@ -26,6 +26,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { Phone, ArrowRight, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
@@ -275,10 +276,11 @@ export default function LoginDialog({ open, onOpenChange, onLoginSuccess }) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Enter OTP</FormLabel>
-                      <FormControl className="mt-2">
+                      <FormControl>
                         <div className="flex justify-center">
                           <InputOTP
                             maxLength={6}
+                            pattern={REGEXP_ONLY_DIGITS}
                             disabled={loading}
                             {...field}
                           >
