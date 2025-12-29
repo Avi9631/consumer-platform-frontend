@@ -23,6 +23,8 @@ import useLocationStore from "@/stores/locationStore";
 
 // Data
 import { PROPERTIES_DATA, VIRTUAL_TOURS_DATA, DEVELOPERS_DATA } from "@/constants/propertyData";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function Home() {
   // Zustand store for global location state
@@ -197,19 +199,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#1a0f1f] relative overflow-x-hidden">
-      {/* Sunset Ambient Glow Effects */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute top-20 left-1/2 w-[700px] h-[700px] bg-gradient-radial from-orange-500/20 via-orange-600/10 to-transparent rounded-full blur-[120px] -translate-x-1/2 animate-pulse"></div>
-        <div
-          className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-gradient-radial from-purple-500/15 via-purple-600/5 to-transparent rounded-full blur-[100px] animate-pulse"
-          style={{ animationDelay: "1s" }}
-        ></div>
-        <div
-          className="absolute bottom-1/4 left-1/4 w-[500px] h-[500px] bg-gradient-radial from-amber-500/15 via-amber-600/5 to-transparent rounded-full blur-[100px] animate-pulse"
-          style={{ animationDelay: "2s" }}
-        ></div>
-        <div className="absolute inset-x-0 top-1/4 h-[300px] bg-gradient-to-b from-orange-500/5 via-rose-500/5 to-transparent"></div>
-      </div>
+ 
 
       {/* Header */}
       <Header
@@ -236,15 +226,18 @@ export default function Home() {
       {/* Virtual Tours Carousel */}
       <CarouselSection
         title={
-          <>
-            ✨Trending{" "}
+          <div className="flex items-center gap-3  "> 
+          <div>
+            Virtual {" "}
             <span className="text-primary drop-shadow-[0_0_20px_rgba(251,146,60,0.8)]">
-              Properties
-            </span>
-          </>
+              Tours
+            </span>{" "}</div>
+            <Link href={'/developer'}><Button  size="sm">Explore More</Button></Link>
+          </div>
         }
-        subtitle="Hover over videos to auto-play • Swipe to explore more"
-        className="bg-gradient-to-b from-[#3d1f2f] via-[#2d1b1f] to-[#1a0f1f]"
+        className="my-3"
+        // subtitle="Hover over videos to auto-play • Swipe to explore more"
+        // className="bg-gradient-to-b from-[#3d1f2f] via-[#2d1b1f] to-[#1a0f1f]"
       >
         {VIRTUAL_TOURS_DATA.map((tour) => (
           <VirtualTourCard
@@ -259,15 +252,18 @@ export default function Home() {
       {/* Assured Properties Section */}
       <CarouselSection
         title={
-          <>
+          <div className="flex items-center gap-3  "> 
+          <div>
+            Top {" "}
             <span className="text-primary drop-shadow-[0_0_20px_rgba(251,146,60,0.8)]">
-              Assured
-            </span>{" "}
-            Projects
-          </>
+              Projects
+            </span>{" "}</div>
+            <Link href={'/projects'} target="_blank"><Button  size="sm" className="cursor-pointer">Explore More</Button></Link>
+          </div>
         }
-        subtitle="Swipe to explore more assured properties"
-        className="bg-gradient-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#3d1f2f]"
+        className="my-3"
+        // subtitle="Swipe to explore more assured properties"
+        // className="bg-gradient-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#3d1f2f]"
       >
         {PROPERTIES_DATA.length > 0 ? (
           PROPERTIES_DATA.map((property) => (
@@ -290,15 +286,18 @@ export default function Home() {
       {/* Trusted Developers Section */}
       <CarouselSection
         title={
-          <>
+          <div className="flex items-center gap-3  "> 
+          <div>
+            Top {" "}
             <span className="text-primary drop-shadow-[0_0_20px_rgba(251,146,60,0.8)]">
-              Trusted
-            </span>{" "}
-            Developers
-          </>
+              Developers
+            </span>{" "}</div>
+            <Link href={'/developer'} target="_blank"><Button  size="sm">Explore More</Button></Link>
+          </div>
         }
-        subtitle="Explore projects by India's leading real estate developers"
-        className="bg-gradient-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#3d1f2f]"
+        className="my-3"
+        // subtitle="Explore projects by India's leading real estate developers"
+        // className="bg-gradient-to-b from-[#1a0f1f] via-[#2d1b1f] to-[#3d1f2f]"
       >
         {developerLoading ? (
           <div className="w-full text-center py-12">
@@ -341,15 +340,18 @@ export default function Home() {
       {/* PG HOSTELS COLIVING Properties Section */}
       <CarouselSection
         title={
-          <> ✨Top {" "}
+          <div className="flex items-center gap-3  "> 
+          <div>
+            Top {" "}
             <span className="text-primary drop-shadow-[0_0_20px_rgba(251,146,60,0.8)]">
               Pg Hostel Co-living
-            </span>{" "}
-            
-          </>
+            </span>{" "}</div>
+            <Link href={'/pg-hostel-coliving'} target="_blank"><Button  size="sm">Explore More</Button></Link>
+          </div>
         }
-        subtitle="Swipe to explore more PG, Hostels & Co-living spaces"
-        className="bg-gradient-to-b from-[#3d1f2f] via-[#2d1b1f to-[#1a0f1f]] "
+        className="my-3"
+        // subtitle="Swipe to explore more PG, Hostels & Co-living spaces"
+        // className="bg-gradient-to-b from-[#3d1f2f] via-[#2d1b1f to-[#1a0f1f]] "
       >
         {pgHostelLoading ? (
           <div className="w-full text-center py-12">

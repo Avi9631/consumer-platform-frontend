@@ -34,8 +34,8 @@ export default function DeveloperCard({ developer, onClick }) {
   return (
     <Card
       onClick={onClick}
-      className="w-full group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-border/60 hover:border-primary/40 hover:-translate-y-1.5 bg-gradient-to-br from-background to-muted/20"
-    >
+      className="w-full group hover:shadow-[0_0_40px_rgba(251,146,60,0.3)] transition-all duration-300 overflow-hidden p-0 border-primary/10 hover:border-primary/30"
+     >
       {/* Compact Header with Gradient */}
       <div className="relative h-10 bg-gradient-to-br from-primary via-primary/90 to-orange-500 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
@@ -61,7 +61,7 @@ export default function DeveloperCard({ developer, onClick }) {
       </div>
 
       {/* Compact Logo */}
-      <div className="relative -mt-7 px-3">
+      <div className="relative -mt-12 px-3">
         <div className="w-14 h-14 rounded-lg border-3 border-background bg-white shadow-lg overflow-hidden group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
           <div className="relative w-full h-full">
             <Image
@@ -76,29 +76,29 @@ export default function DeveloperCard({ developer, onClick }) {
       </div>
 
       {/* Main Content Section - Compact */}
-      <div className="px-3 pt-2 pb-3 space-y-2">
+      <div className="px-3  pb-3 space-y-2">
         {/* Developer Name & Location */}
         <div className="space-y-0.5">
-          <h3 className="font-bold text-md leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+          <h3 className="font-bold text-lg leading-tight line-clamp-2 group-hover:text-primary transition-colors">
             {developer.name}
           </h3>
           
           {developer.tagline && (
-            <p className="text-[10px] text-muted-foreground italic line-clamp-1">
+            <p className="text-xs text-muted-foreground italic line-clamp-1">
               "{developer.tagline}"
             </p>
           )}
           
-          {location && (
-            <div className="flex items-center gap-0.5 text-muted-foreground">
+          {/* {location && (
+            <div className="flex items-center gap-0.5 text-muted-foreground mt-2">
               <MapPin className="w-3 h-3 flex-shrink-0" />
-              <span className="text-[10px] font-medium line-clamp-1">{location}</span>
+              <span className="text-xs font-medium line-clamp-1">{location}</span>
             </div>
-          )}
+          )} */}
         </div>
 
         {/* Experience & Year - Compact Row */}
-        <div className="flex items-center gap-1.5 text-[10px]">
+        {/* <div className="flex items-center gap-1.5 text-xs">
           {developer.yearsOfExperience && (
             <div className="flex items-center gap-1 py-1 px-2 rounded-full bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20">
               <Briefcase className="w-3 h-3 text-primary flex-shrink-0" />
@@ -116,14 +116,14 @@ export default function DeveloperCard({ developer, onClick }) {
               </span>
             </div>
           )}
-        </div>
+        </div> */}
 
    
 
         {/* View Details Button */}
         <Button 
           onClick={handleViewDetails}
-          className="w-full h-8 text-xs font-semibold bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white shadow-md hover:shadow-lg transition-all group/btn"
+          className="w-full h-8 text-xs font-semibold bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white shadow-md hover:shadow-lg transition-all group/btn cursor-pointer"
         >
           <span>View Details</span>
           <ArrowRight className="w-3.5 h-3.5 ml-1 group-hover/btn:translate-x-0.5 transition-transform" />

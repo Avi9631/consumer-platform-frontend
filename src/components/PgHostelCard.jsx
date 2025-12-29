@@ -51,7 +51,7 @@ export default function PgHostelCard({ property, onClick }) {
 
   // Handle individual image errors
   const handleImageError = (index) => {
-    setImageErrors(prev => ({ ...prev, [index]: true }));
+    setImageErrors((prev) => ({ ...prev, [index]: true }));
   };
 
   // Auto-play carousel
@@ -181,8 +181,6 @@ export default function PgHostelCard({ property, onClick }) {
     return "Independent";
   };
 
-
-
   // Get gender badge
   const getGenderBadge = () => {
     const gender = property.genderAllowed || property.gender_allowed;
@@ -231,8 +229,8 @@ export default function PgHostelCard({ property, onClick }) {
     if (onClick) {
       onClick(property);
     } else {
-window.open(`/pg-coliving-hostel/${property.pgHostelId}`, '_blank');
-     }
+      window.open(`/pg-coliving-hostel/${property.pgHostelId}`, "_blank");
+    }
   };
 
   return (
@@ -308,7 +306,9 @@ window.open(`/pg-coliving-hostel/${property.pgHostelId}`, '_blank');
                     index === currentImageIndex
                       ? "w-6 bg-white"
                       : "w-1.5 bg-white/50 hover:bg-white/75"
-                  }`}                  aria-label={`Go to image ${index + 1}`}                />
+                  }`}
+                  aria-label={`Go to image ${index + 1}`}
+                />
               ))}
             </div>
           </>
@@ -337,7 +337,9 @@ window.open(`/pg-coliving-hostel/${property.pgHostelId}`, '_blank');
             >
               <Heart
                 className={`w-4 h-4 transition-all duration-300 ${
-                  isFavorite ? "fill-red-500 text-red-500 scale-110" : "text-white"
+                  isFavorite
+                    ? "fill-red-500 text-red-500 scale-110"
+                    : "text-white"
                 }`}
               />
             </Button>
@@ -354,7 +356,10 @@ window.open(`/pg-coliving-hostel/${property.pgHostelId}`, '_blank');
 
         {/* Brand Badge - Bottom Left */}
         <div className="absolute bottom-3 left-3 z-20">
-          <Badge variant="secondary" className="backdrop-blur-lg bg-black/40 text-white border-white/20 shadow-lg font-medium">
+          <Badge
+            variant="secondary"
+            className="backdrop-blur-lg bg-black/40 text-white border-white/20 shadow-lg font-medium"
+          >
             {getBrandName()}
           </Badge>
         </div>
@@ -370,7 +375,9 @@ window.open(`/pg-coliving-hostel/${property.pgHostelId}`, '_blank');
           {property.rating && (
             <div className="flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded-full border border-white/20 flex-shrink-0">
               <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-              <span className="text-xs font-semibold text-white">{property.rating}</span>
+              <span className="text-xs font-semibold text-white">
+                {property.rating}
+              </span>
             </div>
           )}
         </div>
@@ -385,7 +392,9 @@ window.open(`/pg-coliving-hostel/${property.pgHostelId}`, '_blank');
         <div className="flex items-center gap-2 mb-3 text-white/80 flex-wrap">
           <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-md border border-white/10">
             <Home className="w-3 h-3" />
-            <span className="text-xs font-medium">{property.roomTypes?.length || 0}</span>
+            <span className="text-xs font-medium">
+              {property.roomTypes?.length || 0}
+            </span>
           </div>
           {hasFoodService() && (
             <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-md border border-white/10">
@@ -413,15 +422,15 @@ window.open(`/pg-coliving-hostel/${property.pgHostelId}`, '_blank');
               {getRoomTypesSummary()}
             </p>
           </div>
-          <Button 
-            size="sm" 
-            className="whitespace-nowrap font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 bg-primary hover:bg-primary/90 text-xs md:text-sm"
+          <Button
+            size="sm"
+            className="whitespace-nowrap cursor-pointer font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 bg-primary hover:bg-primary/90 text-xs text-white"
             onClick={(e) => {
               e.stopPropagation();
               handleCardClick();
             }}
           >
-            VIEW
+            View
           </Button>
         </div>
       </div>

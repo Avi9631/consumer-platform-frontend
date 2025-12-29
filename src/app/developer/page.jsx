@@ -31,6 +31,7 @@ export default function DeveloperSearchPage() {
   const [totalResults, setTotalResults] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [limit] = useState(20);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Load developers on mount
   useEffect(() => {
@@ -46,6 +47,16 @@ export default function DeveloperSearchPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Handle responsive pagination
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    handleResize(); // Set initial value
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   // Load developers with pagination
   const loadDevelopers = async (page = 1) => {
     setLoading(true);
@@ -53,8 +64,9 @@ export default function DeveloperSearchPage() {
     try {
       const result = await getDevelopers({ page, limit });
       console.log('Developers loaded:', result);
+      console.log(result.pagination)
       setDevelopers(result.data || []);
-      setTotalResults(result.pagination?.total || 0);
+      setTotalResults(result.pagination?.totalItems || 0);
       setTotalPages(result.pagination?.totalPages || 1);
       setCurrentPage(page);
     } catch (error) {
@@ -80,8 +92,9 @@ export default function DeveloperSearchPage() {
     try {
       const result = await searchDevelopers({ name: query, page, limit });
       console.log('Search results:', result);
+      console.log(result.pagination)
       setDevelopers(result.data || []);
-      setTotalResults(result.pagination?.total || 0);
+      setTotalResults(result.pagination?.totalItems || 0);
       setTotalPages(result.pagination?.totalPages || 1);
       setCurrentPage(page);
     } catch (error) {
@@ -113,7 +126,11 @@ export default function DeveloperSearchPage() {
 
   // Handle pagination
   const handlePageChange = (newPage) => {
-    if (newPage < 1 || newPage > totalPages) return;
+    console.log('Page change:', newPage, 'Total pages:', totalPages);
+    if (newPage < 1 || newPage > totalPages) {
+      console.log('Invalid page number');
+      return;
+    }
     
     if (isSearching && searchQuery) {
       performSearch(searchQuery, newPage);
@@ -266,8 +283,8 @@ export default function DeveloperSearchPage() {
                     
                     <div className="flex items-center gap-1">
                       {/* Show fewer pages on mobile */}
-                      {Array.from({ length: Math.min(window.innerWidth < 640 ? 3 : 5, totalPages) }, (_, i) => {
-                        const maxVisible = window.innerWidth < 640 ? 3 : 5;
+                      {Array.from({ length: Math.min(isMobile ? 3 : 5, totalPages) }, (_, i) => {
+                        const maxVisible = isMobile ? 3 : 5;
                         let pageNum;
                         if (totalPages <= maxVisible) {
                           pageNum = i + 1;

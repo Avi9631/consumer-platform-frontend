@@ -43,7 +43,7 @@ export default function InterestDialog({
               </p>
               
               {/* Show selected rooms if provided */}
-              {selectedRooms && selectedRooms.length > 0 ? (
+              {/* {selectedRooms && selectedRooms.length > 0 ? (
                 <div className="p-3 bg-orange-500/10 border border-orange-500/20 rounded-lg space-y-2">
                   <p className="text-sm font-semibold text-orange-400">Selected Room Types:</p>
                   <ScrollArea className={selectedRooms.length > 3 ? "h-[200px]" : ""}>
@@ -95,7 +95,7 @@ export default function InterestDialog({
                     </p>
                   ))}
                 </div>
-              ) : null}
+              ) : null} */}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

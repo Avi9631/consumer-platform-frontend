@@ -15,7 +15,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/context/AuthContext";
 import LoginDialog from "./LoginDialog";
-
+import Link from "next/link";
+ 
 /**
  * Header Component
  * Application header with logo, location selector, and user avatar
@@ -46,12 +47,12 @@ export default function Header({
         }`}
       >
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="text-xl md:text-2xl font-bold hover:scale-105 transition-transform cursor-pointer">
+          <Link href={'/'} className="text-xl md:text-2xl font-bold hover:scale-105 transition-transform cursor-pointer">
             Real
             <span className="text-primary drop-shadow-[0_0_15px_rgba(251,146,60,0.8)]">
               Estate
             </span>
-          </div>
+          </Link>
           <div className="flex items-center gap-3">
             {selectedLocation && (
               <Button
