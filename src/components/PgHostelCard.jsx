@@ -231,9 +231,8 @@ export default function PgHostelCard({ property, onClick }) {
     if (onClick) {
       onClick(property);
     } else {
-
-      window.location.href = `/pg-coliving-hostel/${property.pgHostelId}`;
-    }
+window.open(`/pg-coliving-hostel/${property.pgHostelId}`, '_blank');
+     }
   };
 
   return (

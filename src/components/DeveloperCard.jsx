@@ -17,10 +17,7 @@ export default function DeveloperCard({ developer, onClick }) {
   
   // Calculate total projects from statistics
   const statistics = developer?.statistics || {};
-  const totalProjects = 
-    (statistics.projectsCompleted || 0) + 
-    (statistics.projectsOngoing || 0) + 
-    (statistics.projectsUpcoming || 0);
+ 
   
   // Get location from contact address
   const location = developer?.contact?.address?.city || developer?.location;
@@ -31,7 +28,7 @@ export default function DeveloperCard({ developer, onClick }) {
 
   const handleViewDetails = (e) => {
     e.stopPropagation();
-    router.push(`/developer/${developer.id}`);
+    window.open(`/developer/${developer.id}`, '_blank');
   };
 
   return (
@@ -121,53 +118,7 @@ export default function DeveloperCard({ developer, onClick }) {
           )}
         </div>
 
-        {/* Compact Project Statistics */}
-        <div className="space-y-1.5">
-          {/* Total Projects - Compact */}
-          <div className="flex items-center gap-2 py-1.5 px-2 rounded-lg bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 group-hover:border-primary/30 transition-all">
-            <div className="w-7 h-7 rounded-md bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center flex-shrink-0">
-              <Building2 className="w-3.5 h-3.5 text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-lg font-extrabold text-primary leading-none">
-                {totalProjects}
-              </div>
-              <div className="text-[9px] text-muted-foreground font-semibold mt-0.5 uppercase tracking-wide">
-                Total Projects
-              </div>
-            </div>
-          </div>
-
-          {/* Stats Grid - Compact */}
-          <div className="grid grid-cols-3 gap-1.5">
-            <div className="py-1.5 px-1.5 rounded-md bg-gradient-to-br from-emerald-50 to-emerald-50/50 dark:from-emerald-950/30 dark:to-emerald-950/10 border border-emerald-200/60 dark:border-emerald-800/40 text-center">
-              <div className="text-sm font-bold text-emerald-600 dark:text-emerald-500 leading-none">
-                {statistics.projectsCompleted || 0}
-              </div>
-              <div className="text-[9px] text-emerald-600/70 dark:text-emerald-500/70 font-semibold mt-0.5 uppercase">
-                Done
-              </div>
-            </div>
-            
-            <div className="py-1.5 px-1.5 rounded-md bg-gradient-to-br from-blue-50 to-blue-50/50 dark:from-blue-950/30 dark:to-blue-950/10 border border-blue-200/60 dark:border-blue-800/40 text-center">
-              <div className="text-sm font-bold text-blue-600 dark:text-blue-500 leading-none">
-                {statistics.projectsOngoing || 0}
-              </div>
-              <div className="text-[9px] text-blue-600/70 dark:text-blue-500/70 font-semibold mt-0.5 uppercase">
-                Active
-              </div>
-            </div>
-
-            <div className="py-1.5 px-1.5 rounded-md bg-gradient-to-br from-orange-50 to-orange-50/50 dark:from-orange-950/30 dark:to-orange-950/10 border border-orange-200/60 dark:border-orange-800/40 text-center">
-              <div className="text-sm font-bold text-orange-600 dark:text-orange-500 leading-none">
-                {statistics.projectsUpcoming || 0}
-              </div>
-              <div className="text-[9px] text-orange-600/70 dark:text-orange-500/70 font-semibold mt-0.5 uppercase">
-                Coming
-              </div>
-            </div>
-          </div>
-        </div>
+   
 
         {/* View Details Button */}
         <Button 
