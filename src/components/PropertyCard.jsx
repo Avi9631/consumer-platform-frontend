@@ -232,9 +232,10 @@ export default function PropertyCard({
   // Get developer/brand name
   const getDeveloperName = () => {
     if (property.developer) return property.developer;
+    if (property.builder_name) return property.builder_name;
     if (property.brand_name) return property.brand_name;
     if (property.is_brand_managed) return "Brand Managed";
-    return "Independent";
+    return null; // Return null instead of "Independent" for property sales
   };
 
   // Check if property is verified
@@ -399,15 +400,17 @@ export default function PropertyCard({
           </div>
         </div>
 
-        {/* Developer Badge - Bottom Left */}
-        <div className="absolute bottom-3 left-3 z-20">
-          <Badge
-            variant="secondary"
-            className="backdrop-blur-lg bg-black/40 text-white border-white/20 shadow-lg font-medium"
-          >
-            {getDeveloperName()}
-          </Badge>
-        </div>
+        {/* Developer Badge - Bottom Left (Only show if developer info exists) */}
+        {getDeveloperName() && (
+          <div className="absolute bottom-3 left-3 z-20">
+            <Badge
+              variant="secondary"
+              className="backdrop-blur-lg bg-black/40 text-white border-white/20 shadow-lg font-medium px-2.5 py-1"
+            >
+              <span className="text-xs">Built by {getDeveloperName()}</span>
+            </Badge>
+          </div>
+        )}
       </div>
 
       {/* Content Section */}

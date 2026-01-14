@@ -28,7 +28,7 @@ export const searchProperties = async ({ latitude, longitude, radius, propertyTy
       params.append('propertyType', propertyType);
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/properties/search?${params}`, {
+    const response = await fetch(`${API_BASE_URL}/api/property/search-nearby?${params}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -40,7 +40,8 @@ export const searchProperties = async ({ latitude, longitude, radius, propertyTy
     }
 
     const data = await response.json();
-    return data.properties || data.data || [];
+    // Backend returns: { success: true, data: { properties: [], searchCenter: {}, pagination: {} } }
+    return data.data?.properties || [];
   } catch (error) {
     console.error('Error searching properties:', error);
     return [];

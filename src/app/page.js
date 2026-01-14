@@ -13,6 +13,7 @@ import PropertyCard from "@/components/PropertyCard";
 import PgHostelCard from "@/components/PgHostelCard";
 import DeveloperCard from "@/components/DeveloperCard";
 import LocationSheet from "@/components/LocationSheet";
+import PropertyListingCard from "@/components/PropertyListingCard";
 
 // Hooks
 import { useScrollDetection } from "@/hooks/useScrollDetection";
@@ -47,6 +48,9 @@ export default function Home() {
   const [developerData, setDeveloperData] = useState([]);
   const [developerLoading, setDeveloperLoading] = useState(false);
   const [developerError, setDeveloperError] = useState(null);
+  const [propertyListData, setPropertyListData] = useState([]);
+  const [propertyListLoading, setPropertyListLoading] = useState(false);
+  const [propertyListError, setPropertyListError] = useState(null);
 
   // Custom hooks
   const scrolled = useScrollDetection(50);
@@ -120,6 +124,37 @@ export default function Home() {
     };
 
     fetchDeveloperData();
+  }, []);
+
+  // Fetch Property List data
+  useEffect(() => {
+    const fetchPropertyListData = async () => {
+      setPropertyListLoading(true);
+      setPropertyListError(null);
+      
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/property/list?page=1&limit=20`
+        );
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log("Property List Data:", result);
+        setPropertyListData(result?.data?.properties || []);
+        console.log("=== Property List Data Fetched ===", result?.data?.properties);
+      } catch (error) {
+        console.error("Error fetching property list data:", error);
+        setPropertyListError(error.message);
+        setPropertyListData([]);
+      } finally {
+        setPropertyListLoading(false);
+      }
+    };
+
+    fetchPropertyListData();
   }, []);
 
   // Event handlers using Zustand store
@@ -380,6 +415,53 @@ export default function Home() {
               <h3 className="text-xl font-bold mb-2">No PG/Hostels Found</h3>
               <p className="text-muted-foreground">
                 Try selecting a different location or increasing the search radius
+              </p>
+            </Card>
+          </div>
+        )}
+      </CarouselSection>
+
+      {/* Properties Section */}
+      <CarouselSection
+        title={
+          <div className="flex items-center gap-3  "> 
+          <div>
+            Top {" "}
+            <span className="text-primary drop-shadow-[0_0_20px_rgba(251,146,60,0.8)]">
+              Properties
+            </span>{" "}</div>
+            <Link href={'/property'} target="_blank"><Button  size="sm">Explore More</Button></Link>
+          </div>
+        }
+        className="my-3"
+      >
+        {propertyListLoading ? (
+          <div className="w-full text-center py-12">
+            <Card className="inline-block p-6">
+              <MapPin className="w-16 h-16 text-primary mx-auto mb-4 animate-pulse" />
+              <h3 className="text-xl font-bold mb-2">Loading...</h3>
+              <p className="text-muted-foreground">Fetching properties</p>
+            </Card>
+          </div>
+        ) : propertyListError ? (
+          <div className="w-full text-center py-12">
+            <Card className="inline-block p-6">
+              <MapPin className="w-16 h-16 text-destructive mx-auto mb-4" />
+              <h3 className="text-xl font-bold mb-2">Error Loading Data</h3>
+              <p className="text-muted-foreground">{propertyListError}</p>
+            </Card>
+          </div>
+        ) : propertyListData.length > 0 ? (
+          propertyListData.map((property) => (
+            <PropertyListingCard key={property.propertyId} property={property} />
+          ))
+        ) : (
+          <div className="w-full text-center py-12">
+            <Card className="inline-block p-6">
+              <MapPin className="w-16 h-16 text-primary mx-auto mb-4" />
+              <h3 className="text-xl font-bold mb-2">No Properties Found</h3>
+              <p className="text-muted-foreground">
+                No properties available at the moment
               </p>
             </Card>
           </div>

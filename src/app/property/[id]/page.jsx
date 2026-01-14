@@ -29,6 +29,7 @@ import {
   Shield,
   Trees,
   Waves,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,11 @@ export default function PropertyDetailPage() {
   const params = useParams();
   const propertyId = params?.id;
 
+  // Fetch property data state
+  const [propertyData, setPropertyData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   // Zustand store for global location state
   const location = useLocationStore((state) => state.location);
   const searchResult = useLocationStore((state) => state.searchResult);
@@ -70,132 +76,244 @@ export default function PropertyDetailPage() {
   });
   const [sheetMapMarker, setSheetMapMarker] = useState(null);
   const scrollRef = useRef(null);
-  const [currentStatIndex, setCurrentStatIndex] = useState(0);
 
-  // Mock property data - in real app, fetch based on propertyId
-  const property = {
-    id: propertyId,
-    title: "Lodha Solitaire",
-    subtitle: "Lodha Solitaire, Maulana Azad Road, off Sant Rasta, Mahalakshmi, Mumbai, Maharashtra 400011",
-    price: "₹5.65 Cr - 8.44 Cr",
-    originalPrice: "₹6.2 Cr - 9.1 Cr",
-    discount: "9% off",
-    configuration: "3 BHK, 4 BHK",
-    status: "Under construction",
-    possession: "Possession in Dec 2027",
-    avgPrice: "₹40,949/sq.ft",
-    area: "1206 - 1727 sq.ft",
-    images: [
-    "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1586105251261-72a756497a11?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1599423300746-b62533397364?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop",
-  "https://images.unsplash.com/photo-1502005097973-6a7082348e28?w=800&h=600&fit=crop"
-],
-    amenities: [
-      { icon: Shield, name: "CCTV / Video Surveillance" },
-      { icon: CarIcon, name: "Car Parking Space" }, 
-      { icon: Dumbbell, name: "Gymnasium" },
-      { icon: Waves, name: "Swimming Pool" },
-      { icon: Trees, name: "Landscaped Gardens" },
-      { icon: Wifi, name: "High Speed Internet" },
-      { icon: Users, name: "Community Hall" },
-      { icon: Shield, name: "24x7 Security" }
-    ],
-    highlights: [
-      "Premium Residential Project in the heart of South Mumbai",
-      "Spacious 3&amp;4 BHK luxury homes with high-end interiors and finishes",
-      "World-class amenities for an exclusive living experience",
-      "Eco-friendly and sustainable features for a refined lifestyle",
-      "Seamless connectivity to key locations via the Eastern Express Highway"
-    ],
-    developer: {
-      name: "Lodha Group",
-      logo: "/api/placeholder/60/60",
-      rating: 4.5,
-      projects: 45
-    },
-    agent: {
-      name: "Sukruth Shetty",
-      role: "Relationship Manager | Owner | Agent", 
-      image: "/api/placeholder/60/60",
-      phone: "+91 98765 43210",
-      email: "sukruth@lodha.com"
-    },
-    coordinates: {
-      lat: 19.0176,
-       lng: 72.8562
-    }
+  // Fetch property data from API
+  useEffect(() => {
+    if (!propertyId) return;
+
+    const fetchPropertyData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(`http://localhost:3000/api/property/${propertyId}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch property data');
+        }
+        const result = await response.json();
+        if (result.success && result.data) {
+          setPropertyData(result.data);
+        } else {
+          throw new Error(result.message || 'Failed to load property');
+        }
+      } catch (err) {
+        console.error('Error fetching property:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPropertyData();
+  }, [propertyId]);
+
+  // Helper function to map features to amenities with icons
+  const mapFeaturesToAmenities = (features) => {
+    const featureIconMap = {
+      'cctv_surveillance': { icon: Shield, name: "CCTV Surveillance" },
+      'visitor_parking': { icon: CarIcon, name: "Visitor Parking" },
+      'gym': { icon: Dumbbell, name: "Gymnasium" },
+      'swimming_pool': { icon: Waves, name: "Swimming Pool" },
+      'jogging_track': { icon: Trees, name: "Jogging Track" },
+      'gated_society': { icon: Shield, name: "Gated Society" },
+      'children_play_area': { icon: Users, name: "Children Play Area" },
+      'water_supply_247': { icon: Waves, name: "24x7 Water Supply" },
+      'maintenance_staff': { icon: Users, name: "Maintenance Staff" },
+      'fire_safety': { icon: Shield, name: "Fire Safety" },
+      'power_backup': { icon: Shield, name: "Power Backup" },
+      'piped_gas': { icon: Shield, name: "Piped Gas" }
+    };
+
+    return features.map(feature => 
+      featureIconMap[feature] || { icon: Shield, name: feature.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) }
+    );
   };
 
-  // Quick Stats data
-  const quickStats = [
-    {
-      icon: Building2,
-      label: "Configuration",
-      value: property.configuration
-    },
-    {
-      icon: Square,
-      label: "Area",
-      value: property.area
-    },
-    {
-      icon: Calendar,
-      label: "Status",
-      value: property.status
-    },
-    {
-      icon: IndianRupee,
-      label: "Avg. Price",
-      value: property.avgPrice
-    },
-    {
-      icon: Building2,
-      label: "Configuration",
-      value: property.configuration
-    },
-    {
-      icon: Square,
-      label: "Area",
-      value: property.area
-    },
-    {
-      icon: Calendar,
-      label: "Status",
-      value: property.status
-    },
-    {
-      icon: IndianRupee,
-      label: "Avg. Price",
-      value: property.avgPrice
+  // Helper function to format price
+  const formatPrice = (pricing) => {
+    if (!pricing || pricing.length === 0) return 'Price on Request';
+    const askingPrice = pricing.find(p => p.type === 'asking_price');
+    if (!askingPrice) return 'Price on Request';
+    
+    const price = askingPrice.value;
+    if (price >= 10000000) {
+      return `₹${(price / 10000000).toFixed(2)} Cr`;
+    } else if (price >= 100000) {
+      return `₹${(price / 100000).toFixed(2)} Lac`;
     }
-  ];
+    return `₹${price.toLocaleString('en-IN')}`;
+  };
 
-  // Auto-carousel effect for Quick Stats
-  useEffect(() => {
-    const CAROUSEL_INTERVAL = 3000; // milliseconds between slide changes
-    const totalSlides = Math.ceil(quickStats.length / 4);
+  // Helper function to format area
+  const formatArea = (carpetArea, superArea) => {
+    if (superArea) return `${superArea} sq.ft`;
+    if (carpetArea) return `${carpetArea} sq.ft`;
+    return 'N/A';
+  };
 
-    const carouselInterval = setInterval(() => {
-      setCurrentStatIndex((prev) => (prev + 1) % totalSlides);
-    }, CAROUSEL_INTERVAL);
+  // Map API data to component structure
+  const property = propertyData ? {
+    id: propertyData.propertyId,
+    title: propertyData.title || propertyData.propertyName,
+    subtitle: propertyData.addressText || `${propertyData.locality}, ${propertyData.city}`,
+    price: formatPrice(propertyData.pricing),
+    configuration: propertyData.bedrooms ? `${propertyData.bedrooms} BHK` : 'N/A',
+    status: propertyData.possessionStatus === 'ready' ? 'Ready to Move' : 'Under Construction',
+    possession: propertyData.availableFrom ? `Available from ${new Date(propertyData.availableFrom).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}` : 'Immediate',
+    avgPrice: propertyData.pricing && propertyData.carpetArea ? 
+      `₹${Math.round(propertyData.pricing.find(p => p.type === 'asking_price')?.value / propertyData.carpetArea).toLocaleString('en-IN')}/sq.ft` : 'N/A',
+    area: formatArea(propertyData.carpetArea, propertyData.superArea),
+    carpetArea: propertyData.carpetArea,
+    superArea: propertyData.superArea,
+    description: propertyData.description,
+    images: propertyData.mediaData?.length > 0 ? 
+      propertyData.mediaData.map(media => media.url) : 
+      ["https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&h=600&fit=crop"],
+    amenities: mapFeaturesToAmenities(propertyData.features || []),
+    features: propertyData.features || [],
+    highlights: [
+      propertyData.description || "Premium residential property",
+      propertyData.projectName ? `Part of ${propertyData.projectName}` : null,
+      propertyData.furnishingStatus ? `${propertyData.furnishingStatus.charAt(0).toUpperCase() + propertyData.furnishingStatus.slice(1)} Furnished` : null,
+      propertyData.ownershipType ? `${propertyData.ownershipType.charAt(0).toUpperCase() + propertyData.ownershipType.slice(1)} Ownership` : null,
+      propertyData.isGated ? "Gated Community" : null,
+      propertyData.fireSafety ? "Fire Safety Systems" : null,
+      propertyData.petFriendly ? "Pet Friendly" : null,
+    ].filter(Boolean).slice(0, 6),
+    bedrooms: propertyData.bedrooms,
+    bathrooms: propertyData.bathrooms,
+    facing: propertyData.facing,
+    view: propertyData.view,
+    floorNumber: propertyData.floorNumber,
+    totalFloors: propertyData.totalFloors,
+    unitNumber: propertyData.unitNumber,
+    towerName: propertyData.towerName,
+    isUnitNumberPrivate: propertyData.isUnitNumberPrivate,
+    ageOfProperty: propertyData.ageOfProperty,
+    furnishingStatus: propertyData.furnishingStatus,
+    furnishingDetails: propertyData.furnishingDetails,
+    projectName: propertyData.projectName,
+    propertyType: propertyData.propertyType,
+    listingType: propertyData.listingType,
+    propertyPosition: propertyData.propertyPosition,
+    ownershipType: propertyData.ownershipType,
+    measurementMethod: propertyData.measurementMethod,
+    areaConfig: propertyData.areaConfig,
+    isPriceNegotiable: propertyData.isPriceNegotiable,
+    isPriceVerified: propertyData.isPriceVerified,
+    isNewProperty: propertyData.isNewProperty,
+    isGated: propertyData.isGated,
+    fireSafety: propertyData.fireSafety,
+    hasIntercom: propertyData.hasIntercom,
+    petFriendly: propertyData.petFriendly,
+    hasEmergencyExit: propertyData.hasEmergencyExit,
+    flooringTypes: propertyData.flooringTypes,
+    smartHomeDevices: propertyData.smartHomeDevices,
+    reraIds: propertyData.reraIds,
+    pricing: propertyData.pricing,
+    possessionDate: propertyData.possessionDate,
+    showMapExact: propertyData.showMapExact,
+    city: propertyData.city,
+    locality: propertyData.locality,
+    landmark: propertyData.landmark,
+    developer: {
+      name: propertyData.creator?.derivedUserName || "Property Owner",
+      logo: "/api/placeholder/60/60",
+      rating: 4.5,
+      projects: 1
+    },
+    agent: {
+      name: propertyData.creator?.derivedUserName || "Property Owner",
+      role: "Property Owner",
+      image: "/api/placeholder/60/60",
+      phone: propertyData.creator?.phone || "Contact via platform",
+      email: propertyData.creator?.email || "",
+      verificationStatus: propertyData.creator?.verificationStatus
+    },
+    coordinates: {
+      lat: propertyData.lat || 19.0176,
+      lng: propertyData.lng || 72.8562
+    },
+    createdDate: propertyData.v_created_date,
+    createdTime: propertyData.v_created_time,
+    updatedDate: propertyData.v_updated_date,
+    updatedTime: propertyData.v_updated_time
+  } : null;
 
-    return () => clearInterval(carouselInterval);
-  }, [quickStats.length]);
+  // Quick Stats data
+  const quickStats = property ? [
+    {
+      icon: Building2,
+      label: "Property Type",
+      value: property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'N/A'
+    },
+    {
+      icon: IndianRupee,
+      label: "Listing Type",
+      value: property.listingType ? property.listingType.charAt(0).toUpperCase() + property.listingType.slice(1) : 'N/A'
+    },
+    {
+      icon: Building2,
+      label: "Configuration",
+      value: property.configuration
+    },
+    {
+      icon: Square,
+      label: "Carpet Area",
+      value: property.carpetArea ? `${property.carpetArea} sq.ft` : 'N/A'
+    },
+    {
+      icon: Square,
+      label: "Super Area",
+      value: property.superArea ? `${property.superArea} sq.ft` : 'N/A'
+    },
+    {
+      icon: Calendar,
+      label: "Status",
+      value: property.status
+    },
+    {
+      icon: IndianRupee,
+      label: "Avg. Price/sq.ft",
+      value: property.avgPrice
+    },
+    {
+      icon: Bed,
+      label: "Bedrooms",
+      value: property.bedrooms || 'N/A'
+    },
+    {
+      icon: Bath,
+      label: "Bathrooms",
+      value: property.bathrooms || 'N/A'
+    },
+    {
+      icon: Building2,
+      label: "Floor",
+      value: property.floorNumber ? `${property.floorNumber}/${property.totalFloors}` : 'N/A'
+    },
+    {
+      icon: Building2,
+      label: "Facing",
+      value: property.facing ? property.facing.charAt(0).toUpperCase() + property.facing.slice(1) : 'N/A'
+    },
+    {
+      icon: Calendar,
+      label: "Age",
+      value: property.ageOfProperty ? `${property.ageOfProperty} years` : property.isNewProperty ? 'New' : 'N/A'
+    }
+  ] : [];
+
+
 
   const nextImage = () => {
+    if (!property) return;
     setCurrentImageIndex((prev) => 
       prev === property.images.length - 1 ? 0 : prev + 1
     );
   };
 
   const prevImage = () => {
+    if (!property) return;
     setCurrentImageIndex((prev) => 
       prev === 0 ? property.images.length - 1 : prev - 1
     );
@@ -207,12 +325,14 @@ export default function PropertyDetailPage() {
   };
 
   const nextGalleryImage = () => {
+    if (!property) return;
     setGalleryImageIndex((prev) => 
       prev === property.images.length - 1 ? 0 : prev + 1
     );
   };
 
   const prevGalleryImage = () => {
+    if (!property) return;
     setGalleryImageIndex((prev) => 
       prev === 0 ? property.images.length - 1 : prev - 1
     );
@@ -220,6 +340,7 @@ export default function PropertyDetailPage() {
 
   // Handle opening location sheet
   const handleOpenLocationSheet = () => {
+    if (!property) return;
     if (searchResult && searchResult.coordinates) {
       setSheetMapCenter({
         lat: searchResult.coordinates.lat,
@@ -284,6 +405,47 @@ export default function PropertyDetailPage() {
 
  
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-white flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-orange-500 animate-spin mx-auto mb-4" />
+          <p className="text-gray-400">Loading property details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-6 max-w-md">
+            <p className="text-red-400 mb-4">{error}</p>
+            <Button 
+              onClick={() => window.location.reload()} 
+              className="bg-orange-500 hover:bg-orange-600"
+            >
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // No property data
+  if (!property) {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-white flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-400">Property not found</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-white relative overflow-hidden">
@@ -552,18 +714,44 @@ export default function PropertyDetailPage() {
         </div>
 
         {/* Main Content */}
-        <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-6 sm:py-8">
+        <div className="container mx-auto py-6 px-3 sm:px-4 lg:px-6 sm:py-8">
 
              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 lg:gap-6 text-white mb-8">
               <div className="flex-1">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3 bg-linear-to-r from-white to-gray-300 bg-clip-text text-white">{property.title}</h1>
+                <div className="flex items-center gap-2 mb-2">
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-linear-to-r from-white to-gray-300 bg-clip-text text-white">{property.title}</h1>
+                  {property.isNewProperty && (
+                    <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs">
+                      NEW
+                    </Badge>
+                  )}
+                </div>
+                
+                {/* Property Type & Listing Type Badges */}
+                <div className="flex items-center gap-2 mb-3">
+                  {property.propertyType && (
+                    <Badge className="bg-orange-500/20 text-orange-300 border-orange-500/30 text-xs capitalize">
+                      {property.propertyType}
+                    </Badge>
+                  )}
+                  {property.listingType && (
+                    <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs capitalize">
+                      For {property.listingType}
+                    </Badge>
+                  )}
+                </div>
+
                 <div className="flex items-start gap-2 mb-3">
                   <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 mt-0.5 shrink-0" />
                   <p className="text-gray-300 text-xs sm:text-sm lg:text-base leading-relaxed">{property.subtitle}</p>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3">
                   <span className="text-xl sm:text-2xl  font-bold bg-linear-to-r from-orange-500 to-orange-400 bg-clip-text text-white">{property.price}</span>
-      
+                  {property.isPriceNegotiable && (
+                    <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs">
+                      Negotiable
+                    </Badge>
+                  )}
                 </div>
               </div>
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full lg:w-auto">
@@ -580,45 +768,6 @@ export default function PropertyDetailPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
             {/* Left Content */}
             <div className="lg:col-span-2 space-y-6 sm:space-y-8">
-              {/* Quick Stats Carousel */}
-              <div className="relative">
-                <div className="overflow-hidden">
-                  <div 
-                    ref={scrollRef}
-                    className="flex gap-3 sm:gap-4 transition-transform duration-700 ease-in-out"
-                    style={{ transform: `translateX(-${currentStatIndex * 100}%)` }}
-                  >
-                    {Array.from({ length: Math.ceil(quickStats.length / 4) }).map((_, slideIndex) => (
-                      <div key={slideIndex} className="min-w-full grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                        {quickStats.slice(slideIndex * 4, (slideIndex + 1) * 4).map((stat, index) => (
-                          <Card key={index} className="bg-linear-to-br from-slate-800/80 to-slate-900/80 border-white/10 backdrop-blur-xl hover:border-orange-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/20 hover:scale-105 group">
-                            <CardContent className="p-3 sm:p-4 text-center">
-                              <stat.icon className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500 mx-auto mb-2 group-hover:scale-110 transition-transform duration-300" />
-                              <p className="text-xs sm:text-sm text-gray-400 mb-1">{stat.label}</p>
-                              <p className="font-semibold text-white text-xs sm:text-sm">{stat.value}</p>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Carousel Indicators */}
-                <div className="flex justify-center gap-2 mt-4">
-                  {Array.from({ length: Math.ceil(quickStats.length / 4) }).map((_, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentStatIndex(index)}
-                      className={`h-2 rounded-full transition-all duration-300 ${
-                        index === currentStatIndex 
-                          ? 'bg-orange-500 w-8 shadow-lg shadow-orange-500/50' 
-                          : 'bg-white/30 hover:bg-white/50 w-2'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
 
               {/* Overview Section */}
               <div className="space-y-6 sm:space-y-8">
@@ -628,70 +777,293 @@ export default function PropertyDetailPage() {
                   </h3>
                   <div className="space-y-4 sm:space-y-6">
                     <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
-                      Lodha Solitaire is a luxury residential development in Mahalaxmi, Mumbai, offering 3 & 4 BHK Luxury Homes with world-class amenities. Designed with meticulous interior planning, high-end fixtures, and an ultra-modern architectural concept, Lodha Solitaire redefines luxury living.
+                      {property.description || 'Premium residential property with modern amenities and excellent connectivity.'}
                     </p>
                     
-           
-                    <div className="grid sm:grid-cols-3 gap-3 sm:gap-4 p-4 sm:p-5 bg-linear-to-br from-slate-700/50 to-slate-800/50 rounded-xl border border-white/10">
-                      <div className="text-center sm:text-left">
-                        <p className="text-xs sm:text-sm text-gray-400 mb-1">Configuration</p>
-                        <p className="font-semibold text-white text-sm sm:text-base">{property.configuration}</p>
+                    {/* Property Details Grid */}
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {/* Quick Stats Information */}
+                      <div className="p-3 bg-white/5 rounded-lg border border-white/10 hover:border-orange-500/30 transition-all">
+                        <p className="text-xs text-gray-400 mb-1">Property Type</p>
+                        <p className="font-semibold text-white text-sm">{property.propertyType ? property.propertyType.charAt(0).toUpperCase() + property.propertyType.slice(1) : 'N/A'}</p>
                       </div>
-                      <div className="text-center sm:text-left">
-                        <p className="text-xs sm:text-sm text-gray-400 mb-1">Under construction</p>
-                        <p className="font-semibold text-white text-sm sm:text-base">{property.possession}</p>
+                      <div className="p-3 bg-white/5 rounded-lg border border-white/10 hover:border-orange-500/30 transition-all">
+                        <p className="text-xs text-gray-400 mb-1">Listing Type</p>
+                        <p className="font-semibold text-white text-sm">{property.listingType ? property.listingType.charAt(0).toUpperCase() + property.listingType.slice(1) : 'N/A'}</p>
                       </div>
-                      <div className="text-center sm:text-left">
-                        <p className="text-xs sm:text-sm text-gray-400 mb-1">RERA Carpet Area</p>
-                        <p className="font-semibold text-white text-sm sm:text-base">{property.area}</p>
+                      <div className="p-3 bg-white/5 rounded-lg border border-white/10 hover:border-orange-500/30 transition-all">
+                        <p className="text-xs text-gray-400 mb-1">Configuration</p>
+                        <p className="font-semibold text-white text-sm">{property.configuration}</p>
                       </div>
+                      <div className="p-3 bg-white/5 rounded-lg border border-white/10 hover:border-orange-500/30 transition-all">
+                        <p className="text-xs text-gray-400 mb-1">Carpet Area</p>
+                        <p className="font-semibold text-white text-sm">{property.carpetArea ? `${property.carpetArea} sq.ft` : 'N/A'}</p>
+                      </div>
+                      <div className="p-3 bg-white/5 rounded-lg border border-white/10 hover:border-orange-500/30 transition-all">
+                        <p className="text-xs text-gray-400 mb-1">Super Area</p>
+                        <p className="font-semibold text-white text-sm">{property.superArea ? `${property.superArea} sq.ft` : 'N/A'}</p>
+                      </div>
+                      <div className="p-3 bg-white/5 rounded-lg border border-white/10 hover:border-orange-500/30 transition-all">
+                        <p className="text-xs text-gray-400 mb-1">Property Status</p>
+                        <p className="font-semibold text-white text-sm">{property.status}</p>
+                      </div>
+                      <div className="p-3 bg-white/5 rounded-lg border border-white/10 hover:border-orange-500/30 transition-all">
+                        <p className="text-xs text-gray-400 mb-1">Avg. Price/sq.ft</p>
+                        <p className="font-semibold text-white text-sm">{property.avgPrice}</p>
+                      </div>
+                      <div className="p-3 bg-white/5 rounded-lg border border-white/10 hover:border-orange-500/30 transition-all">
+                        <p className="text-xs text-gray-400 mb-1">Bedrooms</p>
+                        <p className="font-semibold text-white text-sm">{property.bedrooms || 'N/A'}</p>
+                      </div>
+                      <div className="p-3 bg-white/5 rounded-lg border border-white/10 hover:border-orange-500/30 transition-all">
+                        <p className="text-xs text-gray-400 mb-1">Bathrooms</p>
+                        <p className="font-semibold text-white text-sm">{property.bathrooms || 'N/A'}</p>
+                      </div>
+                      <div className="p-3 bg-white/5 rounded-lg border border-white/10 hover:border-orange-500/30 transition-all">
+                        <p className="text-xs text-gray-400 mb-1">Floor</p>
+                        <p className="font-semibold text-white text-sm">{property.floorNumber ? `${property.floorNumber}/${property.totalFloors}` : 'N/A'}</p>
+                      </div>
+                      <div className="p-3 bg-white/5 rounded-lg border border-white/10 hover:border-orange-500/30 transition-all">
+                        <p className="text-xs text-gray-400 mb-1">Age of Property</p>
+                        <p className="font-semibold text-white text-sm">{property.ageOfProperty ? `${property.ageOfProperty} years` : property.isNewProperty ? 'New' : 'N/A'}</p>
+                      </div>
+                      {property.facing && (
+                        <div className="p-3 bg-white/5 rounded-lg border border-white/10 hover:border-orange-500/30 transition-all">
+                          <p className="text-xs text-gray-400 mb-1">Facing</p>
+                          <p className="font-semibold text-white text-sm capitalize">{property.facing}</p>
+                        </div>
+                      )}
+                      {property.view && (
+                        <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                          <p className="text-xs text-gray-400 mb-1">View</p>
+                          <p className="font-semibold text-white text-sm capitalize">{property.view.replace(/_/g, ' ')}</p>
+                        </div>
+                      )}
+                      {property.towerName && (
+                        <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                          <p className="text-xs text-gray-400 mb-1">Tower</p>
+                          <p className="font-semibold text-white text-sm">{property.towerName}</p>
+                        </div>
+                      )}
+                      {property.unitNumber && !property.isUnitNumberPrivate && (
+                        <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                          <p className="text-xs text-gray-400 mb-1">Unit Number</p>
+                          <p className="font-semibold text-white text-sm">{property.unitNumber}</p>
+                        </div>
+                      )}
+                      {property.propertyPosition && (
+                        <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                          <p className="text-xs text-gray-400 mb-1">Position</p>
+                          <p className="font-semibold text-white text-sm capitalize">{property.propertyPosition}</p>
+                        </div>
+                      )}
+                      {property.ownershipType && (
+                        <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                          <p className="text-xs text-gray-400 mb-1">Ownership</p>
+                          <p className="font-semibold text-white text-sm capitalize">{property.ownershipType}</p>
+                        </div>
+                      )}
+                      {property.measurementMethod && (
+                        <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                          <p className="text-xs text-gray-400 mb-1">Measurement Method</p>
+                          <p className="font-semibold text-white text-sm capitalize">{property.measurementMethod.replace(/_/g, ' ')}</p>
+                        </div>
+                      )}
+                      {property.areaConfig && property.areaConfig.length > 0 && property.areaConfig.map((area, index) => (
+                        <div key={index} className="p-3 bg-white/5 rounded-lg border border-white/10">
+                          <p className="text-xs text-gray-400 mb-1 capitalize">{area.type} Area</p>
+                          <p className="font-semibold text-white text-sm">{area.value} sq.ft</p>
+                        </div>
+                      ))}
                     </div>
+
+                    {property.furnishingStatus && (
+                      <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                        <p className="text-xs text-gray-400 mb-2">Furnishing Status</p>
+                        <p className="font-semibold text-white text-sm capitalize mb-3">{property.furnishingStatus} Furnished</p>
+                        
+                        {/* Furnishing Details */}
+                        {property.furnishingDetails && Object.keys(property.furnishingDetails).length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-white/10">
+                            <p className="text-xs text-gray-400 mb-2">Includes:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {Object.entries(property.furnishingDetails).map(([key, value]) => 
+                                value && (
+                                  <Badge key={key} variant="secondary" className="bg-orange-500/20 text-orange-300 border-orange-500/30 text-xs">
+                                    <CheckCircle className="w-3 h-3 mr-1" />
+                                    {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                  </Badge>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                          {/* Why consider buying this property? Section */}
+                {/* Flooring & Interiors Section */}
+                {(property.flooringTypes?.length > 0 || property.smartHomeDevices?.length > 0) && (
+                  <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
+                    <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
+                      Interiors & Smart Features
+                    </h3>
+                    
+                    {property.flooringTypes?.length > 0 && (
+                      <div className="mb-4">
+                        <p className="text-sm text-gray-400 mb-2 font-semibold">Flooring Types</p>
+                        <div className="flex flex-wrap gap-2">
+                          {property.flooringTypes.map((type, index) => (
+                            <Badge key={index} className="bg-white/5 text-white border-white/20 hover:bg-white/10">
+                              {type}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {property.smartHomeDevices?.length > 0 && (
+                      <div>
+                        <p className="text-sm text-gray-400 mb-3 font-semibold">Smart Home Features</p>
+                        <div className="grid sm:grid-cols-2 gap-2">
+                          {property.smartHomeDevices.map((device, index) => (
+                            <div key={index} className="flex items-center gap-2 p-2 bg-white/5 rounded-lg">
+                              <CheckCircle className="w-4 h-4 text-orange-500" />
+                              <span className="text-white text-xs capitalize">{device.replace(/_/g, ' ')}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Security & Safety Features */}
                 <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
                   <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
-                    Why consider buying this property?
+                    Security & Safety
                   </h3>
-                   <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
-                        {property.highlights.map((highlight, index) => (
-                          <div key={index} className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300 group">
-                            <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-orange-500 mt-0.5 shrink-0 group-hover:scale-110 transition-transform" />
-                            <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">{highlight}</p>
-                          </div>
-                        ))}
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {property.isGated && (
+                      <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg">
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                        <span className="text-white text-sm">Gated Society</span>
                       </div>
+                    )}
+                    {property.fireSafety && (
+                      <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg">
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                        <span className="text-white text-sm">Fire Safety</span>
+                      </div>
+                    )}
+                    {property.hasIntercom && (
+                      <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg">
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                        <span className="text-white text-sm">Intercom Facility</span>
+                      </div>
+                    )}
+                    {property.hasEmergencyExit && (
+                      <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg">
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                        <span className="text-white text-sm">Emergency Exit</span>
+                      </div>
+                    )}
+                    {property.petFriendly && (
+                      <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg">
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                        <span className="text-white text-sm">Pet Friendly</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
+
+                {/* RERA Information */}
+                {property.reraIds && property.reraIds.length > 0 && (
+                  <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
+                    <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
+                      RERA Information
+                    </h3>
+                    <div className="space-y-2">
+                      {property.reraIds.map((rera, index) => (
+                        <div key={index} className="p-4 bg-white/5 rounded-lg border border-white/10">
+                          <p className="text-xs text-gray-400 mb-1">RERA ID</p>
+                          <p className="font-semibold text-white text-sm font-mono">{rera.id}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+ 
 
                 {/* Amenities Section */}
                 <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
                   <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
-                    Amenities
+                    Amenities & Features
                   </h3>
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                    {property.amenities.map((amenity, index) => (
-                      <div key={index} className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300 group">
-                        <amenity.icon className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500 group-hover:scale-110 transition-transform" />
-                        <span className="text-white text-xs sm:text-sm font-medium">{amenity.name}</span>
-                      </div>
-                    ))}
+                    {property.amenities.length > 0 ? (
+                      property.amenities.map((amenity, index) => (
+                        <div key={index} className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300 group">
+                          <amenity.icon className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500 group-hover:scale-110 transition-transform" />
+                          <span className="text-white text-xs sm:text-sm font-medium">{amenity.name}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-400 text-sm col-span-3">No amenities listed</p>
+                    )}
                   </div>
                 </div>
 
-                {/* Price & Floor Plan Section */}
+                {/* Price & Payment Details Section */}
                 <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
                   <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
-                    Price & Floor Plan
+                    Pricing Details
                   </h3>
                   <div className="space-y-3 sm:space-y-4">
+                    {/* Main Price Display */}
                     <div className="p-4 sm:p-5 bg-linear-to-br from-slate-700/50 to-slate-800/50 rounded-xl border border-white/10 hover:border-orange-500/30 transition-all duration-300">
-                      <h4 className="font-semibold text-white mb-2 text-sm sm:text-base">Price Range</h4>
-                      <p className="text-xl sm:text-2xl font-bold bg-linear-to-r from-orange-500 to-orange-400 bg-clip-text text-white">{property.price}</p>
-                      {property.originalPrice && (
-                        <p className="text-gray-400 text-xs sm:text-sm mt-1">Original Price: <span className="line-through">{property.originalPrice}</span></p>
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h4 className="font-semibold text-white mb-2 text-sm sm:text-base">Asking Price</h4>
+                          <p className="text-xl sm:text-2xl font-bold bg-linear-to-r from-orange-500 to-orange-400 bg-clip-text text-white">{property.price}</p>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          {property.isPriceNegotiable && (
+                            <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
+                              Negotiable
+                            </Badge>
+                          )}
+                          {property.isPriceVerified && (
+                            <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Verified
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Price Breakdown */}
+                      {property.pricing && property.pricing.length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-white/10">
+                          <p className="text-xs text-gray-400 mb-2">Price Breakdown</p>
+                          <div className="space-y-2">
+                            {property.pricing.map((price, index) => (
+                              <div key={index} className="flex justify-between items-center text-sm">
+                                <span className="text-gray-400 capitalize">{price.type.replace(/_/g, ' ')}:</span>
+                                <span className="text-white font-semibold">
+                                  ₹{(price.value).toLocaleString('en-IN')}
+                                  {price.unit !== 'total' && ` (${price.unit})`}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
                       )}
                     </div>
+
+                    {/* Average Price per sq.ft */}
                     <div className="p-4 sm:p-5 bg-linear-to-br from-slate-700/50 to-slate-800/50 rounded-xl border border-white/10 hover:border-orange-500/30 transition-all duration-300">
                       <h4 className="font-semibold text-white mb-2 text-sm sm:text-base">Average Price per sq.ft</h4>
                       <p className="text-lg sm:text-xl font-bold bg-linear-to-r from-orange-500 to-orange-400 bg-clip-text text-white">{property.avgPrice}</p>
@@ -699,24 +1071,50 @@ export default function PropertyDetailPage() {
                   </div>
                 </div>
 
-                {/* Locality Section */}
+                {/* Location Section */}
                 <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
                   <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
-                    Locality
+                    Location
                   </h3>
-                  <div className="h-64 sm:h-80 rounded-xl overflow-hidden border border-white/10 shadow-xl">
-                    {/* <GoogleMapViewer 
-                      center={property.coordinates}
-                      markers={[{
-                        lat: property.coordinates.lat,
-                        lng: property.coordinates.lng,
-                        title: property.title
-                      }]}
-                      zoom={15}
-                    /> */}
-                    
-                  <iframe src={`https://www.google.com/maps?q=${property.coordinates.lat},${property.coordinates.lng}&z=15&output=embed`} width="600" height="450" className="w-full"   loading="lazy" referrerPolicy="no-referrer-when-downgrade"></iframe>
+                  
+                  {/* Location Details */}
+                  <div className="grid sm:grid-cols-2 gap-3 mb-4">
+                    {property.city && (
+                      <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                        <p className="text-xs text-gray-400 mb-1">City</p>
+                        <p className="font-semibold text-white text-sm">{property.city}</p>
+                      </div>
+                    )}
+                    {property.locality && (
+                      <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                        <p className="text-xs text-gray-400 mb-1">Locality</p>
+                        <p className="font-semibold text-white text-sm">{property.locality}</p>
+                      </div>
+                    )}
+                    {property.landmark && (
+                      <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                        <p className="text-xs text-gray-400 mb-1">Landmark</p>
+                        <p className="font-semibold text-white text-sm">{property.landmark}</p>
+                      </div>
+                    )}
+                    {property.projectName && (
+                      <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                        <p className="text-xs text-gray-400 mb-1">Project Name</p>
+                        <p className="font-semibold text-white text-sm">{property.projectName}</p>
+                      </div>
+                    )}
+                  </div>
 
+                  {/* Map */}
+                  <div className="h-64 sm:h-80 rounded-xl overflow-hidden border border-white/10 shadow-xl">
+                    <iframe 
+                      src={`https://www.google.com/maps?q=${property.coordinates.lat},${property.coordinates.lng}&z=15&output=embed`} 
+                      width="600" 
+                      height="450" 
+                      className="w-full h-full"   
+                      loading="lazy" 
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
                   </div>
  
                 </div>
@@ -725,28 +1123,81 @@ export default function PropertyDetailPage() {
 
             {/* Right Sidebar */}
             <div className="space-y-4 sm:space-y-6">
-              {/* Developer Info */}
-              <Card className="bg-linear-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500 sticky top-24">
-                {/* <CardHeader>
+              {/* Property Owner/Creator Info */}
+              <Card className="bg-linear-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500">
+                <CardHeader>
                   <CardTitle className="text-orange-500 text-base sm:text-lg font-bold flex items-center gap-2">
                     <div className="w-1 h-5 bg-linear-to-b from-orange-500 to-orange-600 rounded-full"></div>
-                    Developer
+                    Property Owner
                   </CardTitle>
-                </CardHeader> */}
+                </CardHeader>
                 <CardContent>
-                  <div className="flex items-center gap-3  ">
+                  <div className="flex items-center gap-3 mb-4">
                     <Avatar className="w-12 h-12 sm:w-14 sm:h-14 ring-2 ring-orange-500/50">
-                      <AvatarImage src={property.developer.logo} />
-                      <AvatarFallback className="bg-linear-to-br from-orange-500 to-orange-600 text-white font-bold">LG</AvatarFallback>
+                      <AvatarImage src={property.agent.image} />
+                      <AvatarFallback className="bg-linear-to-br from-orange-500 to-orange-600 text-white font-bold">
+                        {property.agent.name.split(' ').map(n => n[0]).join('')}
+                      </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                      <h4 className="font-semibold text-white text-sm sm:text-base mb-1">{property.developer.name}</h4>
-                      <div className="flex items-center gap-1">
-                        <Star className="w-3 h-3 sm:w-4 sm:h-4 text-orange-500 fill-current" />
-                        <span className="text-xs sm:text-sm text-gray-400">{property.developer.rating} • {property.developer.projects} Projects</span>
-                      </div>
+                      <h4 className="font-semibold text-white text-sm sm:text-base mb-1">{property.agent.name}</h4>
+                      <p className="text-xs sm:text-sm text-gray-400">{property.agent.role}</p>
+                      {property.agent.verificationStatus && (
+                        <Badge 
+                          className={`mt-1 text-xs ${
+                            property.agent.verificationStatus === 'APPROVED' 
+                              ? 'bg-green-500/20 text-green-300 border-green-500/30' 
+                              : 'bg-yellow-500/20 text-yellow-300 border-yellow-500/30'
+                          }`}
+                        >
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          {property.agent.verificationStatus}
+                        </Badge>
+                      )}
                     </div>
                   </div>
+                  
+                  {/* Contact Information */}
+                  {property.agent.phone && (
+                    <div className="p-3 bg-white/5 rounded-lg mb-2">
+                      <p className="text-xs text-gray-400 mb-1">Phone</p>
+                      <p className="text-sm text-white font-medium">{property.agent.phone}</p>
+                    </div>
+                  )}
+                  {property.agent.email && (
+                    <div className="p-3 bg-white/5 rounded-lg">
+                      <p className="text-xs text-gray-400 mb-1">Email</p>
+                      <p className="text-sm text-white font-medium break-all">{property.agent.email}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Listing Information */}
+              <Card className="bg-linear-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500">
+                <CardHeader>
+                  <CardTitle className="text-orange-500 text-base sm:text-lg font-bold flex items-center gap-2">
+                    <div className="w-1 h-5 bg-linear-to-b from-orange-500 to-orange-600 rounded-full"></div>
+                    Listing Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between items-center p-2 bg-white/5 rounded">
+                    <span className="text-xs text-gray-400">Property ID</span>
+                    <span className="text-sm text-white font-medium">#{property.id}</span>
+                  </div>
+                  {property.createdDate && (
+                    <div className="flex justify-between items-center p-2 bg-white/5 rounded">
+                      <span className="text-xs text-gray-400">Listed On</span>
+                      <span className="text-sm text-white font-medium">{property.createdDate}</span>
+                    </div>
+                  )}
+                  {property.updatedDate && (
+                    <div className="flex justify-between items-center p-2 bg-white/5 rounded">
+                      <span className="text-xs text-gray-400">Last Updated</span>
+                      <span className="text-sm text-white font-medium">{property.updatedDate}</span>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -754,9 +1205,8 @@ export default function PropertyDetailPage() {
               <Card className="bg-linear-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500">
                 <CardHeader>
                   <CardTitle className="text-orange-500 text-base sm:text-lg font-bold flex items-center gap-2">
-                    Visit property from your home
+                    Schedule a Visit
                   </CardTitle>
-          
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-3 mb-4  ">
