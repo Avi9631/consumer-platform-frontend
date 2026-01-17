@@ -143,11 +143,11 @@ export default function HeroSection({ onSearchSelect, onOpenLocationSheet, selec
             </div>
             
             {/* Optional floating badge for premium feel */}
-            {selectedLocation.name && (
+            {/* {selectedLocation.name && (
               <div className="absolute -top-2 -right-2 bg-linear-to-r from-primary to-orange-500 text-white text-xs px-3 py-1 rounded-full shadow-lg animate-pulse">
                 <span className="font-medium">✨ Active</span>
               </div>
-            )}
+            )} */}
           </div>
         </motion.div>
       </div>
