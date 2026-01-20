@@ -390,14 +390,14 @@ export default function PgHostelCard({ property, onClick }) {
                 }`}
               />
             </Button>
-            <Button
+            {/* <Button
               variant="secondary"
               size="icon-sm"
               className="rounded-full backdrop-blur-lg bg-white/20 hover:bg-white/30 border-white/30 shadow-lg transition-all duration-300 hover:scale-110"
               onClick={(e) => e.stopPropagation()}
             >
               <Phone className="w-4 h-4 text-white" />
-            </Button>
+            </Button> */}
           </div>
         </div>
 
