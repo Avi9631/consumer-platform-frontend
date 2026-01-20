@@ -1309,7 +1309,7 @@ export default function PropertyDetailPage() {
                     <Shield className="w-5 h-5 sm:w-6 sm:h-6" />
                     Rules & Policies
                   </h3>
-                  <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="grid md:grid-cols-2  gap-3 sm:gap-4">
                     {property.rules.map((rule, index) =>
                       rule.key.toLowerCase() === "other" ? (
                         // Special handling for "Other" type rules - display as full-width text block
@@ -1333,12 +1333,12 @@ export default function PropertyDetailPage() {
                         // Standard rule display
                         <div
                           key={index}
-                          className="flex justify-between items-center p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300"
+                          className="    items-center p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300"
                         >
-                          <span className="text-gray-400 text-xs sm:text-sm">
+                          <p className="text-gray-400 text-xs sm:text-sm">
                             {rule.key}
-                          </span>
-                          <span
+                          </p>
+                          <p
                             className={`font-semibold text-xs sm:text-sm ${
                               rule.value.toLowerCase() === "yes"
                                 ? "text-green-400"
@@ -1348,7 +1348,7 @@ export default function PropertyDetailPage() {
                             }`}
                           >
                             {rule.value}
-                          </span>
+                          </p>
                         </div>
                       )
                     )}

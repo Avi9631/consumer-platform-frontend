@@ -39,7 +39,7 @@ export default function PropertySearchPage() {
   const location = useLocationStore((state) => state.location);
   const searchResult = useLocationStore((state) => state.searchResult);
   const updateFromSearchResult = useLocationStore(
-    (state) => state.updateFromSearchResult
+    (state) => state.updateFromSearchResult,
   );
 
   // Local state
@@ -72,14 +72,14 @@ export default function PropertySearchPage() {
   // Auto-search when location is available
   useEffect(() => {
     if (location?.lat && location?.lng) {
-      console.log('Location available, triggering search:', location);
+      console.log("Location available, triggering search:", location);
       searchProperties(
         { lat: location.lat, lng: location.lng },
         searchRadius,
         propertyType,
         priceRange,
         minBedrooms,
-        minBathrooms
+        minBathrooms,
       );
     }
   }, [location?.lat, location?.lng]);
@@ -162,7 +162,7 @@ export default function PropertySearchPage() {
     searchProperties(
       { lat: data.lat, lng: data.lng },
       searchRadius,
-      propertyType
+      propertyType,
     );
   };
 
@@ -173,7 +173,7 @@ export default function PropertySearchPage() {
     type,
     price,
     beds,
-    baths
+    baths,
   ) => {
     setLoading(true);
     try {
@@ -185,10 +185,10 @@ export default function PropertySearchPage() {
         genderAllowed: null, // Can be filtered from filterSheet
         isBrandManaged: null, // Can be filtered from filterSheet
         page: 1,
-        limit: 50
+        limit: 50,
       });
 
-      console.log('PG Hostel search results:', result);
+      console.log("PG Hostel search results:", result);
       setPgHostels(result.pgHostels);
       setTotalResults(result.total);
     } catch (error) {
@@ -209,7 +209,7 @@ export default function PropertySearchPage() {
         propertyType,
         priceRange,
         minBedrooms,
-        minBathrooms
+        minBathrooms,
       );
     }
   };
@@ -225,12 +225,10 @@ export default function PropertySearchPage() {
         propertyType,
         priceRange,
         minBedrooms,
-        minBathrooms
+        minBathrooms,
       );
     }
   };
-
- 
 
   // Clear all filters
   const clearFilters = () => {
@@ -266,39 +264,37 @@ export default function PropertySearchPage() {
 
   return (
     <>
-      
-
-    <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-white relative overflow-hidden">
-      {/* Premium gradient background with decorative elements */}
-      <div className="absolute inset-0 bg-linear-to-br from-orange-500/10 via-transparent to-purple-500/5"></div>
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute inset-0 animate-spin-slow">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-conic from-orange-500/20 via-transparent to-orange-500/20 rounded-full blur-3xl"></div>
+      <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-white relative overflow-hidden">
+        {/* Premium gradient background with decorative elements */}
+        <div className="absolute inset-0 bg-linear-to-br from-orange-500/10 via-transparent to-purple-500/5"></div>
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute inset-0 animate-spin-slow">
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-conic from-orange-500/20 via-transparent to-orange-500/20 rounded-full blur-3xl"></div>
+          </div>
         </div>
-      </div>
-      <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-linear-to-bl from-orange-500/20 to-transparent blur-3xl"></div>
-      <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-linear-to-tr from-purple-600/10 to-transparent blur-3xl"></div>
-      <div className="absolute top-1/3 right-1/3 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl animate-pulse"></div>
-     
-      <div className="relative z-10">
-<Header
-        scrolled={scrolled}
-        selectedLocation={location}
-        onOpenLocationSheet={handleOpenLocationSheet}
-      />
+        <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-linear-to-bl from-orange-500/20 to-transparent blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-linear-to-tr from-purple-600/10 to-transparent blur-3xl"></div>
+        <div className="absolute top-1/3 right-1/3 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl animate-pulse"></div>
 
-      {/* Location Sheet */}
-      <LocationSheet
-        isOpen={isLocationSheetOpen}
-        onOpenChange={setIsLocationSheetOpen}
-        searchResult={searchResult}
-        mapCenter={sheetMapCenter}
-        mapMarker={sheetMapMarker}
-        onSearchSelect={handleSheetSearchSelect}
-        onMapInteraction={handleSheetMapInteraction}
-      />
-      </div>
-     
+        <div className="relative z-10">
+          <Header
+            scrolled={scrolled}
+            selectedLocation={location}
+            onOpenLocationSheet={handleOpenLocationSheet}
+          />
+
+          {/* Location Sheet */}
+          <LocationSheet
+            isOpen={isLocationSheetOpen}
+            onOpenChange={setIsLocationSheetOpen}
+            searchResult={searchResult}
+            mapCenter={sheetMapCenter}
+            mapMarker={sheetMapMarker}
+            onSearchSelect={handleSheetSearchSelect}
+            onMapInteraction={handleSheetMapInteraction}
+          />
+        </div>
+
         {/* Top Navigation Bar */}
         <div className="  sticky top-14 z-40">
           <div className="px-2 sm:px-4 py-2 sm:py-3">
@@ -309,8 +305,8 @@ export default function PropertySearchPage() {
                   placeholder="Search address, city..."
                   initialValue={location?.formattedAddress || ""}
                 /> */}
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className="w-full justify-start border bg-transparent hover:bg-primary/5 min-w-0 max-w-full cursor-pointer"
                   onClick={handleOpenLocationSheet}
                 >
@@ -323,7 +319,7 @@ export default function PropertySearchPage() {
 
               <div className="flex items-center gap-2 shrink-0 ml-auto">
                 <Button
-                  variant="outline" 
+                  variant="outline"
                   size="sm"
                   onClick={() => setFilterSheetOpen(true)}
                   className="gap-1 sm:gap-2 whitespace-nowrap relative"
@@ -423,17 +419,14 @@ export default function PropertySearchPage() {
               <div className="p-2 sm:p-4 w-full">
                 {/* Results count */}
                 <div className="mb-4 text-sm text-gray-400">
-                  Found {totalResults} PG/Hostel{totalResults !== 1 ? 's' : ''} near your location
+                  Found {totalResults} PG/Hostel{totalResults !== 1 ? "s" : ""}{" "}
+                  near your location
                 </div>
                 {/* PG/Hostel Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full">
                   {pgHostels.map((hostel) => (
-                      <PgHostelCard
-                        key={hostel.pgHostelId}
-                        property={hostel}
-                      />
-                    )
-                  )}
+                    <PgHostelCard key={hostel.pgHostelId} property={hostel} />
+                  ))}
                 </div>
               </div>
             )}

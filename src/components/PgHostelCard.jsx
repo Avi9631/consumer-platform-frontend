@@ -31,7 +31,9 @@ export default function PgHostelCard({ property, onClick }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
+  const [currentRoomTypeIndex, setCurrentRoomTypeIndex] = useState(0);
   const autoPlayRef = useRef(null);
+  const roomTypeAutoPlayRef = useRef(null);
 
   // Get all images from media array for carousel
   const getImages = () => {
@@ -41,9 +43,7 @@ export default function PgHostelCard({ property, onClick }) {
       return ["/placeholder-pg.jpg"];
     }
 
-    const images = media
-      .filter((item) => item.url)
-      .map((item) => item.url);
+    const images = media.filter((item) => item.url).map((item) => item.url);
 
     return images.length > 0 ? images : ["/placeholder-pg.jpg"];
   };
@@ -60,7 +60,7 @@ export default function PgHostelCard({ property, onClick }) {
     if (isHovered && images.length > 1) {
       autoPlayRef.current = setInterval(() => {
         setCurrentImageIndex((prev) => (prev + 1) % images.length);
-      }, 3000);
+      }, 2000);
     } else {
       if (autoPlayRef.current) {
         clearInterval(autoPlayRef.current);
@@ -73,6 +73,22 @@ export default function PgHostelCard({ property, onClick }) {
       }
     };
   }, [isHovered, images.length]);
+
+  // Auto-play room types carousel
+  useEffect(() => {
+    const roomTypes = property.roomTypes;
+    if (roomTypes && Array.isArray(roomTypes) && roomTypes.length > 1) {
+      roomTypeAutoPlayRef.current = setInterval(() => {
+        setCurrentRoomTypeIndex((prev) => (prev + 1) % roomTypes.length);
+      }, 3000);
+    }
+
+    return () => {
+      if (roomTypeAutoPlayRef.current) {
+        clearInterval(roomTypeAutoPlayRef.current);
+      }
+    };
+  }, [property.roomTypes]);
 
   // Navigate carousel
   const nextImage = (e) => {
@@ -139,7 +155,7 @@ export default function PgHostelCard({ property, onClick }) {
       .map((room) => {
         if (!room.pricing || !Array.isArray(room.pricing)) return 0;
         const monthlyRent = room.pricing.find(
-          (p) => p.type === "Monthly Rent" || p.type === "monthly_rent"
+          (p) => p.type === "Monthly Rent" || p.type === "monthly_rent",
         );
         return monthlyRent?.amount || 0;
       })
@@ -149,6 +165,34 @@ export default function PgHostelCard({ property, onClick }) {
 
     const minPrice = Math.min(...prices);
     return `Starting ${formatPrice(minPrice)}/mo`;
+  };
+
+  // Get price for specific room type
+  const getRoomTypePrice = (roomType) => {
+    if (!roomType.pricing || !Array.isArray(roomType.pricing)) {
+      return "Contact for price";
+    }
+    
+    const monthlyRent = roomType.pricing.find(
+      (p) => p.type === "Monthly Rent" || p.type === "monthly_rent",
+    );
+    
+    if (!monthlyRent || !monthlyRent.amount) {
+      return "Contact for price";
+    }
+    
+    return `₹${(monthlyRent.amount)}`;
+  };
+
+  // Get room type display name
+  const getRoomTypeName = (roomType) => {
+    if (roomType.category) {
+      return roomType.category;
+    }
+    if (roomType.name) {
+      return roomType.name;
+    }
+    return "Room";
   };
 
   // Get room types summary
@@ -240,10 +284,10 @@ export default function PgHostelCard({ property, onClick }) {
     <Card
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="shrink-0 w-[220px] sm:w-[260px] md:w-[300px] group hover:shadow-[0_8px_40px_rgba(251,146,60,0.35)] transition-all duration-500 overflow-hidden p-0 border-primary/10 hover:border-primary/40 hover:scale-[1.02] flex flex-col gap-0"
+      className="shrink-0 w-full group hover:shadow-[0_8px_40px_rgba(251,146,60,0.35)] transition-all duration-500 overflow-hidden p-0 border-primary/10 hover:border-primary/40 hover:scale-[1.02] flex flex-col gap-0"
     >
       {/* Image Section */}
-      <div className="relative aspect-[4/3] overflow-hidden">
+      <div className="relative aspect-[16/9] overflow-hidden">
         {/* Image Carousel */}
         <div className="relative w-full h-full">
           {images.map((imgSrc, index) => (
@@ -394,7 +438,7 @@ export default function PgHostelCard({ property, onClick }) {
         </div>
 
         {/* Amenities */}
-        <div className="flex items-center gap-2 mb-3 text-white/80 flex-wrap">
+        {/* <div className="flex items-center gap-2 mb-3 text-white/80 flex-wrap">
           <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-md border border-white/10">
             <Home className="w-3 h-3" />
             <span className="text-xs font-medium">
@@ -415,27 +459,59 @@ export default function PgHostelCard({ property, onClick }) {
               </span>
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* Price & CTA */}
-        <div className="flex items-center justify-between gap-2 pt-3 border-t border-white/10">
-          <div className="flex-1">
-            <p className="text-sm md:text-base font-bold text-primary">
-              {getStartingPrice()}
-            </p>
-            <p className="text-xs text-white/60 line-clamp-1">
-              {getRoomTypesSummary()}
-            </p>
+        <div className="flex flex-col gap-2 pt-3 border-t border-white/10">
+          <div className="relative overflow-hidden min-h-[44px]">
+            {property.roomTypes && property.roomTypes.length > 0 ? (
+              property.roomTypes.map((roomType, index) => (
+                <div
+                  key={index}
+                  className={`absolute inset-0 transition-all duration-500 ease-in-out flex items-center justify-between gap-2 ${
+                    index === currentRoomTypeIndex
+                      ? "opacity-100 translate-x-0"
+                      : index < currentRoomTypeIndex
+                      ? "opacity-0 -translate-x-4"
+                      : "opacity-0 translate-x-4"
+                  }`}
+                >
+                  <div className="flex-1">
+                    <p className="text-sm md:text-md font-semibold text-white/80 line-clamp-1">
+                     {roomType.name }
+                    </p>
+                    <p className="text-xs italic text-white/60 line-clamp-1">
+                       {roomType.category }
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm md:text-lg font-bold text-primary ">
+                     {getRoomTypePrice(roomType)}
+                    </p> 
+                            <p className="text-xs italic text-white/60 line-clamp-1">
+                      / month
+                    </p> 
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="flex items-center justify-between  ">
+                <p className="text-xs text-white/60 mb-0 ">Various rooms available</p>
+                <p className="text-sm md:text-base font-bold text-primary mt-0">
+                  Contact for price
+                </p>
+              </div>
+            )}
           </div>
           <Button
             size="sm"
-            className="whitespace-nowrap cursor-pointer font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 bg-primary hover:bg-primary/90 text-xs text-white"
+            className="w-full cursor-pointer font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] bg-primary hover:bg-primary/90 text-xs text-white"
             onClick={(e) => {
               e.stopPropagation();
               handleCardClick();
             }}
           >
-            View
+            View Details
           </Button>
         </div>
       </div>
