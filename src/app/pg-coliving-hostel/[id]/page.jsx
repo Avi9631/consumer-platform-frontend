@@ -811,12 +811,12 @@ export default function PropertyDetailPage() {
                   </div>
                 </div>
 
-                {/* Room Types & Pricing Section */}
+                {/* Room Type Section */}
                 <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
                     <h3 className="text-orange-500 text-lg sm:text-2xl font-bold flex items-center gap-2">
                       <Bed className="w-5 h-5 sm:w-6 sm:h-6" />
-                      Room Types & Pricing
+                      Room Type 
                     </h3>
                     <div className="flex gap-2">
                       <Button
@@ -924,7 +924,7 @@ export default function PropertyDetailPage() {
                 </div>
 
                 {/* Food & Mess Section */}
-                {property.foodMess?.available && (
+                {/* {property.foodMess?.available && (
                   <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
                     <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
                       <Users className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -1034,8 +1034,7 @@ export default function PropertyDetailPage() {
                       </Card>
                     </div>
 
-                    {/* Weekly Menu Carousel */}
-                    {property.foodMess.weeklyMenu &&
+                     {property.foodMess.weeklyMenu &&
                       property.foodMess.weeklyMenu.length > 0 && (
                         <div className="relative">
                           <div className="flex items-center justify-between mb-4">
@@ -1076,8 +1075,7 @@ export default function PropertyDetailPage() {
                             </div>
                           </div>
 
-                          {/* Carousel Container */}
-                          <div className="overflow-hidden">
+                           <div className="overflow-hidden">
                             <div
                               className="flex transition-transform duration-700 ease-in-out"
                               style={{
@@ -1102,8 +1100,7 @@ export default function PropertyDetailPage() {
                                         </div>
 
                                         <div className="grid sm:grid-cols-3 gap-4">
-                                          {/* Breakfast */}
-                                          <div className="bg-white/5 p-3 sm:p-4 rounded-lg">
+                                           <div className="bg-white/5 p-3 sm:p-4 rounded-lg">
                                             <div className="flex items-center gap-2 mb-3">
                                               <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center">
                                                 <span className="text-orange-500 text-xs font-bold">
@@ -1162,8 +1159,7 @@ export default function PropertyDetailPage() {
                                             </div>
                                           </div>
 
-                                          {/* Lunch */}
-                                          <div className="bg-white/5 p-3 sm:p-4 rounded-lg">
+                                           <div className="bg-white/5 p-3 sm:p-4 rounded-lg">
                                             <div className="flex items-center gap-2 mb-3">
                                               <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center">
                                                 <span className="text-orange-500 text-xs font-bold">
@@ -1222,8 +1218,7 @@ export default function PropertyDetailPage() {
                                             </div>
                                           </div>
 
-                                          {/* Dinner */}
-                                          <div className="bg-white/5 p-3 sm:p-4 rounded-lg">
+                                           <div className="bg-white/5 p-3 sm:p-4 rounded-lg">
                                             <div className="flex items-center gap-2 mb-3">
                                               <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center">
                                                 <span className="text-orange-500 text-xs font-bold">
@@ -1290,8 +1285,7 @@ export default function PropertyDetailPage() {
                             </div>
                           </div>
 
-                          {/* Carousel Indicators */}
-                          <div className="flex justify-center gap-2 mt-4">
+                           <div className="flex justify-center gap-2 mt-4">
                             {property.foodMess.weeklyMenu.map((_, index) => (
                               <button
                                 key={index}
@@ -1307,7 +1301,7 @@ export default function PropertyDetailPage() {
                         </div>
                       )}
                   </div>
-                )}
+                )} */}
 
                 {/* Rules & Policies Section */}
                 <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">

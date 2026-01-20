@@ -230,20 +230,7 @@ export default function PropertySearchPage() {
     }
   };
 
-  // Handle property type change
-  const handlePropertyTypeChange = (value) => {
-    setPropertyType(value);
-    if (location?.lat && location?.lng) {
-      searchProperties(
-        { lat: location.lat, lng: location.lng },
-        searchRadius,
-        value,
-        priceRange,
-        minBedrooms,
-        minBathrooms
-      );
-    }
-  };
+ 
 
   // Clear all filters
   const clearFilters = () => {

@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { ImageIcon } from "lucide-react";
+import { Shell } from "lucide-react";
 
 /**
  * PgHostelCard Component
@@ -32,17 +33,17 @@ export default function PgHostelCard({ property, onClick }) {
   const [imageLoading, setImageLoading] = useState(true);
   const autoPlayRef = useRef(null);
 
-  // Get all images from mediaData for carousel
+  // Get all images from media array for carousel
   const getImages = () => {
-    const mediaData = property.mediaData || property.media_data;
+    const media = property.media;
 
-    if (!mediaData || !Array.isArray(mediaData) || mediaData.length === 0) {
+    if (!media || !Array.isArray(media) || media.length === 0) {
       return ["/placeholder-pg.jpg"];
     }
 
-    const images = mediaData
-      .filter((media) => media.type === "image" && media.url)
-      .map((media) => media.url);
+    const images = media
+      .filter((item) => item.url)
+      .map((item) => item.url);
 
     return images.length > 0 ? images : ["/placeholder-pg.jpg"];
   };
@@ -178,7 +179,7 @@ export default function PgHostelCard({ property, onClick }) {
     if (property.isBrandManaged || property.is_brand_managed) {
       return property.brandName || property.brand_name || "Brand Managed";
     }
-    return "Independent";
+    return "";
   };
 
   // Get gender badge
@@ -189,6 +190,8 @@ export default function PgHostelCard({ property, onClick }) {
     const colors = {
       Male: "bg-blue-500/20 text-blue-300 border-blue-500/30",
       Female: "bg-pink-500/20 text-pink-300 border-pink-500/30",
+      Gents: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+      Ladies: "bg-pink-500/20 text-pink-300 border-pink-500/30",
       Unisex: "bg-purple-500/20 text-purple-300 border-purple-500/30",
     };
 
@@ -356,12 +359,14 @@ export default function PgHostelCard({ property, onClick }) {
 
         {/* Brand Badge - Bottom Left */}
         <div className="absolute bottom-3 left-3 z-20">
-          <Badge
-            variant="secondary"
-            className="backdrop-blur-lg bg-black/40 text-white border-white/20 shadow-lg font-medium"
-          >
-            {getBrandName()}
-          </Badge>
+          {property?.isBrandManaged && (
+            <Badge
+              variant="secondary"
+              className="backdrop-blur-lg bg-black/40 text-white border-white/20 shadow-lg font-medium"
+            >
+              {getBrandName()}
+            </Badge>
+          )}
         </div>
       </div>
 
@@ -402,11 +407,11 @@ export default function PgHostelCard({ property, onClick }) {
               <span className="text-xs font-medium">Food</span>
             </div>
           )}
-          {property.commonAmenities?.length > 0 && (
+          {property.amenities?.length > 0 && (
             <div className="flex items-center gap-1 bg-white/10 px-2 py-1 rounded-md border border-white/10">
-              <Users className="w-3 h-3" />
+              <Shell className="w-3 h-3" />
               <span className="text-xs font-medium">
-                {property.commonAmenities.length}+
+                {property.amenities.length}+
               </span>
             </div>
           )}

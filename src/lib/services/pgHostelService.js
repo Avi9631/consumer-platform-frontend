@@ -43,7 +43,7 @@ export const searchNearbyPgHostels = async ({
       params.append('isBrandManaged', isBrandManaged.toString());
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/pg-hostel/search-nearby?${params}`, {
+    const response = await fetch(`${API_BASE_URL}/api/pg-hostel/search?${params}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
