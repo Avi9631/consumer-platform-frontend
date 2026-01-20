@@ -869,11 +869,11 @@ export default function PropertyDetailPage() {
                 <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
                   <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
                     <Building2 className="w-5 h-5 sm:w-6 sm:h-6" />
-                    Amenities & Facilities
+                    Amenities
                   </h3>
 
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                    {property.commonAmenities?.map((amenity, index) => {
+                    {property.amenities?.map((amenity, index) => {
                       // Map icon names from API to Lucide icons
                       const getIcon = (iconName) => {
                         const iconMap = {
@@ -991,12 +991,7 @@ export default function PropertyDetailPage() {
                                   : "Not Available"}
                               </span>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Star className="w-4 h-4 text-orange-500 fill-current" />
-                              <span className="text-white font-semibold text-xs sm:text-sm">
-                                {property.foodMess.rating} Food Rating
-                              </span>
-                            </div>
+                            
                           </div>
                         </CardContent>
                       </Card>
@@ -1366,64 +1361,7 @@ export default function PropertyDetailPage() {
                   </div>
                 </div>
 
-                {/* Safety & Security Section */}
-                <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
-                  <h3 className="text-orange-500 text-lg sm:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
-                    <Shield className="w-5 h-5 sm:w-6 sm:h-6" />
-                    Safety & Security
-                  </h3>
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                    {property.commonAmenities?.some(
-                      (a) => a.name === "Security Guard" && a.available
-                    ) && (
-                      <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                        <span className="text-white text-xs sm:text-sm">
-                          Security Guard
-                        </span>
-                      </div>
-                    )}
-                    {property.commonAmenities?.some(
-                      (a) => a.name === "Biometric Access" && a.available
-                    ) && (
-                      <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                        <span className="text-white text-xs sm:text-sm">
-                          Biometric Access
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
-                      <CheckCircle className="w-5 h-5 text-gray-500" />
-                      <span className="text-white text-xs sm:text-sm">
-                        Fire Safety Certificate
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
-                      <Shield className="w-5 h-5 text-orange-500" />
-                      <div>
-                        <span className="text-white text-xs sm:text-sm block">
-                          CCTV Coverage
-                        </span>
-                        <span className="text-gray-400 text-xs">
-                          Check with Owner
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
-                      <CheckCircle className="w-5 h-5 text-gray-500" />
-                      <span className="text-white text-xs sm:text-sm">
-                        Emergency Exit
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 sm:p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-300">
-                      <CheckCircle className="w-5 h-5 text-gray-500" />
-                      <span className="text-white text-xs sm:text-sm">
-                        24x7 Guard Available
-                      </span>
-                    </div>
-                  </div>
-                </div>
+  
 
                 {/* Location & Nearby Section */}
                 <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
@@ -1484,10 +1422,7 @@ export default function PropertyDetailPage() {
                         {property.isBrandManaged
                           ? `${property.brandName} - Owner`
                           : "Property Owner"}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Available 24x7
-                      </p>
+                      </p> 
                     </div>
                   </div>
                   {/* Availability Status */}

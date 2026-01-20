@@ -101,31 +101,7 @@ export const getPgHostelById = async (pgHostelId) => {
   }
 };
 
-/**
- * Get PG/Hostel details by slug
- * @param {string} slug - PG/Hostel slug
- * @returns {Promise<Object>} PG/Hostel details
- */
-export const getPgHostelBySlug = async (slug) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/pg-hostel/slug/${slug}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to get PG/Hostel details: ${response.statusText}`);
-    }
-
-    const result = await response.json();
-    return result.data || result.pgHostel || null;
-  } catch (error) {
-    console.error('Error getting PG/Hostel details:', error);
-    return null;
-  }
-};
+ 
 
 /**
  * List PG/Hostels with filters and pagination
