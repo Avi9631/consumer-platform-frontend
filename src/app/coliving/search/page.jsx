@@ -14,6 +14,7 @@ import {
   Bed,
   Bath,
   IndianRupee,
+  ChevronDown,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -337,7 +338,7 @@ export default function CoLivingSearchPage() {
         </div>
 
         {/* Top Navigation Bar */}
-        <div className="  sticky top-14 z-40">
+        <div className="  sticky top-20 z-40">
           <div className="px-2 sm:px-4 py-2 sm:py-3">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full max-w-screen-2xl mx-auto">
               <div className="flex-1 w-full sm:max-w-2xl min-w-0">
@@ -347,14 +348,24 @@ export default function CoLivingSearchPage() {
                   initialValue={location?.formattedAddress || ""}
                 /> */}
                 <Button
-                  variant="ghost"
-                  className="w-full justify-start border bg-transparent hover:bg-primary/5 min-w-0 max-w-full cursor-pointer"
+                  variant="outline"
+                  className="group w-full justify-between items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 h-auto min-h-[44px] bg-slate-900/60 backdrop-blur-md border-slate-700/50 hover:border-primary/40 hover:bg-slate-900/80 transition-all duration-200 shadow-lg hover:shadow-primary/10 min-w-0 overflow-hidden"
                   onClick={handleOpenLocationSheet}
                 >
-                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-primary drop-shadow-[0_0_8px_rgba(251,146,60,0.8)] shrink-0" />
-                  <span className="truncate text-left ml-1 sm:ml-2 min-w-0">
-                    {location?.formattedAddress || "Select Location"}
-                  </span>
+                  <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                    <div className="shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <MapPin className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-primary drop-shadow-[0_0_8px_rgba(251,146,60,0.6)]" />
+                    </div>
+                    <div className="flex flex-col items-start min-w-0 flex-1">
+                      <span className="text-[10px] sm:text-xs text-slate-400 font-medium uppercase tracking-wider">
+                        Location
+                      </span>
+                      <span className="text-sm sm:text-base font-medium text-white truncate w-full text-left">
+                        {location?.formattedAddress || "Select Location"}
+                      </span>
+                    </div>
+                  </div>
+                  <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 shrink-0 group-hover:text-primary transition-colors" />
                 </Button>
               </div>
 
@@ -406,7 +417,7 @@ export default function CoLivingSearchPage() {
         />
 
         {/* Main Content */}
-        <div className="flex flex-1 overflow-hidden w-full mt-16">
+        <div className="flex flex-1 overflow-hidden w-full mt-24">
           {/* Property Listings Section */}
           <div
             className={`${
