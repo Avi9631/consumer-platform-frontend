@@ -249,7 +249,7 @@ export default function CoLivingSearchPage() {
       }
 
       // Call the PG/Hostel API
-      const response = await fetch(`http://localhost:3000/api/pg-hostel/search?${params.toString()}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/pg-hostel/search?${params.toString()}`);
       const result = await response.json();
 
       console.log("PG/Hostel search results:", result);

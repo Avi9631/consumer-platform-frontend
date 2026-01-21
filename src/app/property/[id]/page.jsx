@@ -85,7 +85,7 @@ export default function PropertyDetailPage() {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch(`http://localhost:3000/api/property/${propertyId}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/property/${propertyId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch property data');
         }

@@ -51,16 +51,20 @@ import useLocationStore from "@/stores/locationStore";
 import { PROPERTIES_DATA } from "@/constants/propertyData";
 import { X } from "lucide-react";
 import { ImageIcon } from "lucide-react";
+import { useApi } from "@/hooks/useApi";
+import { useAuth } from "@/context/AuthContext";
 
 export default function PropertyDetailPage() {
   const params = useParams();
   const propertyId = params?.id;
+  const api = useApi();
+  const { user } = useAuth();
 
   // Zustand store for global location state
   const location = useLocationStore((state) => state.location);
   const searchResult = useLocationStore((state) => state.searchResult);
   const updateFromSearchResult = useLocationStore(
-    (state) => state.updateFromSearchResult
+    (state) => state.updateFromSearchResult,
   );
 
   // State management
@@ -99,7 +103,7 @@ export default function PropertyDetailPage() {
         setError(null);
 
         const response = await fetch(
-          `http://localhost:3000/api/pg-hostel/${propertyId}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/pg-hostel/${propertyId}`,
         );
 
         if (!response.ok) {
@@ -152,7 +156,7 @@ export default function PropertyDetailPage() {
 
     const menuCarouselInterval = setInterval(() => {
       setCurrentMenuDayIndex(
-        (prev) => (prev + 1) % property.foodMess.weeklyMenu.length
+        (prev) => (prev + 1) % property.foodMess.weeklyMenu.length,
       );
     }, MENU_CAROUSEL_INTERVAL);
 
@@ -215,7 +219,7 @@ export default function PropertyDetailPage() {
         available: acc.available + (room.availability?.availableBeds || 0),
         total: acc.total + (room.availability?.totalBeds || 0),
       }),
-      { available: 0, total: 0 }
+      { available: 0, total: 0 },
     );
   };
 
@@ -272,7 +276,7 @@ export default function PropertyDetailPage() {
 
   // Helper: Get images from API data
   const propertyImages = property.media
-    ?.filter((m) =>  m.url)
+    ?.filter((m) => m.url)
     .map((m) => m.url) || [
     "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&h=600&fit=crop",
   ];
@@ -280,14 +284,14 @@ export default function PropertyDetailPage() {
   const nextImage = () => {
     setMainImageError(false);
     setCurrentImageIndex((prev) =>
-      prev === propertyImages.length - 1 ? 0 : prev + 1
+      prev === propertyImages.length - 1 ? 0 : prev + 1,
     );
   };
 
   const prevImage = () => {
     setMainImageError(false);
     setCurrentImageIndex((prev) =>
-      prev === 0 ? propertyImages.length - 1 : prev - 1
+      prev === 0 ? propertyImages.length - 1 : prev - 1,
     );
   };
 
@@ -299,14 +303,14 @@ export default function PropertyDetailPage() {
   const nextGalleryImage = () => {
     setGalleryImageError(false);
     setGalleryImageIndex((prev) =>
-      prev === propertyImages.length - 1 ? 0 : prev + 1
+      prev === propertyImages.length - 1 ? 0 : prev + 1,
     );
   };
 
   const prevGalleryImage = () => {
     setGalleryImageError(false);
     setGalleryImageIndex((prev) =>
-      prev === 0 ? propertyImages.length - 1 : prev - 1
+      prev === 0 ? propertyImages.length - 1 : prev - 1,
     );
   };
 
@@ -370,14 +374,10 @@ export default function PropertyDetailPage() {
     updateFromSearchResult(place);
   };
 
-  // Handle Show Interest from property page (opens room selection)
+  // Handle Show Interest from property page (opens interest dialog directly)
   const handleShowPropertyInterest = () => {
-    if (property?.roomTypes && property.roomTypes.length > 0) {
-      setIsRoomSelectionOpen(true);
-    } else {
-      // If no room types, show dialog directly
-      setIsInterestDialogOpen(true);
-    }
+    // Show confirmation dialog directly
+    setIsInterestDialogOpen(true);
   };
 
   // Handle room selection confirmation
@@ -385,6 +385,35 @@ export default function PropertyDetailPage() {
     setSelectedRooms(rooms);
     setIsRoomSelectionOpen(false);
     setIsInterestDialogOpen(true);
+  };
+
+  // Handle interest submission to backend
+  const handleInterestSubmit = async (data) => {
+    try {
+      const response = await api.post(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000"}/api/leads/property-interest`,
+        {
+          listingId: propertyId,
+          propertyName: property.propertyName,
+          selectedRooms: selectedRooms.map((room) => ({
+            name: room.name,
+            category: room.category,
+            pricing: room.pricing,
+          })),
+          reason: "CALLBACK_REQUEST",
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to submit interest");
+      }
+
+      const result = await response.json();
+      console.log("Interest submitted successfully:", result);
+    } catch (error) {
+      console.error("Error submitting interest:", error);
+      throw error;
+    }
   };
 
   return (
@@ -736,11 +765,11 @@ export default function PropertyDetailPage() {
         </div>
 
         {/* Main Content */}
-        <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-6 sm:py-8">
+        <div className="  mx-auto px-3 sm:px-4 lg:px-6 py-6 sm:py-8">
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 lg:gap-6 text-white mb-8">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-2xl sm:text-3xl lg:text-3xl font-bold bg-linear-to-r from-white to-gray-300 bg-clip-text text-white">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-white via-orange-100 to-orange-300 bg-clip-text text-transparent drop-shadow-[0_0_25px_rgba(249,115,22,0.5)] tracking-tight leading-tight">
                   {property.propertyName}
                 </h1>
                 {property.verificationStatus === "VERIFIED" && (
@@ -773,19 +802,22 @@ export default function PropertyDetailPage() {
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full lg:w-auto">
-              <Button
+              {/* <Button
                 className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm cursor-pointer h-10 sm:h-11"
                 onClick={handleShowPropertyInterest}
               >
                 <Play className="w-4 h-4 mr-2" />
                 Show Interest
-              </Button>
-              <Button 
+              </Button> */}
+              <Button
                 className="bg-white/5 backdrop-blur-xl hover:bg-white/10 text-white border border-white/20 hover:border-orange-500/50 transition-all duration-300 hover:scale-105 shadow-lg font-medium text-sm sm:text-base h-10 sm:h-11"
                 onClick={() => {
                   const lat = parseFloat(property.lat);
                   const lng = parseFloat(property.lng);
-                  window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank');
+                  window.open(
+                    `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`,
+                    "_blank",
+                  );
                 }}
               >
                 <MapPin className="w-4 h-4 mr-2" />
@@ -816,7 +848,7 @@ export default function PropertyDetailPage() {
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
                     <h3 className="text-orange-500 text-lg sm:text-2xl font-bold flex items-center gap-2">
                       <Bed className="w-5 h-5 sm:w-6 sm:h-6" />
-                      Room Type 
+                      Room Type
                     </h3>
                     <div className="flex gap-2">
                       <Button
@@ -898,13 +930,13 @@ export default function PropertyDetailPage() {
                               : "bg-white/5 opacity-50"
                           }`}
                         >
-                          <IconComponent
+                          {/* <IconComponent
                             className={`w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform ${
                               amenity.available !== false
                                 ? "text-orange-500"
                                 : "text-gray-500"
                             }`}
-                          />
+                          /> */}
                           <span
                             className={`text-xs sm:text-sm font-medium ${
                               amenity.available !== false
@@ -1343,19 +1375,17 @@ export default function PropertyDetailPage() {
                               rule.value.toLowerCase() === "yes"
                                 ? "text-green-400"
                                 : rule.value.toLowerCase() === "no"
-                                ? "text-red-400"
-                                : "text-white"
+                                  ? "text-red-400"
+                                  : "text-white"
                             }`}
                           >
                             {rule.value}
                           </p>
                         </div>
-                      )
+                      ),
                     )}
                   </div>
                 </div>
-
-  
 
                 {/* Location & Nearby Section */}
                 <div className="bg-linear-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl">
@@ -1368,7 +1398,7 @@ export default function PropertyDetailPage() {
                   <div className="h-64 sm:h-80 rounded-xl overflow-hidden border border-white/10 shadow-xl">
                     <iframe
                       src={`https://www.google.com/maps?q=${parseFloat(
-                        property.lat
+                        property.lat,
                       )},${parseFloat(property.lng)}&z=15&output=embed`}
                       width="600"
                       height="450"
@@ -1384,91 +1414,194 @@ export default function PropertyDetailPage() {
 
             {/* Right Sidebar */}
             <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-              {/* Contact Property Manager */}
-              <Card className="bg-linear-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500">
-                <CardHeader>
-                  <CardTitle className="text-orange-500 text-base sm:text-lg font-bold flex items-center gap-2">
-                    <Phone className="w-5 h-5" />
-                    Contact Property
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-3 mb-4">
-                    <Avatar className="w-12 h-12 sm:w-14 sm:h-14 ring-2 ring-orange-500/50">
-                      <AvatarImage
-                        src={
-                          property.user?.profileImage ||
-                          "/api/placeholder/60/60"
-                        }
-                      />
-                      <AvatarFallback className="bg-linear-to-br from-orange-500 to-orange-600 text-white font-bold">
-                        {property.user?.firstName?.[0]}
-                        {property.user?.lastName?.[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-white text-sm sm:text-base">
-                        {property.user
-                          ? `${property.user.firstName} ${property.user.lastName}`
-                          : "Property Owner"}
-                      </h4>
-                      <p className="text-xs sm:text-sm text-gray-400">
-                        {property.isBrandManaged
-                          ? `${property.brandName} - Owner`
-                          : "Property Owner"}
-                      </p> 
-                    </div>
-                  </div>
-                  {/* Availability Status */}
-                  {/* <div className="p-3 bg-green-500/10 border border-green-500/30 rounded-lg mb-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-green-400 text-xs sm:text-sm font-medium">Available Beds</span>
-                      <span className="text-green-400 text-sm sm:text-base font-bold">
-                        {(() => { const beds = getTotalBeds(); return `${beds.available}/${beds.total}`; })()}
-                      </span>
-                    </div>
-                  </div> */}
-                  <div className="flex gap-4 flex-wrap  ">
-                    {/* <Button className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
-                      <Phone className="w-4 h-4 mr-2" />
-                      Call {property.user?.phone || 'Owner'}
-                    </Button> */}
-                    {/* <Button    className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
-                      <Mail className="w-4 h-4 mr-2" />
-                      WhatsApp
-                    </Button> */}
-                    {/* <Button    className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
-                      <Calendar className="w-4 h-4 mr-2" />
-                      Schedule Visit
-                    </Button> */}
-                    {/* <Button   className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
-                      <Play className="w-4 h-4 mr-2" />
-                      Virtual Tour
-                    </Button> */}
+              {/* Select Room Types */}
+              <Card className="relative bg-gradient-to-br from-slate-800/80 via-slate-900/80 to-slate-950/90 backdrop-blur-2xl border-2 border-orange-500/20 shadow-[0_8px_32px_rgba(249,115,22,0.15)] hover:shadow-[0_16px_48px_rgba(249,115,22,0.25)] hover:border-orange-500/40 transition-all duration-500 rounded-xl overflow-hidden group">
+                {/* Animated Background Glow */}
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                <div className="absolute -inset-1 bg-gradient-to-r from-orange-500/20 to-purple-500/20 rounded-xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"></div>
 
-                    <Button
-                      className="  bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 font-semibold text-sm cursor-pointer w-full"
-                      onClick={handleShowPropertyInterest}
-                    >
-                      <Play className="w-4 h-4 mr-2" />
-                      Show Interest
-                    </Button>
+                <CardContent className="relative space-y-4  ">
+                  {/* Header */}
+                  <div className="space-y-2 pb-3 border-b border-white/10">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 bg-gradient-to-br from-orange-500/20 to-orange-600/20 rounded-lg border border-orange-500/30 shadow-lg shadow-orange-500/20">
+                        <Bed className="w-4 h-4 text-orange-400" />
+                      </div>
+                      <h3 className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-orange-500 to-orange-600 text-lg font-bold">
+                        Select Room Type
+                      </h3>
+                    </div>
+                    <p className="text-gray-400 text-xs leading-relaxed pl-9">
+                      Choose your preferred room options
+                    </p>
                   </div>
+
+                  {/* Room Type Checkboxes */}
+                  <div className="space-y-2.5 max-h-[350px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-orange-500/30 scrollbar-track-white/5">
+                    {property.roomTypes && property.roomTypes.length > 0 ? (
+                      property.roomTypes.map((room, index) => {
+                        const monthlyRent =
+                          room.pricing?.find((p) => p.type === "Monthly Rent")
+                            ?.amount || 0;
+                        const isSelected = selectedRooms.some(
+                          (r) => r.index === index,
+                        );
+                        return (
+                          <label
+                            key={index}
+                            className={`relative flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all duration-300 group/room ${
+                              isSelected
+                                ? "bg-gradient-to-br from-orange-500/15 to-orange-600/10 border-orange-500/60 shadow-lg shadow-orange-500/20"
+                                : "bg-gradient-to-br from-white/5 to-white/[0.02] border-white/10 hover:border-orange-500/40 hover:bg-white/10"
+                            }`}
+                          >
+                            {/* Selection Indicator Line */}
+                            <div
+                              className={`absolute left-0 top-0 bottom-0 w-1 rounded-r-full transition-all duration-300 ${
+                                isSelected
+                                  ? "bg-gradient-to-b from-orange-400 to-orange-600"
+                                  : "bg-transparent"
+                              }`}
+                            ></div>
+
+                            {/* Custom Checkbox */}
+                            <div className="relative mt-0.5 shrink-0">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedRooms([
+                                      ...selectedRooms,
+                                      { ...room, index },
+                                    ]);
+                                  } else {
+                                    setSelectedRooms(
+                                      selectedRooms.filter(
+                                        (r) => r.index !== index,
+                                      ),
+                                    );
+                                  }
+                                }}
+                                className="peer sr-only"
+                              />
+                              <div
+                                className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all duration-300 ${
+                                  isSelected
+                                    ? "bg-gradient-to-br from-orange-500 to-orange-600 border-orange-500 shadow-md shadow-orange-500/50"
+                                    : "bg-slate-800/50 border-gray-500 group-hover/room:border-orange-400"
+                                }`}
+                              >
+                                {isSelected && (
+                                  <CheckCircle className="w-3.5 h-3.5 text-white animate-in zoom-in-50 duration-200" />
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              {/* Room Name and Price */}
+                              <div className="flex items-start justify-between gap-2 mb-1.5">
+                                <span className="text-white font-semibold text-sm group-hover/room:text-orange-100 transition-colors">
+                                  {room.name}
+                                </span>
+                                {/* <div className="flex flex-col items-end shrink-0">
+                                  <span
+                                    className={`font-bold text-sm transition-colors ${
+                                      isSelected
+                                        ? "text-orange-400"
+                                        : "text-orange-500 group-hover/room:text-orange-400"
+                                    }`}
+                                  >
+                                    ₹{monthlyRent.toLocaleString()}
+                                  </span>
+                                  <span className="text-[9px] text-gray-500 font-medium">
+                                    /mo
+                                  </span>
+                                </div> */}
+                              </div>
+
+                              {/* Room Details */}
+                              <div className="flex items-center justify-between gap-3 flex-wrap">
+                                <div className="  shrink-0">
+                                  <span
+                                    className={`font-bold text-sm transition-colors ${
+                                      isSelected
+                                        ? "text-orange-400"
+                                        : "text-orange-500 group-hover/room:text-orange-400"
+                                    }`}
+                                  >
+                                    ₹{monthlyRent.toLocaleString()}
+                                  </span>
+                                  <span className="text-[9px] text-gray-500 font-medium">
+                                    /month
+                                  </span>
+                                </div>
+                                <span className="flex items-center gap-1 text-[11px] text-gray-400 group-hover/room:text-gray-300 transition-colors">
+                                  <Users className="w-3 h-3" />
+                                  <span className="font-medium">
+                                    {room.category}
+                                  </span>
+                                </span>
+                                {/* <span className={`flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded transition-colors ${
+                                  room.availability?.soldOut 
+                                    ? 'text-red-400 bg-red-500/10' 
+                                    : 'text-emerald-400 bg-emerald-500/10'
+                                }`}>
+                                  <div className={`w-1 h-1 rounded-full ${
+                                    room.availability?.soldOut ? 'bg-red-400' : 'bg-emerald-400 animate-pulse'
+                                  }`}></div>
+                                  {room.availability?.soldOut ? 'Sold Out' : room.availability?.nextAvailability || 'Available'}
+                                </span> */}
+                              </div>
+                            </div>
+                          </label>
+                        );
+                      })
+                    ) : (
+                      <div className="p-5 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-lg border-2 border-dashed border-white/10 text-center">
+                        <Bed className="w-10 h-10 text-gray-600 mx-auto mb-2" />
+                        <p className="text-gray-400 text-xs font-medium">
+                          No room types available
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Selected Rooms Counter */}
+                  {selectedRooms.length > 0 && (
+                    <div className="relative overflow-hidden p-3 bg-gradient-to-r from-orange-500/15 via-orange-600/10 to-purple-500/10 border border-orange-500/30 rounded-lg animate-in slide-in-from-top-2 duration-300">
+                      <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-transparent animate-pulse"></div>
+                      <div className="relative flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse"></div>
+                          <p className="text-orange-400 text-xs font-semibold">
+                            {selectedRooms.length} room
+                            {selectedRooms.length > 1 ? "s" : ""} selected
+                          </p>
+                        </div>
+                        <CheckCircle className="w-4 h-4 text-orange-400" />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Show Interest Button */}
+                  <Button
+                    className="relative w-full bg-gradient-to-r from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white shadow-[0_8px_24px_rgba(249,115,22,0.35)] hover:shadow-[0_12px_32px_rgba(249,115,22,0.5)] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] font-bold text-sm py-6 rounded-lg border-none overflow-hidden group/btn"
+                    onClick={handleShowPropertyInterest}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700"></div>
+                    <div className="relative flex items-center justify-center gap-2">
+                      <Heart className="w-4 h-4 group-hover/btn:scale-110 transition-transform" />
+                      <span>Show Interest</span>
+                    </div>
+                  </Button>
+
+                  {/* Info Text */}
+                  <p className="text-center text-[10px] text-gray-500 italic pt-1">
+                    🔒 Your information is secure
+                  </p>
                 </CardContent>
               </Card>
-
-              {/* Chat Support */}
-              {/* <Card className="bg-linear-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-xl border border-white/10 shadow-2xl hover:shadow-orange-500/10 transition-all duration-500">
-                <CardHeader className="text-white font-medium  text-sm sm:text-base leading-relaxed">
-                     Need help? Our support team is available 24x7! 
-                </CardHeader>
-                <CardContent>
-                    <Button  className="w-full bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-xl shadow-orange-500/30 hover:shadow-2xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-102 font-semibold text-sm h-10 sm:h-11 cursor-pointer">
-                      <Mail className="w-4 h-4 mr-2" />
-                      Start Chat
-                    </Button>
-                 </CardContent>
-              </Card> */}
             </div>
           </div>
         </div>
@@ -1486,7 +1619,9 @@ export default function PropertyDetailPage() {
           isOpen={isInterestDialogOpen}
           onOpenChange={setIsInterestDialogOpen}
           propertyName={property?.propertyName}
+          propertyId={propertyId}
           selectedRooms={selectedRooms.length > 0 ? selectedRooms : null}
+          onConfirm={handleInterestSubmit}
           propertyDetails={
             selectedRooms.length === 0
               ? [

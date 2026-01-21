@@ -12,13 +12,32 @@ export default function InterestDialog({
   onOpenChange, 
   propertyName,
   propertyDetails,
-  selectedRooms = null // Array of room objects when called from property page
+  selectedRooms = null, // Array of room objects when called from property page
+  propertyId = null,
+  onConfirm = null // Callback function to handle submission
 }) {
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleConfirm = () => {
-    onOpenChange(false);
-    setShowSuccess(true);
+  const handleConfirm = async () => {
+    setIsSubmitting(true);
+    try {
+      // Call the parent's onConfirm if provided
+      if (onConfirm) {
+        await onConfirm({
+          propertyId,
+          propertyName,
+          selectedRooms,
+        });
+      }
+      onOpenChange(false);
+      setShowSuccess(true);
+    } catch (error) {
+      console.error('Error submitting interest:', error);
+      alert('Failed to submit interest. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCloseSuccess = () => {
@@ -105,8 +124,9 @@ export default function InterestDialog({
             <AlertDialogAction 
               className="bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white"
               onClick={handleConfirm}
+              disabled={isSubmitting}
             >
-              Confirm Interest
+              {isSubmitting ? 'Submitting...' : 'Confirm Interest'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

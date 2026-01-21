@@ -99,7 +99,7 @@ export default function PropertyDetailPage() {
         setError(null);
 
         const response = await fetch(
-          `http://localhost:3000/api/pg-hostel/${propertyId}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/pg-hostel/${propertyId}`
         );
 
         if (!response.ok) {

@@ -100,7 +100,7 @@ export default function Home() {
         const radius = 9;
 
         const response = await fetch(
-          `http://localhost:3000/api/pg-hostel/search?lat=${lat}&lng=${lng}&radius=${radius}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/pg-hostel/search?lat=${lat}&lng=${lng}&radius=${radius}`,
         );
 
         if (!response.ok) {
@@ -131,7 +131,7 @@ export default function Home() {
 
       try {
         const response = await fetch(
-          `http://localhost:3000/api/developer-consumer-api/list?page=1&limit=20`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/developer-consumer-api/list?page=1&limit=20`,
         );
 
         if (!response.ok) {
@@ -162,7 +162,7 @@ export default function Home() {
 
       try {
         const response = await fetch(
-          `http://localhost:3000/api/property/list?page=1&limit=20`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/property/list?page=1&limit=20`,
         );
 
         if (!response.ok) {
