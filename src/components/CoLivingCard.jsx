@@ -262,8 +262,8 @@ const CoLivingCard = ({ property }) => {
         {/* Brand/Partner badge */}
         {(brandName || (isBrandManaged && brandName)) && (
           <div className="absolute top-2 right-2">
-            <Badge className="bg-white/90 text-gray-800 border-none shadow-lg backdrop-blur">
-              <Award className="w-3 h-3 mr-1" />
+            <Badge className="bg-white/90 text-gray-800 border-none shadow-lg backdrop-blur rounded-sm">
+              <Award className="w-3 h-3 " />
               {brandName}
             </Badge>
           </div>

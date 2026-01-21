@@ -359,7 +359,7 @@ export default function CoLivingSearchPage() {
               </div>
 
               <div className="flex items-center gap-2 shrink-0 ml-auto">
-                <Button
+                {/* <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setFilterSheetOpen(true)}
@@ -379,7 +379,7 @@ export default function CoLivingSearchPage() {
                       •
                     </Badge>
                   )}
-                </Button>
+                </Button> */}
               </div>
             </div>
           </div>

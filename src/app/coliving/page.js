@@ -55,6 +55,7 @@ import {
 } from "@/constants/propertyData";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import CoLivingCard from "@/components/CoLivingCard";
 
 export default function Home() {
   // Zustand store for global location state
@@ -289,69 +290,78 @@ export default function Home() {
         onOpenLocationSheet={handleOpenLocationSheet}
       />
 
-      {/* Features & Categories Combined Section */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 mx-auto space-y-12">
-        {/* Explore By Category Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-          {/* Categories */}
-          <div>
-            <Card className="border-0 bg-transparent h-fit">
-              <CardHeader>
-                <div className="flex flex-col items-center lg:items-start">
-                  <CardTitle className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-                    Explore By Category
-                  </CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-3">
-                {[
-                  {
-                    title: "For Men",
-                    gradient: "from-blue-500/20 to-cyan-500/20",
-                    icon: "👨",
-                  },
-                  {
-                    title: "For Women",
-                    gradient: "from-pink-500/20 to-purple-500/20",
-                    icon: "👩",
-                  },
-                  {
-                    title: "Coliving - Unisex",
-                    gradient: "from-orange-500/20 to-yellow-500/20",
-                    icon: "🏘️",
-                  },
-                ].map((category, index) => (
-                  <Card
-                    key={index}
-                    className={`bg-gradient-to-br ${category.gradient} backdrop-blur-sm border-white/10 hover:scale-[1.02] transition-all duration-300 cursor-pointer group`}
-                  >
-                    <CardContent className="flex items-center gap-4">
-                      <div className="text-4xl flex-shrink-0">
-                        {category.icon}
-                      </div>
-                      <h3 className="text-base font-bold text-white mb-0.5">
-                        {category.title}
-                      </h3>
-                    </CardContent>
-                  </Card>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
 
-          {/* Image with Title Border */}
-          <div className="relative flex flex-col">
-            <div className="ml-6 flex-1 rounded-lg overflow-hidden">
-              <img
-                src="https://static.wixstatic.com/media/489126_d4fc78aa2987441995a8f6e69ea20b02~mv2.jpg/v1/crop/x_532,y_247,w_1990,h_1775/fill/w_1360,h_1212,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/IMG_20250122_165600405_edited.jpg"
-                alt="Premium Living Spaces"
-                className="w-full h-100 object-cover rounded-lg"
-              />
+            {/* Virtual Tours Carousel */}
+      <CarouselSection
+        title={
+          <div className="flex items-center gap-3  ">
+            <div>
+              Virtual {" "}  
+              <span className="text-primary drop-shadow-[0_0_20px_rgba(251,146,60,0.8)]">
+                Tours
+              </span> 
             </div>
+            <Link href={"/developer"}>
+              <Button size="sm">Explore More</Button>
+            </Link>
           </div>
-        </div>
-      </section>
+        }
+        className=""
+        // subtitle="Hover over videos to auto-play • Swipe to explore more"
+        // className="bg-gradient-to-b from-[#3d1f2f] via-[#2d1b1f] to-[#1a0f1f]"
+      >
+        {VIRTUAL_TOURS_DATA.map((tour) => (
+          <VirtualTourCard
+            key={tour.id}
+            tour={tour}
+            isHovered={hoveredTourId === tour.id}
+            onHover={setHoveredTourId}
+          />
+        ))}
+      </CarouselSection>
+{/* CTA Banner */}
+<section className="my-8 px-4 sm:px-6 lg:px-8">
+  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch mx-auto">
 
+    {/* CTA Card */}
+    <Card className="lg:col-span-2 bg-gradient-to-r from-primary via-purple-500 to-blue-500 border-0 overflow-hidden relative h-full self-stretch">
+      <div className="absolute inset-0 bg-black/20" />
+      <CardContent className="py-8 px-6 text-center relative z-10 h-full flex flex-col justify-center">
+        <Zap className="w-12 h-12 text-white mx-auto mb-4 animate-pulse" />
+
+        <h2 className="text-2xl lg:text-3xl font-bold text-white mb-3">
+          Ready to Find Your Perfect Stay?
+        </h2>
+
+        <p className="text-white/90 mb-6">
+          Join thousands of happy residents who found their ideal accommodation with us
+        </p>
+
+        <div className="flex justify-center">
+          <Link href="/coliving/search" target="_blank">
+            <Button size="lg" variant="secondary">
+              <MapPin className="mr-2 w-5 h-5" />
+              Start Searching
+            </Button>
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+
+    {/* CTA Image */}
+    <div className="lg:ml-6 rounded-lg overflow-hidden self-stretch">
+      <img
+        src="https://static.wixstatic.com/media/489126_d4fc78aa2987441995a8f6e69ea20b02~mv2.jpg"
+        alt="Premium Living Spaces"
+        className="w-full h-full object-cover"
+      />
+    </div>
+
+  </div>
+</section>
+
+
+ 
       {/* Trusted PG Hostels Section */}
       <CarouselSection
         title={
@@ -362,15 +372,10 @@ export default function Home() {
                 Coliving Spaces
               </span>{" "}
             </div>
-            <Link href={"/pg-coliving-hostel"} target="_blank">
-              <Button size="sm" className="group">
-                Explore More
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
+ 
           </div>
         }
-        className="my-3"
+        className="my-3 "
       >
         {pgHostelLoading ? (
           <div className="w-full text-center py-12">
@@ -394,9 +399,9 @@ export default function Home() {
           pgHostelData.map((property) => (
             <div
               key={property.pgHostelId || property.pg_hostel_id || property.id}
-              className="shrink-0 w-[240px] xs:w-[260px] sm:w-[270px]"
+              className="shrink-0 w-[270px] xs:w-[290px] sm:w-[310px]"
             >
-              <PgHostelCard
+              {/* <PgHostelCard
                 property={property}
                 onClick={() => {
                   console.log(`PG Hostel clicked: ${property.name}`);
@@ -405,7 +410,9 @@ export default function Home() {
                     "_blank",
                   );
                 }}
-              />
+              /> */}
+
+              <CoLivingCard key={property.pgHostelId} property={property} className="hover:shadow-2xl"/>
             </div>
           ))
         ) : (
@@ -420,350 +427,80 @@ export default function Home() {
           </div>
         )}
       </CarouselSection>
+ 
+ 
 
-      {/* Trusted PG Hostels Section */}
-      <CarouselSection
-        title={
-          <div className="flex items-center gap-3">
-            <div>
-              Featured {" "}
-              <span className="text-primary drop-shadow-[0_0_20px_rgba(251,146,60,0.8)]">
-                PG for Men
-              </span>{" "}
-            </div>
-            <Link href={"/pg-coliving-hostel"} target="_blank">
-              <Button size="sm" className="group">
-                Explore More
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-          </div>
-        }
-        className="my-3"
-      >
-        {pgHostelLoading ? (
-          <div className="w-full text-center py-12">
-            <Card className="inline-block p-6">
-              <MapPin className="w-16 h-16 text-primary mx-auto mb-4 animate-pulse" />
-              <h3 className="text-xl font-bold mb-2">Loading...</h3>
-              <p className="text-muted-foreground">
-                Fetching trusted pg hostels
-              </p>
-            </Card>
-          </div>
-        ) : pgHostelError ? (
-          <div className="w-full text-center py-12">
-            <Card className="inline-block p-6">
-              <MapPin className="w-16 h-16 text-destructive mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-2">Error Loading Data</h3>
-              <p className="text-muted-foreground">{pgHostelError}</p>
-            </Card>
-          </div>
-        ) : pgHostelData.length > 0 ? (
-          pgHostelData.map((property) => (
-            <div
-              key={property.pgHostelId || property.pg_hostel_id || property.id}
-              className="shrink-0 w-[240px] xs:w-[260px] sm:w-[270px]"
-            >
-              <PgHostelCard
-                property={property}
-                onClick={() => {
-                  console.log(`PG Hostel clicked: ${property.name}`);
-                  window.open(
-                    `/pg-coliving-hostel/${property.pgHostelId}`,
-                    "_blank",
-                  );
-                }}
-              />
-            </div>
-          ))
-        ) : (
-          <div className="w-full text-center py-12">
-            <Card className="inline-block p-6">
-              <MapPin className="w-16 h-16 text-primary mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-2">No PG Hostels Found</h3>
-              <p className="text-muted-foreground">
-                Unable to load pg hostel data at the moment
-              </p>
-            </Card>
-          </div>
-        )}
-      </CarouselSection>
+{/* Co-Living Focused Footer */}
+<footer className="bg-black/30 border-t border-white/10">
+  <div className="mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-14">
 
-      {/* Trusted PG Hostels Section */}
-      <CarouselSection
-        title={
-          <div className="flex items-center gap-3">
-            <div>
-              Featured {" "}
-              <span className="text-primary drop-shadow-[0_0_20px_rgba(251,146,60,0.8)]">
-                PG for Women
-              </span>{" "}
-            </div>
-            <Link href={"/pg-coliving-hostel"} target="_blank">
-              <Button size="sm" className="group">
-                Explore More
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-          </div>
-        }
-        className="my-3"
-      >
-        {pgHostelLoading ? (
-          <div className="w-full text-center py-12">
-            <Card className="inline-block p-6">
-              <MapPin className="w-16 h-16 text-primary mx-auto mb-4 animate-pulse" />
-              <h3 className="text-xl font-bold mb-2">Loading...</h3>
-              <p className="text-muted-foreground">
-                Fetching trusted pg hostels
-              </p>
-            </Card>
-          </div>
-        ) : pgHostelError ? (
-          <div className="w-full text-center py-12">
-            <Card className="inline-block p-6">
-              <MapPin className="w-16 h-16 text-destructive mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-2">Error Loading Data</h3>
-              <p className="text-muted-foreground">{pgHostelError}</p>
-            </Card>
-          </div>
-        ) : pgHostelData.length > 0 ? (
-          pgHostelData.map((property) => (
-            <div
-              key={property.pgHostelId || property.pg_hostel_id || property.id}
-              className="shrink-0 w-[240px] xs:w-[260px] sm:w-[270px]"
-            >
-              <PgHostelCard
-                property={property}
-                onClick={() => {
-                  console.log(`PG Hostel clicked: ${property.name}`);
-                  window.open(
-                    `/pg-coliving-hostel/${property.pgHostelId}`,
-                    "_blank",
-                  );
-                }}
-              />
-            </div>
-          ))
-        ) : (
-          <div className="w-full text-center py-12">
-            <Card className="inline-block p-6">
-              <MapPin className="w-16 h-16 text-primary mx-auto mb-4" />
-              <h3 className="text-xl font-bold mb-2">No PG Hostels Found</h3>
-              <p className="text-muted-foreground">
-                Unable to load pg hostel data at the moment
-              </p>
-            </Card>
-          </div>
-        )}
-      </CarouselSection>
-       
-       
-       
-            {/* Features & Categories Combined Section */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 mx-auto space-y-12">
-        {/* Your Comfort, Our Priority Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
-          {/* Image with Title Border */}
-          <div className="relative flex flex-col  ">
-            <div className="ml-6 flex-1 rounded-lg overflow-hidden">
-              <img
-                src="https://static.wixstatic.com/media/489126_d4fc78aa2987441995a8f6e69ea20b02~mv2.jpg/v1/crop/x_532,y_247,w_1990,h_1775/fill/w_1360,h_1212,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/IMG_20250122_165600405_edited.jpg"
-                alt="Quality Living Experience"
-                className="w-full h-100 object-cover rounded-lg"
-              />
-            </div>
-          </div>
-          {/* Features */}
-          <div className="">
-            <Card className="border-0 bg-transparent h-fit">
-              <CardHeader>
-                <div className="flex flex-col items-center lg:items-start">
-                  <CardTitle className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-                    Your Comfort, Our Priority
-                  </CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {[
-                  {
-                    icon: Shield,
-                    title: "Verified Properties",
-                    description: "All listings verified for safety and quality",
-                    color: "text-emerald-500",
-                  },
-                  {
-                    icon: DollarSign,
-                    title: "Zero Brokerage",
-                    description:
-                      "Direct contact with owners, no hidden charges",
-                    color: "text-blue-500",
-                  },
-                  {
-                    icon: Heart,
-                    title: "24/7 Support",
-                    description: "Always here to help with any concerns",
-                    color: "text-pink-500",
-                  },
-                ].map((feature, index) => (
-                  <Card
-                    key={index}
-                    className="bg-white/5 backdrop-blur-sm border-white/10 hover:bg-white/10 transition-all duration-300 group"
-                  >
-                    <CardContent className="flex items-center gap-4">
-                      <feature.icon
-                        className={`w-10 h-10 ${feature.color} group-hover:scale-110 transition-transform flex-shrink-0`}
-                      />
-                      <div>
-                        <h3 className="text-base font-semibold text-white mb-0.5">
-                          {feature.title}
-                        </h3>
-                        <p className="text-gray-400 text-xs">
-                          {feature.description}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
+    {/* Top Grid */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 sm:gap-8 lg:gap-10 mb-8 sm:mb-10 lg:mb-12">
 
+      {/* Brand */}
+      <div className="sm:col-span-2 md:col-span-2">
+        <h3 className="text-xl sm:text-2xl font-bold text-white mb-3 sm:mb-4">Zybrick</h3>
+        <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
+          Zybrick is a curated co-living discovery platform built for modern urban living.
+          We go beyond listings—uncovering legal risks, pricing inconsistencies, and
+          locality challenges so you move in with absolute confidence.
+        </p>
 
-      {/* CTA Banner */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="  mx-auto">
-          <Card className="bg-gradient-to-r from-primary via-purple-500 to-blue-500 border-0 overflow-hidden relative">
-            <div className="absolute inset-0 bg-black/20" />
-            <CardContent className="py-4 text-center relative z-10">
-              <Zap className="w-16 h-16 text-white mx-auto mb-6 animate-pulse" />
-              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-                Ready to Find Your Perfect Stay?
-              </h2>
-              <p className="text-white/90 mb-8 text-lg">
-                Join thousands of happy residents who found their ideal
-                accommodation with us
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link href="/pg-coliving-hostel" target="_blank">
-                  <Button
-                    size="lg"
-                    variant="secondary"
-                    className="text-lg px-8"
-                  >
-                    <MapPin className="mr-2 w-5 h-5" /> Start Searching
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
+ 
+      </div>
 
+      {/* Explore */}
+      <div>
+        <h4 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Explore</h4>
+        <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-gray-400">
+          <li><Link href="/stays" className="hover:text-primary">All Co-Living Spaces</Link></li>
+          <li><Link href="/stays?type=managed" className="hover:text-primary">Managed Co-Living</Link></li>
+          <li><Link href="/stays?type=studio" className="hover:text-primary">Studio Living</Link></li>
+          <li><Link href="/stays?type=shared" className="hover:text-primary">Shared Living</Link></li>
+          <li><Link href="/verified" className="hover:text-primary">Verified Listings</Link></li>
+        </ul>
+      </div>
 
+      {/* Cities */}
+      <div>
+        <h4 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Cities</h4>
+        <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-gray-400">
+          <li><Link href="/bangalore" className="hover:text-primary">Bangalore</Link></li>
+          <li><Link href="/hyderabad" className="hover:text-primary">Hyderabad</Link></li>
+          <li><Link href="/pune" className="hover:text-primary">Pune</Link></li>
+          <li><Link href="/chennai" className="hover:text-primary">Chennai</Link></li>
+          <li><Link href="/coming-soon" className="hover:text-primary">More Cities</Link></li>
+        </ul>
+      </div>
 
-      {/* Footer */}
-      <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-white/10 bg-black/20">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <h3 className="text-xl font-bold text-white mb-4">About Us</h3>
-              <p className="text-gray-400 text-sm">
-                Your trusted platform for finding verified PG accommodations,
-                hostels, and co-living spaces across India.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-white mb-4">Quick Links</h3>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li>
-                  <Link
-                    href="/pg-coliving-hostel"
-                    className="hover:text-primary transition-colors"
-                  >
-                    All Properties
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="hover:text-primary transition-colors"
-                  >
-                    About Us
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="hover:text-primary transition-colors"
-                  >
-                    Contact
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="hover:text-primary transition-colors"
-                  >
-                    Blog
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-white mb-4">Support</h3>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li>
-                  <Link
-                    href="#"
-                    className="hover:text-primary transition-colors"
-                  >
-                    Help Center
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="hover:text-primary transition-colors"
-                  >
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="hover:text-primary transition-colors"
-                  >
-                    Terms of Service
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="hover:text-primary transition-colors"
-                  >
-                    FAQs
-                  </Link>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-white mb-4">Contact</h3>
-              <ul className="space-y-2 text-gray-400 text-sm">
-                <li>📧 support@example.com</li>
-                <li>📞 +91 1234567890</li>
-                <li>📍 Bangalore, India</li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-white/10 pt-8 text-center text-gray-400 text-sm">
-            <p>&copy; 2026 PG Finder. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      {/* Company */}
+      <div>
+        <h4 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Company</h4>
+        <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-gray-400">
+          <li><Link href="/about" className="hover:text-primary">About Zybrick</Link></li>
+          <li><Link href="/contact" className="hover:text-primary">Contact</Link></li>
+          <li><Link href="/blog" className="hover:text-primary">Insights & Guides</Link></li>
+          <li><Link href="/list-property" className="hover:text-primary">List Your Co-Living</Link></li>
+          <li><Link href="/careers" className="hover:text-primary">Careers</Link></li>
+        </ul>
+      </div>
+    </div>
+
+    {/* Bottom Bar */}
+    <div className="border-t border-white/10 pt-4 sm:pt-6 flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
+      <p className="text-xs text-gray-500 text-center md:text-left">
+        © {new Date().getFullYear()} Zybrick Technologies Pvt. Ltd. All rights reserved.
+      </p>
+
+      <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-xs text-gray-400">
+        <Link href="/privacy-policy" className="hover:text-primary">Privacy Policy</Link>
+        <Link href="/terms" className="hover:text-primary">Terms of Use</Link>
+        <Link href="/disclaimer" className="hover:text-primary">Disclaimer</Link>
+      </div>
+    </div>
+  </div>
+</footer>
+
     </div>
   );
 }
