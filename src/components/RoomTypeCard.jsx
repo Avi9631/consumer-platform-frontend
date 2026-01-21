@@ -96,7 +96,7 @@ export default function RoomTypeCard({ room }) {
       <Card className=" py-0 shrink-0 w-[280px] sm:w-[320px] md:w-[350px] lg:w-[380px] bg-linear-to-br from-slate-700/60 to-slate-800/60 border-white/10 backdrop-blur-xl hover:border-orange-500/50 transition-all duration-300 hover:shadow-xl hover:shadow-orange-500/20 group overflow-hidden snap-start">
         <CardContent className="p-0">
           {/* Room Image Carousel */}
-          {roomImages.length > 0 ? (
+          {/* {roomImages.length > 0 ? (
             <div className="relative h-50 w-full overflow-hidden group/carousel">
               {!imageError ? (
                 <Image
@@ -118,13 +118,11 @@ export default function RoomTypeCard({ room }) {
                 </div>
               )}
 
-              {/* Image Counter Badge */}
-              <div className="absolute top-1.5 right-1.5 bg-black/60 backdrop-blur-sm px-1.5 py-0.5 rounded-full text-[10px] text-white">
+               <div className="absolute top-1.5 right-1.5 bg-black/60 backdrop-blur-sm px-1.5 py-0.5 rounded-full text-[10px] text-white">
                 {currentImageIndex + 1} / {roomImages.length}
               </div>
 
-              {/* Navigation Arrows - Only show if multiple images */}
-              {roomImages.length > 1 && (
+               {roomImages.length > 1 && (
                 <>
                   <Button
                     variant="ghost"
@@ -145,8 +143,7 @@ export default function RoomTypeCard({ room }) {
                 </>
               )}
 
-              {/* Image Indicators */}
-              {roomImages.length > 1 && (
+               {roomImages.length > 1 && (
                 <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1 z-10 bg-black/40 backdrop-blur-md px-1.5 py-0.5 rounded-full">
                   {roomImages.map((_, idx) => (
                     <button
@@ -163,14 +160,13 @@ export default function RoomTypeCard({ room }) {
               )}
             </div>
           ) : (
-            // Placeholder when no images available
-            <div className="relative h-50 w-full bg-gradient-to-br from-slate-700/80 to-slate-800/80 flex flex-col items-center justify-center">
+             <div className="relative h-50 w-full bg-gradient-to-br from-slate-700/80 to-slate-800/80 flex flex-col items-center justify-center">
               <ImageIcon className="w-10 h-10 text-slate-500 mb-1.5" />
               <p className="text-slate-400 text-xs font-medium">
                 No images available
               </p>
             </div>
-          )}
+          )} */}
 
           <div className="p-3 sm:p-3.5">
             <div className="mb-3">
@@ -203,7 +199,7 @@ export default function RoomTypeCard({ room }) {
               <div className="flex justify-between items-center">
                 <span className="text-gray-400 text-sm">Room Size</span>
                 <span className="text-white font-semibold text-sm">
-                  {room.roomSize}
+                  {room.roomSize} sqft
                 </span>
               </div>
               <div className="flex justify-between items-center">

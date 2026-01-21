@@ -55,7 +55,7 @@ export default function Header({
               <Button
                 variant="outline"
                 onClick={onOpenLocationSheet}
-                className="hidden md:flex items-center gap-2 rounded-full bg-primary/10 border-primary/20 hover:bg-primary/20"
+                className="hidden md:flex items-center gap-2 rounded-base bg-primary/10 border-primary/20 hover:bg-primary/20"
               >
                 <MapPin className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium truncate max-w-[150px]">

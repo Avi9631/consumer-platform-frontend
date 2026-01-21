@@ -34,6 +34,40 @@ import LocationSheet from "@/components/LocationSheet";
 import CoLivingCard from "@/components/CoLivingCard";
 import useLocationStore from "@/stores/locationStore";
 
+// Banner configuration - each banner with injection position and data
+const BANNERS = [
+  {
+    id: 'banner-1',
+    type: 'image',
+    injectAfterCard: 6, // Inject after 6th card
+    imageUrl: 'https://static.wixstatic.com/media/489126_d4fc78aa2987441995a8f6e69ea20b02~mv2.jpg',
+    title: 'Special Offer',
+    description: 'Get 20% off on your first booking',
+    ctaText: 'Book Now',
+    ctaLink: '/offers',
+  },
+  {
+    id: 'banner-2',
+    type: 'image',
+    injectAfterCard: 9, // Inject after 9th card
+    imageUrl: 'https://static.wixstatic.com/media/489126_d4fc78aa2987441995a8f6e69ea20b02~mv2.jpg',
+    title: 'Premium Properties',
+    description: 'Explore our verified premium PG accommodations',
+    ctaText: 'Explore',
+    ctaLink: '/premium',
+  },
+  {
+    id: 'banner-3',
+    type: 'image',
+    injectAfterCard: 15, // Inject after 15th card
+    imageUrl: 'https://static.wixstatic.com/media/489126_d4fc78aa2987441995a8f6e69ea20b02~mv2.jpg',
+    title: 'List Your Property',
+    description: 'Reach thousands of students looking for PG',
+    ctaText: 'Get Started',
+    ctaLink: '/list-property',
+  },
+];
+
 export default function CoLivingSearchPage() {
   // Zustand store for global location state
   const location = useLocationStore((state) => state.location);
@@ -304,6 +338,36 @@ export default function CoLivingSearchPage() {
     return `₹${price.toLocaleString("en-IN")}`;
   };
 
+  // Combine hostels with banner cards for responsive grid injection
+  const getCombinedGridItems = () => {
+    const items = [];
+    
+    pgHostels.forEach((hostel, index) => {
+      // Add the hostel card
+      items.push({ 
+        type: 'hostel', 
+        data: hostel,
+        key: hostel.pgHostelId 
+      });
+      
+      // Check if any banner should be injected after this card position
+      const cardPosition = index + 1;
+      const bannerToInject = BANNERS.find(
+        banner => banner.injectAfterCard === cardPosition
+      );
+      
+      if (bannerToInject && cardPosition < pgHostels.length) {
+        items.push({ 
+          type: 'banner', 
+          key: bannerToInject.id,
+          data: bannerToInject
+        });
+      }
+    });
+    
+    return items;
+  };
+
   return (
     <>
       <div className="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 text-white relative overflow-hidden">
@@ -474,11 +538,54 @@ export default function CoLivingSearchPage() {
                   Found {totalResults} PG/Hostel{totalResults !== 1 ? "s" : ""}{" "}
                   near your location
                 </div>
-                {/* PG/Hostel Cards */}
+                {/* PG/Hostel Cards with Banners */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 w-full">
-                  {pgHostels.map((hostel) => (
-                    <CoLivingCard key={hostel.pgHostelId} property={hostel} />
-                  ))}
+                  {getCombinedGridItems().map((item) => {
+                    if (item.type === 'hostel') {
+                      return <CoLivingCard key={item.key} property={item.data} />;
+                    }
+                    
+                    // Banner Cards - Responsive spanning with image
+                    const banner = item.data;
+                    return (
+                      <div 
+                        key={item.key}
+                        className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2 xl:col-span-2"
+                      >
+                        <Card className="h-full min-h-[200px] border-slate-700/50 bg-slate-800/40 backdrop-blur-sm hover:bg-slate-800/60 hover:scale-[1.02] transition-all duration-300 cursor-pointer overflow-hidden group">
+                          <CardContent className="p-0 h-full">
+                            <div className="relative h-full min-h-[200px] overflow-hidden">
+                              {/* Banner Image */}
+                              <img 
+                                src={banner.imageUrl} 
+                                alt={banner.title}
+                                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                              {/* Overlay gradient for text readability */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                              
+                              {/* Banner Content */}
+                              <div className="relative z-10 h-full flex flex-col justify-end p-4 sm:p-6">
+                                <h3 className="text-base sm:text-lg md:text-xl font-bold text-white mb-1 sm:mb-2">
+                                  {banner.title}
+                                </h3>
+                                <p className="text-xs sm:text-sm text-gray-200 mb-3 sm:mb-4">
+                                  {banner.description}
+                                </p>
+                                <Button 
+                                  variant="secondary" 
+                                  size="sm"
+                                  className="w-fit bg-white text-slate-900 hover:bg-white/90 font-semibold text-xs sm:text-sm"
+                                >
+                                  {banner.ctaText}
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}

@@ -271,8 +271,8 @@ export default function PropertyDetailPage() {
   ];
 
   // Helper: Get images from API data
-  const propertyImages = property.mediaData
-    ?.filter((m) => m.type === "image" && m.url)
+  const propertyImages = property.media
+    ?.filter((m) =>  m.url)
     .map((m) => m.url) || [
     "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=800&h=600&fit=crop",
   ];
