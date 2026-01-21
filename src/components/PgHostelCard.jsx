@@ -232,17 +232,17 @@ export default function PgHostelCard({ property, onClick }) {
     if (!gender) return null;
 
     const colors = {
-      Male: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-      Female: "bg-pink-500/20 text-pink-300 border-pink-500/30",
-      Gents: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-      Ladies: "bg-pink-500/20 text-pink-300 border-pink-500/30",
-      Unisex: "bg-purple-500/20 text-purple-300 border-purple-500/30",
+      Male: "bg-white text-blue-600 border-blue-500",
+      Female: "bg-white text-pink-600 border-pink-500",
+      Gents: "bg-white text-blue-600 border-blue-500",
+      Ladies: "bg-white text-pink-600 border-pink-500",
+      Unisex: "bg-white text-purple-600 border-purple-500",
     };
 
     return (
       <Badge
         variant="secondary"
-        className={`backdrop-blur-md ${colors[gender] || ""}`}
+        className={`rounded-sm shadow-xl font-semibold backdrop-blur-sm ${colors[gender] || "bg-white text-gray-700 border-gray-400"}`}
       >
         {gender}
       </Badge>
@@ -301,7 +301,7 @@ export default function PgHostelCard({ property, onClick }) {
             >
               {!imageErrors[index] ? (
                 <Image
-                  src={imgSrc}
+                src={imgSrc}
                   alt={`${getPropertyName()} - Image ${index + 1}`}
                   fill
                   className="object-cover transition-transform duration-700 group-hover:scale-110"
@@ -311,12 +311,23 @@ export default function PgHostelCard({ property, onClick }) {
                   sizes="(max-width: 640px) 220px, (max-width: 768px) 240px, 280px"
                 />
               ) : (
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-800/80 to-slate-900/80 flex flex-col items-center justify-center">
-                  <ImageIcon className="w-16 h-16 text-slate-500 mb-3" />
-                  <p className="text-slate-400 text-sm font-medium">
-                    Image unavailable
-                  </p>
-                </div>
+                // <div className="absolute inset-0 bg-gradient-to-br from-slate-800/80 to-slate-900/80 flex flex-col items-center justify-center">
+                //   <ImageIcon className="w-16 h-16 text-slate-500 mb-3" />
+                //   <p className="text-slate-400 text-sm font-medium">
+                //     Image unavailable
+                //   </p>
+                // </div>
+
+                <Image
+                src={imageErrors[index] ? "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=1920&h=1080&fit=crop" : imgSrc}
+                  alt={`${getPropertyName()} - Image ${index + 1}`}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  onError={() => handleImageError(index)}
+                  onLoadingComplete={() => setImageLoading(false)}
+                  priority={index === 0}
+                  sizes="(max-width: 640px) 220px, (max-width: 768px) 240px, 280px"
+                />
               )}
             </div>
           ))}

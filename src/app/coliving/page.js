@@ -57,17 +57,6 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 export default function Home() {
-
-  useEffect(() => {
-    redirectToColiving();
-  }, []);
-
-  const redirectToColiving = () =>  {
-    console.log("Redirecting to /coliving");   window.location.href = "/coliving";
-  }
-
- 
-
   // Zustand store for global location state
   const location = useLocationStore((state) => state.location);
   const searchResult = useLocationStore((state) => state.searchResult);

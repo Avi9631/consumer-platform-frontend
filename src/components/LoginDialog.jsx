@@ -21,12 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
-import { REGEXP_ONLY_DIGITS } from "input-otp";
+import { useAuth } from "@/context/AuthContext";
 import { Phone, ArrowRight, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
@@ -45,18 +40,37 @@ const otpSchema = z.object({
     .regex(/^\d{6}$/, "OTP must contain only numbers"),
 });
 
+const signupSchema = z.object({
+  firstName: z
+    .string()
+    .min(1, "First name is required")
+    .max(50, "First name must be less than 50 characters"),
+  lastName: z
+    .string()
+    .max(50, "Last name must be less than 50 characters")
+    .optional()
+    .or(z.literal("")),
+  email: z
+    .string()
+    .email("Please enter a valid email address")
+    .optional()
+    .or(z.literal("")),
+});
+
 /**
  * LoginDialog Component
- * Handles mobile OTP authentication flow
+ * Handles mobile OTP authentication flow with signup completion
  * @param {boolean} open - Controls dialog visibility
  * @param {function} onOpenChange - Callback for dialog open state change
- * @param {function} onLoginSuccess - Callback on successful login
  */
-export default function LoginDialog({ open, onOpenChange, onLoginSuccess }) {
-  const [step, setStep] = useState("phone"); // "phone" | "otp"
+export default function LoginDialog({ open, onOpenChange }) {
+  const { login, updateUser } = useAuth();
+  const [step, setStep] = useState("phone"); // "phone" | "otp" | "signup"
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
+  const [otpValues, setOtpValues] = useState(["", "", "", "", "", ""]);
+  const [userData, setUserData] = useState(null); // Store user data for signup step
 
   // Form for phone number step
   const phoneForm = useForm({
@@ -74,16 +88,29 @@ export default function LoginDialog({ open, onOpenChange, onLoginSuccess }) {
     },
   });
 
+  // Form for signup step
+  const signupForm = useForm({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+    },
+  });
+
   // Reset state when dialog closes
   useEffect(() => {
     if (!open) {
       setStep("phone");
       setPhone("");
+      setUserData(null);
       phoneForm.reset();
       otpForm.reset();
+      signupForm.reset();
       setResendTimer(0);
+      setOtpValues(["", "", "", "", "", ""]);
     }
-  }, [open, phoneForm, otpForm]);
+  }, [open, phoneForm, otpForm, signupForm]);
 
   // Countdown timer for resend OTP
   useEffect(() => {
@@ -148,12 +175,24 @@ export default function LoginDialog({ open, onOpenChange, onLoginSuccess }) {
 
       const data = await response.json();
 
-      if (response.ok) {
-        toast.success("Login Successful", {
-          description: `Welcome ${data.data.user.firstName}!`,
-        });
-        onLoginSuccess(data.data.user);
-        onOpenChange(false);
+      if (response.ok && data.data) {
+        const { isSignUp, user } = data.data;
+
+        if (isSignUp) {
+          // New user - show signup form
+          setUserData(user);
+          setStep("signup");
+          toast.success("OTP Verified", {
+            description: "Please complete your profile to continue.",
+          });
+        } else {
+          // Existing user - login directly
+          toast.success("Login Successful", {
+            description: `Welcome back ${user.firstName}!`,
+          });
+          login(user);
+          onOpenChange(false);
+        }
       } else {
         toast.error("Verification Failed", {
           description: data.message || "Invalid OTP. Please try again.",
@@ -190,6 +229,7 @@ export default function LoginDialog({ open, onOpenChange, onLoginSuccess }) {
 
       if (response.ok) {
         setResendTimer(30);
+        setOtpValues(["", "", "", "", "", ""]);
         otpForm.reset();
         toast.success("OTP Resent", {
           description: "A new OTP has been sent to your phone.",
@@ -208,17 +248,90 @@ export default function LoginDialog({ open, onOpenChange, onLoginSuccess }) {
     }
   };
 
+  const handleOtpChange = (index, value) => {
+    const newValues = [...otpValues];
+    newValues[index] = value.slice(-1); // Only keep the last digit
+    setOtpValues(newValues);
+
+    // Update form value
+    const otpString = newValues.join("");
+    otpForm.setValue("otp", otpString);
+
+    // Auto-focus next input
+    if (value && index < 5) {
+      document.getElementById(`otp-${index + 1}`)?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !otpValues[index]) {
+      // Focus previous input on backspace if current is empty
+      if (index > 0) {
+        document.getElementById(`otp-${index - 1}`)?.focus();
+      }
+    } else if (e.key === "ArrowRight" && index < 5) {
+      document.getElementById(`otp-${index + 1}`)?.focus();
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      document.getElementById(`otp-${index - 1}`)?.focus();
+    }
+  };
+
+  const handleSignupSubmit = async (values) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/consumerUser/update`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+          credentials: "include",
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.data) {
+        toast.success("Profile Completed", {
+          description: `Welcome ${data.data.user.firstName}!`,
+        });
+
+        // Login with updated user data
+        login(data.data.user);
+        onOpenChange(false);
+      } else {
+        toast.error("Update Failed", {
+          description: data.message || "Failed to update profile. Please try again.",
+        });
+      }
+    } catch (error) {
+      toast.error("Error", {
+        description: "Failed to update profile. Please check your connection.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
         <SheetHeader>
           <SheetTitle className="text-2xl font-bold">
-            {step === "phone" ? "Login with Mobile" : "Verify OTP"}
+            {step === "phone" 
+              ? "Login with Mobile" 
+              : step === "otp" 
+                ? "Verify OTP" 
+                : "Complete Your Profile"}
           </SheetTitle>
           <SheetDescription>
             {step === "phone"
               ? "Enter your mobile number to receive an OTP"
-              : `Enter the 6-digit OTP sent to ${phone}`}
+              : step === "otp"
+                ? `Enter the 6-digit OTP sent to ${phone}`
+                : "Please provide your details to complete signup"}
           </SheetDescription>
         </SheetHeader>
 
@@ -267,42 +380,36 @@ export default function LoginDialog({ open, onOpenChange, onLoginSuccess }) {
                 </Button>
               </form>
             </Form>
-          ) : (
+          ) : step === "otp" ? (
             <Form {...otpForm}>
               <form onSubmit={otpForm.handleSubmit(handleVerifyOtp)} className="space-y-4">
-                <FormField
-                  control={otpForm.control}
-                  name="otp"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Enter OTP</FormLabel>
-                      <FormControl>
-                        <div className="flex justify-center">
-                          <InputOTP
-                            maxLength={6}
-                            pattern={REGEXP_ONLY_DIGITS}
-                            disabled={loading}
-                            {...field}
-                          >
-                            <InputOTPGroup>
-                              <InputOTPSlot index={0} />
-                              <InputOTPSlot index={1} />
-                              <InputOTPSlot index={2} />
-                              <InputOTPSlot index={3} />
-                              <InputOTPSlot index={4} />
-                              <InputOTPSlot index={5} />
-                            </InputOTPGroup>
-                          </InputOTP>
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <FormItem>
+                  <FormLabel>Enter OTP</FormLabel>
+                  <FormControl>
+                    <div className="flex justify-center gap-2">
+                      {otpValues.map((value, index) => (
+                        <Input
+                          key={index}
+                          id={`otp-${index}`}
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={1}
+                          value={value}
+                          onChange={(e) => handleOtpChange(index, e.target.value)}
+                          onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                          disabled={loading}
+                          className="w-12 h-12 text-center text-lg font-bold"
+                          placeholder="0"
+                        />
+                      ))}
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
 
                 <Button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || otpValues.join("").length !== 6}
                   className="w-full"
                 >
                   {loading ? "Verifying..." : "Verify & Login"}
@@ -314,6 +421,7 @@ export default function LoginDialog({ open, onOpenChange, onLoginSuccess }) {
                     variant="link"
                     onClick={() => {
                       setStep("phone");
+                      setOtpValues(["", "", "", "", "", ""]);
                       otpForm.reset();
                     }}
                     className="p-0 h-auto text-muted-foreground"
@@ -338,6 +446,73 @@ export default function LoginDialog({ open, onOpenChange, onLoginSuccess }) {
                     )}
                   </Button>
                 </div>
+              </form>
+            </Form>
+          ) : (
+            <Form {...signupForm}>
+              <form onSubmit={signupForm.handleSubmit(handleSignupSubmit)} className="space-y-4">
+                <FormField
+                  control={signupForm.control}
+                  name="firstName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>First Name <span className="text-destructive">*</span></FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter your first name"
+                          disabled={loading}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={signupForm.control}
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter your last name (optional)"
+                          disabled={loading}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={signupForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="Enter your email (optional)"
+                          disabled={loading}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full"
+                >
+                  {loading ? "Completing Profile..." : "Complete Profile"}
+                </Button>
               </form>
             </Form>
           )}

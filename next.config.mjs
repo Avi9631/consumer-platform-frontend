@@ -18,7 +18,15 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'logos-api.apistemic.com',
       },
-    ],
+            {
+        protocol: 'https',
+        hostname: 'static.wixstatic.com',
+      },
+                  {
+        protocol: 'https',
+        hostname: 'img.cofynd.com',
+      },
+     ],
   },
 };
 
